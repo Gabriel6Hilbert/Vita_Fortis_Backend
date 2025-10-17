@@ -1,5 +1,10 @@
 package VitaFortis.demo.v1.enums;
 
 public enum CategoriaProduto {
-
+    AMINOACIDOS,
+    CARBOIDRATROS,
+    PRETREINOS,
+    PROTEINAS,
+    TERMOGENICOS,
+    VITAMINAS
 }

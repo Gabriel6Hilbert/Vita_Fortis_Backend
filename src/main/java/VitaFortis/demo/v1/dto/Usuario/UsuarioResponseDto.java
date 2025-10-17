@@ -4,8 +4,7 @@ import VitaFortis.demo.v1.enums.TipoUsuario;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Getter @Setter
 public class UsuarioResponseDto {
 
     private Long id;
@@ -16,5 +15,4 @@ public class UsuarioResponseDto {
     private TipoUsuario tipoUsuario;
     private int pontosFidelidade;
     private boolean ativo;
-  
 }

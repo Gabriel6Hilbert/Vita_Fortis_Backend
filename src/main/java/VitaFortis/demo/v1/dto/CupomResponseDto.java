@@ -4,6 +4,7 @@ import VitaFortis.demo.v1.entity.Usuario;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,7 +14,7 @@ public class CupomResponseDto {
     private Long id;
     private String codigo;
     private String descricao;
-    private double desconto;
+    private BigDecimal desconto;
     private boolean ativo;
     private LocalDateTime dataCadastro;
     private LocalDateTime dataVencimento;
