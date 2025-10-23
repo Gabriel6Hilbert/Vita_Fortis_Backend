@@ -17,7 +17,7 @@ public class ItemCompra {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ITEM_ID")
-    private Long id;
+    private Long itemId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

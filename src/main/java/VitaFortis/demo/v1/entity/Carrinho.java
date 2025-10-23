@@ -49,6 +49,9 @@ public class Carrinho {
     @Column(name = "TOTAL", precision = 19, scale = 2, nullable = false)
     private BigDecimal total = BigDecimal.ZERO;
 
+    @Column(name="CUPOM_CODIGO")
+    private String cupomCodigo;
+
     @Version
     @Column(name = "VERSAO")
     private Long versao;

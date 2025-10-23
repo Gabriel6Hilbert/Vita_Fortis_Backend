@@ -21,5 +21,5 @@ public class CupomRequestDto {
     @DecimalMin(value = "0.00")
     private BigDecimal desconto;
 
-    private LocalDateTime dataVencimento; // opcional
+    private LocalDateTime dataVencimento;
 }

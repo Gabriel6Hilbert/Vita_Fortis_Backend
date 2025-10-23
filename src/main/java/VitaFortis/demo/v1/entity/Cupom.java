@@ -1,5 +1,6 @@
 package VitaFortis.demo.v1.entity;
 
+import VitaFortis.demo.v1.enums.CupomTipo;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(
         name = "CUPOM",
-        uniqueConstraints = @UniqueConstraint(columnNames = "CODIGO")
+        indexes = @Index(name = "ID_CUPOM_CODIGO", columnList = "CODIGO", unique = true)
 )
 public class Cupom {
 
@@ -28,6 +29,10 @@ public class Cupom {
     @Column(name = "CODIGO", nullable = false, length = 50)
     private String codigo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name="TIPO", nullable=false, length=20)
+    private CupomTipo tipo;
+
     @Size(max = 255)
     @Column(name = "DESCRICAO", length = 255)
     private String descricao;
@@ -40,12 +45,15 @@ public class Cupom {
     @Column(name = "ATIVO", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private boolean ativo = true;
 
+    @Column(name="MIN_SUBTOTAL", precision=12, scale=2)
+    private BigDecimal minSubtotal;
+
     @CreationTimestamp
     @Column(name = "DATA_CADASTRO", nullable = false, updatable = false)
     private LocalDateTime dataCadastro;
 
     @Column(name = "DATA_VENCIMENTO")
-    private LocalDateTime dataVencimento;
+    private LocalDateTime dataVencimento; 
 
     @AssertTrue(message = "DATA_VENCIMENTO deve ser posterior à DATA_CADASTRO")
     private boolean isVencimentoValido() {

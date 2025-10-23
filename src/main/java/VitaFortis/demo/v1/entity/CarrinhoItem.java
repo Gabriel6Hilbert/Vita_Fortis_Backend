@@ -25,7 +25,7 @@ public class CarrinhoItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "CARRINHO_ITEM_ID")
-    private Long id;
+    private Long itemId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "CARRINHO_ID", nullable = false)

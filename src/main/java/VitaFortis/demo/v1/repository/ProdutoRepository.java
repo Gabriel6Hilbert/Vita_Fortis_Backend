@@ -2,10 +2,11 @@ package VitaFortis.demo.v1.repository;
 
 import VitaFortis.demo.v1.entity.Produto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-public interface ProdutoRepository extends JpaRepository<Produto,Long> {
+public interface ProdutoRepository extends JpaRepository<Produto,Long>, JpaSpecificationExecutor<Produto> {
 
     @Modifying
     @Query("""

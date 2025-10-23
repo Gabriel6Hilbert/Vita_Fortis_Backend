@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface CupomRepository extends JpaRepository<Cupom, Long> {
 
-    Optional<Cupom> findByCodigo(String codigo);
+    Optional<Cupom> findByCodigoIgnoreCase(String codigo);
 }

@@ -11,7 +11,7 @@ import org.mapstruct.*;
 )
 public interface CarrinhoItemMapper {
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "itemId", ignore = true)
     @Mapping(target = "carrinho", ignore = true)
     @Mapping(target = "produto.id", source = "produtoId")
     CarrinhoItem toEntity(CarrinhoItemRequestDto dto);
@@ -21,7 +21,7 @@ public interface CarrinhoItemMapper {
     CarrinhoItemResponseDto toResponseDto(CarrinhoItem entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "itemId", ignore = true)
     @Mapping(target = "carrinho", ignore = true)
     @Mapping(target = "produto.id", source = "produtoId")
     void updateEntityFromDto(CarrinhoItemRequestDto dto, @MappingTarget CarrinhoItem entity);
