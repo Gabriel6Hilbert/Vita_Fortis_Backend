@@ -12,11 +12,21 @@ import java.math.BigDecimal;
 public class ProdutoRequestDto {
 
     @NotBlank
+    @Size(max = 60)
+    private String codigo;
+
+    @NotBlank
     @Size(max = 120)
     private String nome;
 
     @NotBlank @Size(max = 1000)
     private String descricao;
+
+    @Size(max = 120)
+    private String marca;
+
+    @Size(max = 20)
+    private String unidade;
 
     @NotNull @Digits(integer = 10, fraction = 2)
     private BigDecimal preco;
@@ -31,6 +41,9 @@ public class ProdutoRequestDto {
 
     @Min(0)
     private Integer pontosNecessarios;
+
+    @Size(max = 500)
+    private String imagemUrl;
 
     @AssertTrue(message = "Quando resgatável, 'pontosNecessarios' é obrigatório")
     public boolean isPontosValidos() {

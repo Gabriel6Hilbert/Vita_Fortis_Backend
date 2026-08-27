@@ -1,0 +1,3 @@
+package VitaFortis.demo.v1.entity;
+import VitaFortis.demo.v1.enums.StatusCompra; import jakarta.persistence.*; import lombok.Getter; import lombok.Setter; import org.hibernate.annotations.CreationTimestamp; import java.time.LocalDateTime;
+@Getter @Setter @Entity @Table(name="PEDIDO_STATUS_HISTORICO") public class HistoricoStatusPedido {@Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id;@ManyToOne(fetch=FetchType.LAZY,optional=false) @JoinColumn(name="PEDIDO_ID") private Pedido pedido;@Enumerated(EnumType.STRING) @Column(nullable=false,length=30) private StatusCompra status;@Column(length=300) private String observacao;@CreationTimestamp @Column(nullable=false,updatable=false) private LocalDateTime data;}

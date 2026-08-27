@@ -9,7 +9,7 @@ import java.util.List;
 @Setter
 public class CarrinhoResponseDto {
 
-    private Long itemId;
+    private Long carrinhoId;
     private Long usuarioId;
     private List<CarrinhoItemResponseDto> carrinhoItens;
 }

@@ -1,0 +1,944 @@
+/*CSS DA PÁGINA DE CLUBE FIDELIDADE*/
+
+/*CORPO*/
+
+body {
+    /*cor de fundo*/
+    background-color: #eeece7;
+    overflow-x: hidden;
+    /*remove a barra de rolar embaixo*/
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/*CABEÇALHO*/
+
+/*CABEÇALHO PARTE DE CIMA*/
+
+header {
+    /*cabeçalho não fixo*/
+    top: 0;
+    z-index: 1000;
+    position: relative;
+}
+
+#cabecalhoParteDeCima {
+    /*parte de cima do cabeçalho*/
+    background-color: #F8F1E7;
+}
+
+#logoCabecalho img {
+    /*logo do cabeçalho*/
+    max-height: 5rem;
+    transition: transform 0.3s ease;
+}
+
+#logoCabecalho img:hover {
+    /*logo do cabeçalho quando passa o mouse*/
+    transform: scale(1.08);
+}
+
+#barraDePesquisa {
+    /*tamanho da barra de pesquisa*/
+    width: 50%;
+    max-width: 25rem;
+}
+
+#barraDePesquisaToda {
+    /*posição da barra de pesquisa com o botão/lupa*/
+    margin-left: 15%;
+    margin-right: 5%;
+}
+
+#botaoLupa {
+    /*parte da lupa na barra de pesquisa*/
+    background-color: #F75326;
+    color: white;
+}
+
+#botaoLupa:hover {
+    /*parte da lupa na barra de pesquisa quando passa o mouse*/
+    background-color: #be401d;
+}
+
+.input-group .btn:hover {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    color: white;
+}
+
+.input-group .form-control:focus {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    border-color: transparent;
+    box-shadow: none;
+}
+
+#iconeLogin {
+    /*ícone de boneco no login*/
+    color: #F75326;
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+#iconeLogin:hover {
+    /*ícone de boneco no login quando passa o mouse*/
+    color: #be401d;
+    font-size: 1.3rem;
+    transform: scale(1.08);
+    cursor: pointer;
+}
+
+#loginArea span {
+    /*texto "seja bem-vindo"*/
+    color: #F75326;
+    font-size: .9rem;
+}
+
+#loginArea a {
+    /*texto faça login/cadastre-se*/
+    color: #000000;
+    font-size: .95rem;
+    text-decoration: none;
+}
+
+#loginArea a:hover {
+    /*texto faça login/cadastre-se quando passa o mouse*/
+    text-decoration: underline;
+}
+
+#loginArea .d-flex.flex-column {
+    /*centraliza as duas frases do login*/
+    text-align: center;
+}
+
+#carrinhoArea {
+    /*carrinho de compras*/
+    color: rgb(0, 0, 0);
+    position: relative;
+}
+
+#carrinhoArea:hover {
+    /*carrinho de compras*/
+    cursor: pointer;
+}
+
+#areaLoginECarrinho {
+    /*distância da área do login e do carrinho da margem direita */
+    margin-right: 3.5rem;
+}
+
+#contadorCarrinho {
+    /*número de itens no carrinho*/
+    font-size: 0.6rem;
+    padding: 0.2rem 0.3rem;
+    border: 1px solid #00000020;
+    background-color: #F75326;
+    min-width: 1rem;      
+    height: 1.1rem;        
+}
+
+/*CABEÇALHO PARTE DE BAIXO*/
+
+#cabecalhoParteDeBaixo {
+    /*parte de baixo do cabeçalho (transparente)*/
+    background-color: #f75326;
+    opacity: 90%;
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    font-weight: 600;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.text-uppercase.mx-3 {
+    /*opções do menu*/
+    color: rgb(255, 255, 255);
+    font-size: .9rem;
+    transition: transform 0.3s ease;
+}
+
+.nav-link.text-uppercase.mx-3:hover {
+    /*opções do menu quando passa o mouse*/
+    transform: scale(1.1);
+}
+
+#opcaoFidelidadeCab {
+    /*opção "clube fidelidade"*/
+    color: white;
+}
+
+#fundoFidelidadeCab {
+    /*background da opção "clube fidelidade"*/
+    background-color: rgb(255, 213, 0);
+    border-radius: .2rem;
+    margin-right: .5rem;
+}
+
+#menuIcon {
+    /*esconde o ícone hambúrger em telas grandes*/
+    display: none;
+    color: #F75326;
+}
+
+
+
+
+
+
+/*INÍCIO DO CORPO DO SITE*/
+
+/*BOTÃO ZAP*/
+
+.btn-zap {
+    /*botão do whatsapp*/
+    position: fixed;
+    bottom: 1.2rem;
+    right: .5rem;
+    background-color: #4fce5d;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: bold;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+    z-index: 1050;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    gap: .8rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-zap:hover {
+    /*botão do whatsapp quando passa o mouse*/
+    transform: scale(1.05);
+    background-color: #1f5c0f;
+}
+
+
+
+
+
+
+/*PARTE DO CLUBE FIDELIDADE*/
+
+/*PRIMEIRA PARTE:*/
+
+#fundoPaginaClubeFidelidade {
+    /*distância entre o topo/fim e a página*/
+    background: rgba(255, 213, 185, 0.432);
+    padding-top: 3rem;
+    padding-bottom: 1rem;
+}
+
+h1 {
+    /*título clube fidelidade parte preta*/
+    color: rgb(0, 0, 0);
+    text-align: left;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+#clubFidTitulo {
+    /*título clube fidelidade parte amarela*/
+    color: rgb(253, 211, 1);
+    -webkit-text-stroke: .5px #979797;
+    font-size: 1.5rem;
+}
+
+#subTitulo {
+    /*o grande amarelo*/
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: rgb(253, 211, 1);
+    -webkit-text-stroke: .5px #979797;
+}
+
+#descricao {
+    /*frase que fala: a cada 1 real...*/
+    color: rgb(0, 0, 0);
+    text-align: left;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+#fundoPaginaClubeFidelidade .clube-hero {
+    /*faz o texto e a imagem ficarem um do lado do outro*/
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#fundoPaginaClubeFidelidade .clube-texto {
+    /*o bloco do texto*/
+    flex: 1;
+    padding-left: 5rem;
+}
+
+#fundoPaginaClubeFidelidade .clube-imagem {
+    /*o bloco/área da imagem*/
+    flex: 1;
+    display: flex;
+}
+
+#fundoPaginaClubeFidelidade .clube-imagem img {
+    /*imagem em si*/
+    width: 50%;
+    height: auto;
+    border-radius: 1rem;
+    object-fit: cover;
+}
+
+.queroParticipar {
+    /*primeiro botão "quero participar"*/
+    background-color: #f54b1c;
+    color: white;
+    padding: .3rem .4rem .3rem .4rem;
+    font-weight: 500;
+    font-size: .9rem;
+    margin-left: 5rem;
+}
+
+.queroParticipar:hover {
+    /*primeiro botão quando passa o mouse*/
+    background-color: #be401d;
+    color: white;
+}
+
+
+
+
+
+
+/*SEGUNDA PARTE:*/
+.clube-hero-divisaoDois {
+    /*distância entre a primeira e a segunda parte*/
+    padding-top: 3rem;
+}
+
+h2 {
+    /*título "como funciona" / todos os títulos no corpo com o fundo em degradê laranja*/
+    text-align: center;
+    background-color: #F75326;
+    color: rgb(255, 255, 255);
+    border-radius: .3rem;
+    font-weight: 600;
+    box-shadow: inset 0 0 .6rem .1rem rgba(0, 0, 0, 0.281);
+}
+
+#fundoComoFunciona {
+    /*centralizando o background do título "como funciona"*/
+    display: flex;
+    justify-content: center;
+}
+
+#fundoComoFunciona h2 {
+    /*definindo o tamanho do background do título "como funciona"*/
+    width: 35%;
+    padding-bottom: .1rem;
+}
+
+#descricaoComoFunciona {
+    /*texto da parte "como funciona"*/
+    color: rgb(0, 0, 0);
+    text-align: center;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+#marcaTexto {
+    /*palavra "clube" no texto da parte "como funciona"*/
+    color: rgb(253, 211, 1);
+    -webkit-text-stroke: .5px #979797;
+    font-size: 1.2rem;
+}
+
+.bg {
+    /*linha laranja abaixo de "como funciona"*/
+    color: #F75326;
+    width: 90%;
+    margin: 3rem auto 0 auto;
+}
+
+
+
+
+
+
+/*NÍVEIS*/
+#tituloNiveis {
+    /*distância entre "como funciona" e "níveis"*/
+    margin-top: 2rem;
+}
+
+.sub {
+    /*frase abaixo do título "níveis"*/
+    color: rgb(0, 0, 0);
+    text-align: center;
+    font-weight: 500;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.grid-niveis {
+    /*posição das caixas dos níveis*/
+    max-width: 68rem;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.6rem;
+}
+
+.card-nivel.vita {
+    /*estética da caixa do nível vita*/
+    background: rgba(195, 231, 174, 0.404);
+    border-radius: 1.1rem;
+    padding: 1.3rem 1.3rem 1.1rem;
+    text-align: left;
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.253);
+    border: 1px solid rgba(13, 80, 24, 0.247);
+}
+
+.card-nivel.diamante {
+    /*estética da caixa do nível diamante*/
+    background: #d4af3736;
+    border-radius: 1.1rem;
+    padding: 1.3rem 1.3rem 1.1rem;
+    text-align: left;
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.253);
+    border: 1px solid rgba(212, 175, 55, .55);
+    box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.253);
+}
+
+.titulo-nivel {
+    /*título "vita" e "vita diamante"*/
+    margin: 0 0 0.8rem;
+    font-size: 1.6rem;
+    color: #1f3f34;
+    font-weight: 700;
+}
+
+.badge {
+    /*as barras coloridas*/
+    height: 2rem;
+    border-radius: 0.6rem;
+    display: flex;
+    align-items: center;
+    padding: 0 0.8rem;
+    margin: 0 0 1rem;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25);
+}
+
+.badge-verde {
+    /*a barra verde*/
+    background: linear-gradient(90deg, #4f7d5a 0%, #2f5c3b 60%, #9aa0a6 100%);
+    color: #fff;
+}
+
+.badge-ouro {
+    /*a barra dourada*/
+    background: linear-gradient(90deg, #d7b65f 0%, #9a7a2b 100%);
+    color: #fff;
+}
+
+.texto-badge {
+    /*texto dentro da barra*/
+    font-size: 0.8rem;
+}
+
+.lista-beneficios {
+    /*listas com check*/
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.lista-beneficios li {
+    /*o texto de cada item*/
+    position: relative;
+    padding-left: 28px;
+    color: #000000;
+}
+
+.lista-beneficios li::before {
+    /*os checks + cor do check verde*/
+    content: "✓";
+    position: absolute;
+    left: .2rem;
+    width: 1.25rem;
+    font-weight: 700;
+    color: #4f7d5a;
+}
+
+.card-nivel.diamante .lista-beneficios li::before {
+    /*cor do check dourado*/
+    color: #b98a12;
+}
+
+.assinarClube {
+    /*segundo botão "quero assinar"*/
+    background-color: #f54b1c;
+    color: white;
+    padding: .3rem .4rem .3rem .4rem;
+    font-weight: 500;
+    font-size: .9rem;
+    display: flex;
+    margin: 2rem auto 2rem auto;
+}
+
+.assinarClube:hover {
+    /*segundo botão "quero assinar" quando passa o mouse*/
+    background-color: #be401d;
+    color: white;
+}
+
+
+
+
+
+
+
+/*COMENTÁRIOS*/
+h4 {
+    /*título "Veja o que nossos assinantes estão falando" */
+    padding-top: .7rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+#comentarios {
+    /*fundo amarelinho*/
+    margin: .4rem;
+    border-radius: .3rem;
+    background-color: rgba(255, 255, 84, 0.329);
+    box-shadow: .5rem .3rem 1rem rgba(0, 0, 0, 0.575);
+}
+
+.grid-depoimentos {
+    /*posição dos dois comentários*/
+    max-width: 68rem;
+    margin: 2rem auto 3rem auto;
+    padding-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.3rem;
+}
+
+.dep-card {
+    /*o card do comentário*/
+    background: rgba(255, 255, 255, .72);
+    border-radius: 1rem;
+    padding: 1.1rem 1.1rem 1rem;
+    box-shadow: 0 0.6rem 1rem rgba(0, 0, 0, 0.281);
+}
+
+.dep-topo {
+    /*o conjunto das informações*/
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.6rem;
+}
+
+.dep-avatar {
+    /*foto*/
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0 0 auto;
+}
+
+.dep-info {
+    /*nome + tipo da conta + estrelas*/
+    flex: 1;
+    min-width: 0;
+}
+
+.dep-nome {
+    /*nome*/
+    font-weight: 700;
+    color: #000000;
+    line-height: 1.1;
+}
+
+.dep-badge {
+    /*tipo da conta + background do cliente vita*/
+    display: inline-block;
+    margin-top: 0.3rem;
+    padding: .1rem 0.5rem;
+    border-radius: 100rem;
+    font-size: 0.7rem;
+    color: #fff;
+    background-color: #2f5c3b;
+}
+
+#badgeDiamante {
+    /*background do cliente diamante*/
+    background-color: #D4AF37;
+}
+
+.dep-estrelas { /*estrelas*/
+    margin-top: .2rem;
+    font-size: .7rem;
+    color: #D4AF37;
+}
+
+.dep-texto { /*o comentário -> frase*/
+    margin: 0;
+    color: #000000;
+    font-size: .8rem;
+}
+
+
+
+
+
+
+/*PERGUNTAS FREQUENTES*/
+  
+#faq{ /*distância entre o título e a linha clara acima*/
+    padding: 2rem;
+}
+  
+.faq-container{ /*largura de todo o container*/
+    max-width: 61rem;
+    margin: 0 auto;
+}
+
+.faq-item{ /*linhas entre as perguntas*/
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+  
+.faq-question{ /*a caixa (que está invisível) de cada pergunta*/
+    width: 100%;
+    background: transparent;
+    border: 0;
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+}
+  
+.faq-left{ /*distância entre o número e a pergunta*/
+    display: flex;
+    gap: 10px;
+}
+
+.faq-number{ /*o número de cada pergunta*/
+    color: #f75326;
+    font-weight: 800;
+    min-width: 22px;
+}
+  
+.faq-text{
+    font-weight: 600;
+    font-size: 18px;
+    text-align: left;
+}
+  
+.faq-icon{ /*o ícone +*/
+    color: #f75326;
+    font-size: 28px;
+    line-height: 1;
+    transform: translateY(-1px);
+    transition: transform .18s ease;
+}
+
+.faq-answer{ /*posição da resposta da pergunta*/
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .25s ease;
+}
+  
+.faq-answer-inner{ /*resposta da pergunta*/
+    padding: 0 .5rem 1rem 2.5rem; 
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 16px;
+}
+
+.faq-item.is-open .faq-answer{ /*estado aberto*/
+    max-height: 19rem; 
+}
+
+.faq-item.is-open .faq-icon{ /*o ícone + vira um x*/
+    transform: rotate(45deg); 
+}
+
+
+
+
+
+
+/*RODAPÉ*/
+
+footer {
+    /*parte de fundo do rodapé*/
+    background-color: #F8F1E7;
+    ;
+    box-shadow: 0 -0.5rem .5rem rgba(247, 83, 38, 0.24);
+}
+
+.logo-footer {
+    /*logo do rodapé*/
+    max-width: 7rem;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-footer:hover {
+    /*logo do rodapé quando passa o mouse*/
+    transform: scale(1.05);
+}
+
+footer p {
+    /*opções do rodapé*/
+    font-size: 0.9rem;
+    text-align: left;
+    color: #000000;
+    cursor: pointer;
+}
+
+footer p:hover {
+    /*opções do rodapé quando passa o mouse*/
+    text-decoration: underline;
+}
+
+.copy {
+    /*copyright*/
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+}
+
+.bolaFundoPagamento {
+    /*círculo branco atrás de cada bandeira */
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: #fff;
+    display: grid;
+    place-items: center;
+}
+
+.bolaFundoPagamento img {
+    /*tamanho da logo dentro do círculo*/
+    max-width: 90%;
+    max-height: 90%;
+    height: auto;
+    object-fit: contain;
+}
+
+h6 {
+    /*títulos do rodapé*/
+    font-size: 1.1rem;
+    color: #000;
+}
+
+#tituloRedesSociaisRodape {
+    /*impedindo a quebra de linha em "nos acompanhe nas redes sociais"*/
+    white-space: nowrap;
+}
+
+.bg-light {
+    /*linhas horizontais*/
+    color: #F75326;
+}
+
+#horarioFuncionamentoRodape {
+    /*tiro o cursor do horário de funcionamento*/
+    pointer-events: none;
+}
+
+.fab.fa-whatsapp.fa-lg {
+    /*cor do ícono do whatsapp no rodapé*/
+    color: #4fce5d;
+}
+
+.redesSociaisRodape .fa-instagram::before {
+    /*cor do ícono do instagram no rodapé*/
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    background-clip: text;
+    color: transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+/*RESPONSIVIDADE*/
+@media (min-width: 992px) {
+    /*em telas maiores que 992px de largura*/
+
+    /*ASIDE*/
+    .aside-sticky {
+        /*posição do aside*/
+        position: sticky;
+        top: 5, 5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /*em telas menores que 768px de largura (referência: ipad mini)*/
+
+    /*CABEÇALHO PARTE DE CIMA*/
+    #cabecalhoParteDeCima {
+        /*parte de cima do cabeçalho*/
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #logoCabecalho {
+        /*logo*/
+        margin-top: 0.2rem;
+    }
+
+    #areaMeuPerfil {
+        /*área de login e carrinho*/
+        margin-right: 0.8rem;
+    }
+
+    #meuPerfilArea a {
+        /*texto faça login/cadastre-se*/
+        font-size: 0.85rem;
+    }
+
+    #cabecalhoParteDeCima>.flex-grow-1 {
+        /*joga a barra de pesquisa para baixo + margens*/
+        order: 2;
+        flex: 0 0 100%;
+        margin: 1.5rem 0 3rem 0;
+    }
+
+    #barraDePesquisaToda {
+        /*remove as margens internas da barra de pesquisa*/
+        margin: 0;
+    }
+
+    .input-group {
+        /*ajusta a largura da barra de pesquisa*/
+        width: 90%;
+        max-width: 25rem;
+    }
+
+    /*CABEÇALHO PARTE DE BAIXO*/
+    #cabecalhoParteDeBaixo {
+        /*esconde o menu*/
+        display: none;
+        top: 0;
+        position: sticky;
+    }
+
+    #menuIcon {
+        /*exibe o hambúrguer*/
+        display: inline-block;
+        position: absolute;
+        z-index: 30;
+        top: 80%;
+        padding: 0.5rem;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo {
+        /*menu ao clicar no hambúrguer*/
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 20;
+        background-color: #b43e1a;
+        opacity: 0.9;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo .container {
+        /*layout interno vertical/estilização interna do nav quando aberto*/
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /*PARTE DO CLUBE FIDELIDADE*/
+    #fundoPaginaClubeFidelidade {
+        /*distância entre o topo/fim e a página*/
+        margin-top: 4rem;
+        margin-left: 1rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 853px) {
+
+    /*RODAPÉ*/
+    #tituloRedesSociaisRodape {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        white-space: pre;
+    }
+
+    .quebra-sm::after {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        content: "\A";
+        white-space: pre;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /*rodapé não incluindo 768*/
+
+    /*RODAPÉ*/
+    .primeira-linha-rodape {
+        /*permite as quebras de linha*/
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .primeira-linha-rodape>div {
+        /*define as larguras*/
+        flex: 1 1 50%;
+        max-width: 50%;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(1),
+    .primeira-linha-rodape .col-md-2:nth-child(2) {
+        /*primeira linha: logo + fale conosco*/
+        order: 1;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(3),
+    .primeira-linha-rodape .col-md-2:nth-child(4) {
+        /*segunda linha: parceiro + institucional*/
+        order: 2;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(5) {
+        /*terceira linha: redes sociais centralizadas */
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    footer h6 {
+        /*alinhando título com texto */
+        text-align: left;
+    }
+
+    #tituloRedesSociaisRodape {
+        /*centralizando "redes sociais"*/
+        text-align: center;
+    }
+
+    .primeira-linha-rodape .logo-footer {
+        /*tamanho da logo*/
+        max-width: 8rem;
+        margin: 0 auto;
+    }
+}

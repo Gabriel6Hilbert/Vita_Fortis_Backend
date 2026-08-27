@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "nome": "Julia",
+        "email": "julia@gmail.com",
+        "cpf": "11111111111",
+        "senha": "123456",
+        "tipo": "CLIENTE",
+        "ativo": true
+    },
+    {
+        "id": 2,
+        "nome": "Gabriel",
+        "email": "gabriel@gmail.com",
+        "cpf": "22222222222",
+        "senha": "admin123",
+        "tipo": "ADMIN",
+        "ativo": true
+    },
+    {
+        "id": 3,
+        "nome": "Albiere",
+        "email": "albiere@gmail.com",
+        "cpf": "33333333333",
+        "senha": "colaborador123",
+        "tipo": "COLABORADOR",
+        "ativo": true
+    }
+]

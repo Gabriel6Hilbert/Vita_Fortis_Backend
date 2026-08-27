@@ -53,9 +53,16 @@ public class Pedido {
     @JoinColumn(name = "CUPOM_ID")
     private Cupom cupomUtilizado;
 
+    @Size(max=250) @Column(name="ENDERECO_ENTREGA", length=250) private String enderecoEntrega;
+    @Size(max=40) @Column(name="FORMA_PAGAMENTO", length=40) private String formaPagamento;
+    @Size(max=80) @Column(name="REFERENCIA_PAGAMENTO", length=80) private String referenciaPagamento;
+
+    @OneToMany(mappedBy="pedido", cascade=CascadeType.ALL, orphanRemoval=true, fetch=FetchType.LAZY)
+    @OrderBy("data ASC") private List<HistoricoStatusPedido> historicoStatus = new java.util.ArrayList<>();
+
     @PrePersist @PreUpdate
     private void calcularTotais() {
-        if (items != null) {
+        if (total == null && items != null) {
             this.total = items.stream()
                     .map(ItemCompra::getSubtotal)
                     .filter(java.util.Objects::nonNull)

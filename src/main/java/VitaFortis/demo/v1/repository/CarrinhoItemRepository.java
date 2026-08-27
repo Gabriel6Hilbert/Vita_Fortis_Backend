@@ -10,9 +10,11 @@ import java.util.Optional;
 
 public interface CarrinhoItemRepository extends JpaRepository<CarrinhoItem,Long> {
     Optional<CarrinhoItem> findByCarrinhoIdAndProdutoId(Long carrinhoId, Long produtoId);
-    Optional<CarrinhoItem> findByIdAndCarrinhoId(Long itemId, Long carrinhoId);
+
+    Optional<CarrinhoItem> findByItemIdAndCarrinhoId(Long itemId, Long carrinhoId);
 
     List<CarrinhoItem> findAllByCarrinhoId(Long carrinhoId);
+
     @Modifying
     @Transactional
     void deleteAllByCarrinhoId(Long carrinhoId);

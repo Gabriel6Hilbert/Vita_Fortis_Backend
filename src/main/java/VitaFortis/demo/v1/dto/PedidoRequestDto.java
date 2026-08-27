@@ -20,4 +20,7 @@ public class PedidoRequestDto {
     private List<ItemCompraRequestDto> itens;
 
     private Long cupomId;
+    private String enderecoEntrega;
+    private String formaPagamento;
+    private String referenciaPagamento;
 }

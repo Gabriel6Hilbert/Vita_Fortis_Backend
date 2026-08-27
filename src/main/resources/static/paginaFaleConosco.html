@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fale conosco</title>
+    <link rel="icon" type="image/png" href="assets/imagens/logo_vitafortisBarraPesquisaSemFundo.png">
+    <!--logo na barra de navegação-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!--bootstrap-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+    <!--js do bootstrap-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!--biblioteca de ícones do bootstrap-->
+    <link href="assets/css/paginaFaleConosco.css" rel="stylesheet"> <!--css-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!--biblioteca de ícones-->
+</head>
+
+<body>
+
+    <!--cabeçalho-->
+    <header>
+        <!--parte de cima do cabeçalho-->
+        <div id="cabecalhoParteDeCima"
+            class="container-fluid d-flex justify-content-between align-items-center py-1 position-relative">
+
+            <!--logo no cabeçalho-->
+            <div id="logoCabecalho">
+                <a href="index.html">
+                    <img src="assets/imagens/logo_vitafortisBarraPesquisaSemFundo.png" alt="Logo cabeçalho">
+                </a>
+            </div>
+
+            <!--barra de pesquisa-->
+            <div class="flex-grow-1 d-flex justify-content-center px-2">
+                <div id="barraDePesquisaToda" class="input-group rounded-pill justify-content-center">
+                    <input id="barraDePesquisa" type="text" class="form-control border-0 rounded-start-pill"
+                        placeholder="O que você está buscando?">
+                    <button id="botaoLupa" class="btn rounded-end-pill">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!--ícone boneco e frases de login-->
+            <div id="areaLoginECarrinho" class="d-flex align-items-center">
+                <div id="loginArea" class="d-flex align-items-center me-5">
+                    <a href="paginaLogin.html">
+                        <i id="iconeLogin" class="fas fa-user me-2"></i>
+                    </a>
+                    <div class="d-flex flex-column">
+                        <span>Olá, seja bem-vindo!</span>
+                        <a href="paginaLogin.html">
+                            Entre ou Cadastre-se
+                        </a>
+                    </div>
+                </div>
+
+                <!--ícone do carrinho-->
+                <div id="carrinhoArea" class="position-relative">
+                    <i class="fas fa-shopping-cart fa-lg"></i>
+                    <span id="contadorCarrinho"
+                        class="badge text-white position-absolute top-0 start-100 translate-middle rounded-pill">
+                        0
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!--exibe ou oculta o menu quando clica nas três barrinhas (em telas pequenas)-->
+        <input type="checkbox" id="menuToggle" hidden>
+
+        <!--menu/parte debaixo do cabeçalho-->
+        <nav id="cabecalhoParteDeBaixo">
+            <div class="container d-flex justify-content-center py-1">
+                <!--opção clube fidelidade-->
+                <div id="fundoFidelidadeCab">
+                    <a id="opcaoFidelidadeCab" href="paginaClubeFidelidade.html"
+                        class="nav-link text-uppercase mx-3 d-flex align-items-center">CLUBE FIDELIDADE<i
+                            class="fas fa-star ms-1"></i></a>
+                </div>
+                <!--opção categorias-->
+                <div class="mega">
+                    <a class="nav-link text-uppercase mx-3 d-flex align-items-center gap-2" id="btnCategorias">
+                        <i class="fas fa-bars"></i>CATEGORIAS
+                    </a>
+                    <div class="mega-menu">
+                        <div class="mega-scroll">
+                            <div class="mega-grid">
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-dumbbell"></i>
+                                        <span>Proteína</span>
+                                    </div>
+                                    <a href="#">Whey Protein</a>
+                                    <a href="#">Albumina</a>
+                                    <a href="#">Caseína</a>
+                                    <a href="#">Colágeno</a>
+                                    <a href="#">Blend de Proteína</a>
+                                </div>
+
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-capsules"></i>
+                                        <span>Aminoácidos</span>
+                                    </div>
+                                    <a href="#">BCAA</a>
+                                    <a href="#">Creatina</a>
+                                    <a href="#">Glutamina</a>
+                                    <a href="#">Arginina</a>
+                                    <a href="#">Leucina</a>
+                                </div>
+
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-seedling"></i>
+                                        <span>Vegetarianos</span>
+                                    </div>
+                                    <a href="#">Proteínas</a>
+                                    <a href="#">Aminoácidos</a>
+                                    <a href="#">Carboidratos</a>
+                                    <a href="#">Vitaminas</a>
+                                    <a href="#">Energia</a>
+                                </div>
+
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-notes-medical"></i>
+                                        <span>Linha Clínica</span>
+                                    </div>
+                                    <a href="#">Melatonina</a>
+                                    <a href="#">Coenzima Q10</a>
+                                    <a href="#">Ômega 3</a>
+                                    <a href="#">Lactase</a>
+                                </div>
+
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-box"></i>
+                                        <span>Vitaminas</span>
+                                    </div>
+                                    <a href="#">Complexo B</a>
+                                    <a href="#">Multivitamínico</a>
+                                    <a href="#">Carnitina</a>
+                                </div>
+
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-dumbbell"></i>
+                                        <span>Acessórios</span>
+                                    </div>
+                                    <a href="#">Bolsas e mochilas</a>
+                                    <a href="#">Garrafinha</a>
+                                    <a href="#">Elásticos</a>
+                                </div>
+
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-box"></i>
+                                        <span>Outros</span>
+                                    </div>
+                                    <a href="#">Pós-treino</a>
+                                    <a href="#">Packs</a>
+                                    <a href="#">Temperos</a>
+                                    <a href="#">Nutracêuticos</a>
+                                    <a href="#">Hipercalórico</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--opção marcas-->
+                <div class="mega">
+                    <a class="nav-link text-uppercase mx-3" id="btnMarcas">MARCAS</a>
+                    <div class="mega-menu">
+                        <div class="mega-scroll">
+                            <div class="mega-grid-marcas">
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-award"></i>
+                                        <span>Top marcas</span>
+                                    </div>
+                                    <a href="#">FTW</a>
+                                    <a href="#">Growth</a>
+                                    <a href="#">Max Titanium</a>
+                                    <a href="#">Dux</a>
+                                </div>
+
+                                <div class="mega-col">
+                                    <div class="mega-title-chip">
+                                        <i class="fas fa-tags"></i>
+                                        <span>Todas</span>
+                                    </div>
+                                    <a href="#">Atlhetica</a>
+                                    <a href="#">Black Skull</a>
+                                    <a href="#">Dark Lab</a>
+                                    <a href="#">Essential</a>
+                                    <a href="#">Integralmedica</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--opção novidades-->
+                <a href="#" class="nav-link text-uppercase mx-3">NOVIDADES</a>
+                <!--opção kits-->
+                <a href="#" class="nav-link text-uppercase mx-3">KITS</a>
+                <!--opção acessórios-->
+                <a href="#" class="nav-link text-uppercase mx-3">ACESSÓRIOS</a>
+                <!--opção fale conosco-->
+                <a href="paginaFaleConosco.html" class="nav-link text-uppercase mx-3 d-flex align-items-center"><i
+                        class="fas fa-phone me-2"></i>FALE CONOSCO</a>
+            </div>
+        </nav>
+
+        <!--transforma o menu em três barrinhas em telas pequenas-->
+        <label for="menuToggle" id="menuIcon" class="d-lg-none" style="cursor: pointer;">
+            <i class="fas fa-bars fa-lg"></i>
+        </label>
+
+    </header>
+
+    <main>
+        <!--início do corpo do site-->
+
+        <button class="btn-zap"> <!--botão whatsapp-->
+            <i class="fab fa-whatsapp fa-2x"></i>
+        </button>
+
+        <!--início do conteúdo-->
+        <section class="atendimentoFundo"> <!--título-->
+            <h1>Central de ajuda</h1>
+        </section>
+
+        <!--conteúdo-->
+        <section class="atendimentoConteudo container-fluid">
+
+            <div class="atendimentoLayout">
+
+                <!--aside-->
+                <aside class="atendimentoAside">
+                    <nav class="atendimentoNav">
+                        <a class="atendimentoNavItens" href="#secaoFaleConosco">
+                            <i class="fa-regular fa-comment-dots"></i>
+                            <span>Fale conosco</span>
+                        </a>
+
+                        <a class="atendimentoNavItens" href="#secaoPerguntas">
+                            <i class="fa-regular fa-circle-question"></i>
+                            <span>Perguntas frequentes</span>
+                        </a>
+
+                    </nav>
+
+                </aside>
+
+                <!--conteúdo principal -->
+                <section class="atendimentoMain">
+
+                    <!--seção fale conosco-->
+                    <div class="atendimentoSection" id="secaoFaleConosco">
+                        <div class="faleConoscoHead" id="fale">
+                            <h2>FALE CONOSCO</h2>
+                            <p>
+                                Estamos disponíveis para te atender! Escolha um canal e conte pra gente como podemos
+                                ajudar.
+                            </p>
+                        </div>
+
+                        <!--bloco: atendimento por telefone-->
+                        <div class="faleTelefone">
+                            <h3>ATENDIMENTO POR TELEFONE</h3>
+
+                            <div class="cardsInformativos">
+                                <a class="cardInformativo" href="#">
+                                    <div class="cardInformativo__icon">
+                                        <i class="fa-regular fa-user"></i>
+                                    </div>
+                                    <div class="cardInformativo__text">
+                                        <strong>CENTRAL TELEFÔNICA</strong>
+                                        <span>(31) 9 9999-9999</span>
+                                    </div>
+                                </a>
+
+                                <a class="cardInformativo" href="#">
+                                    <div class="cardInformativo__icon">
+                                        <i class="fa-brands fa-whatsapp"></i>
+                                    </div>
+                                    <div class="cardInformativo__text">
+                                        <strong>WHATSAPP</strong>
+                                        <span>(31) 9 9999-9999</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!--bloco: atendimento por e-mail-->
+                        <div class="faleTelefone">
+                            <h3>ATENDIMENTO POR EMAIL</h3>
+
+                            <div class="cardsInformativos">
+                                <a class="cardInformativo" href="#">
+                                    <div class="cardInformativo__icon">
+                                        <i class="fa-regular fa-envelope"></i>
+                                    </div>
+                                    <div class="cardInformativo__text">
+                                        <strong>EMAIL</strong>
+                                        <span>vitafortis@gmail.com</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!--bloco: atendimento por e-mail-->
+                        <div class="faleTelefone">
+                            <h3>TRABALHE CONOSCO</h3>
+
+                            <div class="cardsInformativos">
+                                <a class="cardInformativo" href="#">
+                                    <div class="cardInformativo__icon">
+                                        <i class="fa-regular fa-envelope"></i>
+                                    </div>
+                                    <div class="cardInformativo__text">
+                                        <strong>EMAIL</strong>
+                                        <span>vitafortisrh@gmail.com</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!--bloco: atendimento por e-mail-->
+                        <div class="faleTelefone">
+                            <h3>SEJA AFILIADO</h3>
+
+                            <div class="cardsInformativos">
+                                <a class="cardInformativo" href="#">
+                                    <div class="cardInformativo__icon">
+                                        <i class="fa-regular fa-envelope"></i>
+                                    </div>
+                                    <div class="cardInformativo__text">
+                                        <strong>EMAIL</strong>
+                                        <span>vitafortismarketing@gmail.com</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--seção perguntas frequentes-->
+                    <div class="atendimentoSection" id="secaoPerguntas">
+                        <div class="perguntasSection" id="secaoPerguntasFreq">
+                            <div class="faleConoscoHead" id="fale">
+                                <h2>PERGUNTAS FREQUENTES</h2>
+                                <p>
+                                    Reunimos aqui as dúvidas mais comuns para te ajudar de forma rápida. Se não
+                                    encontrar o que precisa, fale com a gente.
+                                </p>
+                            </div>
+
+                            <!--as perguntas frequentes-->
+                            <div class="perguntas">
+                                <!--pergunta 1-->
+                                <div class="perguntaAoTodo">
+                                    <button class="aPergunta" type="button" aria-expanded="false">
+                                        <span class="cabecalhoPergunta">
+                                            <span class="numeroPergunta">1.</span>
+                                            <span class="textoPergunta">XXX</span>
+                                        </span>
+                                        <span class="iconePergunta" aria-hidden="true">+</span>
+                                    </button>
+
+                                    <div class="aResposta" role="region" aria-hidden="true">
+                                        <div class="textoResposta">
+                                            YYY
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--pergunta 2-->
+                                <div class="perguntaAoTodo">
+                                    <button class="aPergunta" type="button" aria-expanded="false">
+                                        <span class="cabecalhoPergunta">
+                                            <span class="numeroPergunta">2.</span>
+                                            <span class="textoPergunta">XXX</span>
+                                        </span>
+                                        <span class="iconePergunta" aria-hidden="true">+</span>
+                                    </button>
+
+                                    <div class="aResposta" role="region" aria-hidden="true">
+                                        <div class="textoResposta">
+                                            YYY
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--pergunta 3-->
+                                <div class="perguntaAoTodo">
+                                    <button class="aPergunta" type="button" aria-expanded="false">
+                                        <span class="cabecalhoPergunta">
+                                            <span class="numeroPergunta">3.</span>
+                                            <span class="textoPergunta">XXX</span>
+                                        </span>
+                                        <span class="iconePergunta" aria-hidden="true">+</span>
+                                    </button>
+
+                                    <div class="aResposta" role="region" aria-hidden="true">
+                                        <div class="textoResposta">
+                                            YYY
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--pergunta 4-->
+                                <div class="perguntaAoTodo">
+                                    <button class="aPergunta" type="button" aria-expanded="false">
+                                        <span class="cabecalhoPergunta">
+                                            <span class="numeroPergunta">4.</span>
+                                            <span class="textoPergunta">XXX</span>
+                                        </span>
+                                        <span class="iconePergunta" aria-hidden="true">+</span>
+                                    </button>
+
+                                    <div class="aResposta" role="region" aria-hidden="true">
+                                        <div class="textoResposta">
+                                            YYY
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--pergunta 5-->
+                                <div class="perguntaAoTodo">
+                                    <button class="aPergunta" type="button" aria-expanded="false">
+                                        <span class="cabecalhoPergunta">
+                                            <span class="numeroPergunta">5.</span>
+                                            <span class="textoPergunta">XXX</span>
+                                        </span>
+                                        <span class="iconePergunta" aria-hidden="true">+</span>
+                                    </button>
+
+                                    <div class="aResposta" role="region" aria-hidden="true">
+                                        <div class="textoResposta">
+                                            YYY
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <!--rodapé-->
+        <footer class="text-white pt-3 pb-1">
+            <div class="container-fluid px-4">
+                <div class="row primeira-linha-rodape">
+
+                    <!-- logo -->
+                    <div class="col-md-2 mb-1">
+                        <img src="assets/imagens/logo_vitafortisBarraPesquisaSemFundo.png" alt="Logo rodapé"
+                            class="img-fluid mb-3 logo-footer">
+                    </div>
+
+                    <!-- fale conosco -->
+                    <div class="col-md-2 mb-4">
+                        <h6 class="fw-bold mb-3">Fale Conosco</h6>
+                        <p class="mb-1"><strong>SAC:</strong> (XX) 9XXXX-XXXX</p>
+                        <p class="mb-1 text-nowrap" id="horarioFuncionamentoRodape">Segunda à Quinta<br>8h às 18h
+                        </p>
+                        <p class="mb-1"><strong>E-mail:</strong> xxxxx@gmail.com</p>
+                    </div>
+
+                    <!-- seja parceiro -->
+                    <div class="col-md-2 mb-4">
+                        <h6 class="fw-bold mb-3">Seja nosso parceiro</h6>
+                        <p class="mb-1"><a href="#" class="text-black text-decoration-none">Quero ser
+                                <strong>afiliado</strong></a></p>
+                        <p class="mb-1"><a href="#" class="text-black text-decoration-none">Quero fazer parte da
+                                <strong>equipe</strong></a></p>
+                    </div>
+
+                    <!-- institucional -->
+                    <div class="col-md-2 mb-4">
+                        <h6 class="fw-bold mb-3">Institucional</h6>
+                        <p class="mb-1"><a href="#" class="text-black text-decoration-none">Programa Fidelidade</a>
+                        </p>
+                        <p class="mb-1"><a href="#" class="text-black text-decoration-none">Sobre a Vita Fortis</a>
+                        </p>
+                        <p class="mb-1"><a href="#" class="text-black text-decoration-none">Políticas da empresa</a>
+                        </p>
+                        <p class="mb-1"><a href="#" class="text-black text-decoration-none">Endereços</a></p>
+                    </div>
+
+                    <!-- redes sociais -->
+                    <div class="col-md-2 mb-4">
+                        <h6 id="tituloRedesSociaisRodape" class="fw-bold mb-3">Nos acompanhe <span
+                                class="quebra-sm">nas</span> redes sociais</h6>
+                        <a href="#" class="text me-2 redesSociaisRodape"><i class="fab fa-whatsapp fa-lg"></i></a>
+                        <a href="#" class="text me-2 redesSociaisRodape"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text me-2 redesSociaisRodape"><i class="fab fa-facebook fa-lg"></i></a>
+                    </div>
+                </div>
+
+                <!-- linha clara -->
+                <hr class="bg-light">
+
+                <!-- pagamento -->
+                <div class="row formas-pagamento">
+                    <div class="col-12">
+                        <h6 class="fw-bold text-center mb-4">Formas de pagamento</h6>
+                        <div class="payments d-flex flex-wrap justify-content-center align-items-center gap-3 gap-md-4">
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/exemplo_pagamento"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/mastercard.svg"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/hipercard.svg"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/elo.svg"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/boleto.svg"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/bb.svg"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/caixa.svg"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/paypal.svg"></span>
+                            <span class="bolaFundoPagamento"><img src="assets/imagens/payments/pix.svg"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- linha clara -->
+                <hr class="bg-light">
+
+                <!-- copyright -->
+                <div class="copy">
+                    <p class="small text-center">Vita Fortis - CNPJ: 00.000.000/0000-00 - Endereço: xxxxxxxx &copy;
+                        Todos os direitos reservados</p>
+                </div>
+
+            </div>
+
+        </footer>
+
+    </main>
+
+    <script src="assets/scripts/faleConosco.js"></script> <!--js-->
+
+</body>
+
+</html>

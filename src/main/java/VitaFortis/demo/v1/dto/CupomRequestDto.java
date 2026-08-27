@@ -1,5 +1,6 @@
 package VitaFortis.demo.v1.dto;
 
+import VitaFortis.demo.v1.enums.CupomTipo;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,8 +19,14 @@ public class CupomRequestDto {
     private String descricao;
 
     @NotNull
+    private CupomTipo tipo;
+
+    @NotNull
     @DecimalMin(value = "0.00")
     private BigDecimal desconto;
+
+    @DecimalMin(value = "0.00")
+    private BigDecimal minSubtotal;
 
     private LocalDateTime dataVencimento;
 }

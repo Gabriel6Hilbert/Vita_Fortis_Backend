@@ -15,12 +15,19 @@ public final class FiltroProduto {
     private FiltroProduto() {}
 
     public static Specification<Produto> buildSpec(ProdutoFiltroDto f) {
-        return Specification
-                .where(publico())
-                .and(nomeContem(f.getNome()))
-                .and(categoriaIgual(f.getCategoria()))
-                .and(precoEntre(f.getPrecoMin(), f.getPrecoMax()))
-                .and(resgatavelIgual(f.getResgatavel()));
+        return Specification.allOf(
+                publico(),
+                buscaContem(f.getBusca() == null ? f.getNome() : f.getBusca()),
+                marcaIgual(f.getMarca()),
+                categoriaIgual(f.getCategoria()),
+                precoEntre(f.getPrecoMin(), f.getPrecoMax()),
+                resgatavelIgual(f.getResgatavel()),
+                conjuntoContem("objetivos", f.getObjetivos()), conjuntoContem("esportes", f.getEsportes()),
+                booleano("vegano", f.getVegano()), booleano("vegetariano", f.getVegetariano()),
+                booleano("linhaClinica", f.getLinhaClinica()), booleano("lancamento", f.getLancamento()),
+                textoIgual("subcategoria", f.getSubcategoria()), oferta(f.getOferta()),
+                emEstoque(f.getEmEstoque()), descontoMin(f.getDescontoMin())
+                );
     }
 
     public static Sort buildSort(ProdutoOrdenacao ord) {
@@ -37,15 +44,32 @@ public final class FiltroProduto {
 
     private static Specification<Produto> publico() {
         return (root, q, cb) -> cb.and(
-                cb.isTrue(root.get("ativo")),
-                cb.greaterThan(root.get("quantidadeEstoque"), 0)
+                cb.isTrue(root.get("ativo"))
         );
     }
 
-    private static Specification<Produto> nomeContem(String nome) {
-        return (root, q, cb) -> (nome == null || nome.isBlank())
+    public static Sort buildSort(ProdutoFiltroDto f) {
+        if (Boolean.TRUE.equals(f.getMaisVendidos())) return Sort.by(Sort.Order.desc("totalVendido"), Sort.Order.asc("nome"));
+        return buildSort(f.getOrdenacao());
+    }
+
+    private static Specification<Produto> buscaContem(String termo) {
+        return (root, q, cb) -> {
+            if (termo == null || termo.isBlank()) return cb.conjunction();
+            String like = "%" + termo.trim().toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("nome")), like),
+                    cb.like(cb.lower(root.get("descricao")), like),
+                    cb.like(cb.lower(root.get("codigo")), like),
+                    cb.like(cb.lower(root.get("marca")), like)
+            );
+        };
+    }
+
+    private static Specification<Produto> marcaIgual(String marca) {
+        return (root, q, cb) -> (marca == null || marca.isBlank())
                 ? cb.conjunction()
-                : cb.like(cb.lower(root.get("nome")), "%" + nome.trim().toLowerCase() + "%");
+                : cb.equal(cb.lower(root.get("marca")), marca.trim().toLowerCase());
     }
 
     private static Specification<Produto> categoriaIgual(CategoriaProduto cat) {
@@ -68,6 +92,34 @@ public final class FiltroProduto {
         return (root, q, cb) -> (r == null)
                 ? cb.conjunction()
                 : (r ? cb.isTrue(root.get("resgatavel")) : cb.isFalse(root.get("resgatavel")));
+    }
+
+    private static Specification<Produto> booleano(String campo, Boolean valor) {
+        return (root, q, cb) -> valor == null ? cb.conjunction() : cb.equal(root.get(campo), valor);
+    }
+    private static Specification<Produto> textoIgual(String campo, String valor) {
+        return (root, q, cb) -> valor == null || valor.isBlank() ? cb.conjunction()
+                : cb.equal(cb.lower(root.get(campo)), valor.trim().toLowerCase());
+    }
+    private static Specification<Produto> conjuntoContem(String campo, java.util.Set<String> valores) {
+        return (root, q, cb) -> {
+            if (valores == null || valores.isEmpty()) return cb.conjunction();
+            q.distinct(true);
+            var join = root.<Produto, String>joinSet(campo);
+            return join.in(valores.stream().map(v -> v.trim().toUpperCase()).toList());
+        };
+    }
+    private static Specification<Produto> oferta(Boolean valor) {
+        return (root, q, cb) -> !Boolean.TRUE.equals(valor) ? cb.conjunction()
+                : cb.or(cb.greaterThan(root.get("descontoPercentual"), BigDecimal.ZERO), cb.greaterThan(root.get("descontoValor"), BigDecimal.ZERO));
+    }
+    private static Specification<Produto> emEstoque(Boolean valor) {
+        return (root, q, cb) -> valor == null ? cb.conjunction()
+                : (valor ? cb.greaterThan(root.get("quantidadeEstoque"), 0) : cb.equal(root.get("quantidadeEstoque"), 0));
+    }
+    private static Specification<Produto> descontoMin(BigDecimal valor) {
+        return (root, q, cb) -> valor == null ? cb.conjunction()
+                : cb.greaterThanOrEqualTo(root.get("descontoPercentual"), valor);
     }
 }
 

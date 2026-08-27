@@ -9,7 +9,6 @@ import VitaFortis.demo.v1.enums.CupomTipo;
 import VitaFortis.demo.v1.mapper.CarrinhoItemMapper;
 import VitaFortis.demo.v1.mapper.CarrinhoMapper;
 import VitaFortis.demo.v1.repository.*;
-import org.hibernate.validator.internal.constraintvalidators.bv.time.futureorpresent.FutureOrPresentValidatorForCalendar;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +27,12 @@ public class CarrinhoService {
     private final CarrinhoItemMapper carrinhoItemMapper;
     private final UsuarioRepository usuarioRepository;
     private final CupomRepository cupomRepository;
-    private final FutureOrPresentValidatorForCalendar futureOrPresentValidatorForCalendar;
 
     public CarrinhoService(CarrinhoRepository carrinhoRepository,
                            CarrinhoItemRepository itemRepository,
                            ProdutoRepository produtoRepository,
                            CarrinhoMapper carrinhoMapper,
-                           CarrinhoItemMapper itemMapper, UsuarioRepository usuarioRepository, CupomRepository cupomRepository, FutureOrPresentValidatorForCalendar futureOrPresentValidatorForCalendar) {
+                           CarrinhoItemMapper itemMapper, UsuarioRepository usuarioRepository, CupomRepository cupomRepository) {
         this.carrinhoRepository = carrinhoRepository;
         this.carrinhoItemRepository = itemRepository;
         this.produtoRepository = produtoRepository;
@@ -42,7 +40,6 @@ public class CarrinhoService {
         this.carrinhoItemMapper = itemMapper;
         this.usuarioRepository = usuarioRepository;
         this.cupomRepository = cupomRepository;
-        this.futureOrPresentValidatorForCalendar = futureOrPresentValidatorForCalendar;
     }
 
 
@@ -177,7 +174,7 @@ public class CarrinhoService {
     public CarrinhoResponseDto atualizarQuantidade(Long usuarioId, CarrinhoItemRequestDto dto) {
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
 
-        CarrinhoItem item = carrinhoItemRepository.findByIdAndCarrinhoId(dto.getItemId(), carrinho.getId())
+        CarrinhoItem item = carrinhoItemRepository.findByItemIdAndCarrinhoId(dto.getItemId(), carrinho.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Item não pertence ao carrinho."));
 
         if (!item.getCarrinho().getId().equals(carrinho.getId())) {
@@ -190,7 +187,7 @@ public class CarrinhoService {
         } else {
             Produto produto = item.getProduto();
             Integer estoque  = produto.getQuantidadeEstoque();
-            if (estoque  <= 0 || estoque  == null) {
+            if (estoque == null || estoque < qtd) {
                 throw new IllegalArgumentException("Estoque insuficiente");
             }
             item.setQuantidade(qtd);
@@ -211,6 +208,10 @@ public class CarrinhoService {
 
         CarrinhoItem item = carrinhoItemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item nao pertence ao carrinho"));
+
+        if (!item.getCarrinho().getId().equals(carrinho.getId())) {
+            throw new IllegalArgumentException("Item nao pertence ao carrinho");
+        }
 
         int novaQtd = item.getQuantidade() - delta;
         if (novaQtd <= 0) {

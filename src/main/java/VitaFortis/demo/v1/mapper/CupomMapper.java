@@ -5,10 +5,7 @@ import VitaFortis.demo.v1.dto.CupomResponseDto;
 import VitaFortis.demo.v1.entity.Cupom;
 import org.mapstruct.*;
 
-@Mapper(
-        componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
-)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CupomMapper {
 
     CupomResponseDto toDto(Cupom cupom);

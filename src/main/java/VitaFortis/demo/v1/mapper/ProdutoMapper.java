@@ -11,17 +11,20 @@ import org.mapstruct.*;
 )
 public interface ProdutoMapper {
 
+    @Mapping(target = "valorDesconto", expression = "java(produto.getValorDesconto())")
+    @Mapping(target = "precoFinal",    expression = "java(produto.getPrecoFinal())")
     ProdutoResponseDto toResponseDto(Produto produto);
 
-    @Mapping(target = "produtoId", ignore = true)
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "versao", ignore = true)
     @Mapping(target = "ativo",ignore = true)
     @Mapping(target = "pontosNecessarios", source = "pontosNecessarios")
-    @Mapping(target = "nome", qualifiedByName = "tromOrNull")
+    @Mapping(target = "nome", qualifiedByName = "trimOrNull")
+    @Mapping(target = "descricao", qualifiedByName = "trimOrNull")
     Produto toEntity(ProdutoRequestDto produtoRequestDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "produtoId", ignore = true)
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "versao", ignore = true)
     @Mapping(target = "ativo", ignore = true)
     @Mapping(target = "nome", qualifiedByName = "trimOrNull")

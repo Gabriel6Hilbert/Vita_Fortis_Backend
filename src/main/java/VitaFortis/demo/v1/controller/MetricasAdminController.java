@@ -1,0 +1,3 @@
+package VitaFortis.demo.v1.controller;
+import VitaFortis.demo.v1.dto.MetricasAdminDto;import VitaFortis.demo.v1.service.MetricasService;import org.springframework.format.annotation.DateTimeFormat;import org.springframework.security.core.Authentication;import org.springframework.web.bind.annotation.*;import java.time.LocalDate;
+@RestController @RequestMapping("/api/v1/admin/metricas") public class MetricasAdminController {private final MetricasService service;public MetricasAdminController(MetricasService s){service=s;}@GetMapping public MetricasAdminDto obter(@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate inicio,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate fim,Authentication a){return service.obter(inicio,fim,a.getName());}}

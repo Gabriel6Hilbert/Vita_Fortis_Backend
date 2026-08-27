@@ -22,6 +22,7 @@ public interface CarrinhoMapper {
     Carrinho toEntity(CarrinhoRequestDto dto);
 
     @Mapping(target = "usuarioId", source = "usuario.id")
+    @Mapping(target = "carrinhoId", source = "id")
     @Mapping(target = "carrinhoItens", source = "itens")
     CarrinhoResponseDto toResponseDto(Carrinho entity);
 

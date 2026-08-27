@@ -17,4 +17,8 @@ public class PedidoResponseDto {
     private int pontosGerados;
     private List<ItemCompraResponseDto> itens;
     private String cupomCodigo;
+    private String enderecoMascarado;
+    private String formaPagamento;
+    private String referenciaPagamentoMascarada;
+    private List<HistoricoStatusPedidoDto> historicoStatus;
 }

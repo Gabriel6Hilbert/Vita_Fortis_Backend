@@ -54,15 +54,20 @@ public class Usuario {
     private String telefone;
 
     @Min(0)
-    @Column(name = "PONTOS_FIDELIDADE", nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(name = "PONTOS_FIDELIDADE", nullable = false)
+    @Builder.Default
     private int pontosFidelidade = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "TIPO_USUARIO", nullable = false, length = 30)
     private TipoUsuario tipo;
 
-    @Column(name = "ATIVO", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
+    @Column(name = "ATIVO", nullable = false)
+    @Builder.Default
     private boolean ativo = true;
+
+    @Column(name = "PERMISSAO_RELATORIOS", nullable = false)
+    private boolean permissaoRelatorios;
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
@@ -73,13 +78,13 @@ public class Usuario {
     private LocalDateTime updatedAt;
 
     public Usuario(Long usuarioId) {
-
+        this.id = usuarioId;
     }
 
     @PrePersist
     void prePersist() {
         if (tipo == null)  tipo = TipoUsuario.CLIENTE;
-        ativo = true;
+        if (!ativo) ativo = true;
     }
 
 }

@@ -1,0 +1,625 @@
+/*CSS DA PÁGINA DE LOGIN*/
+
+/*CORPO*/
+
+body {
+    /*cor de fundo*/
+    background-color: rgb(238, 236, 231);
+    overflow-x: hidden;
+    /*remove a barra de rolar embaixo*/
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+main {
+    /*remove o gap no fim da pagina depois do footer*/
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/*CABEÇALHO*/
+
+/*CABEÇALHO PARTE DE CIMA*/
+
+header {
+    /*cabeçalho não fixo*/
+    position: sticky;
+    z-index: 1000;
+}
+
+#cabecalhoParteDeCima {
+    /*parte de cima do cabeçalho*/
+    background-color: #F8F1E7;
+}
+
+#logoCabecalho img {
+    /*logo do cabeçalho*/
+    max-height: 5rem;
+    transition: transform 0.3s ease;
+}
+
+#logoCabecalho img:hover {
+    /*logo do cabeçalho quando passa o mouse*/
+    transform: scale(1.08);
+}
+
+#barraDePesquisa {
+    /*tamanho da barra de pesquisa*/
+    width: 50%;
+    max-width: 25rem;
+}
+
+/*#barraDePesquisaToda {
+    /*posição da barra de pesquisa com o botão/lupa
+    
+}*/
+
+#botaoLupa {
+    /*parte da lupa na barra de pesquisa*/
+    background-color: #F75326;
+    color: white;
+}
+
+#botaoLupa:hover {
+    /*parte da lupa na barra de pesquisa quando passa o mouse*/
+    background-color: #be401d;
+}
+
+.input-group .btn:hover {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    color: white;
+}
+
+.input-group .form-control:focus {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    border-color: transparent;
+    box-shadow: none;
+}
+
+#iconeLogin {
+    /*ícone de boneco no login*/
+    color: rgba(253, 209, 1, 1);
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+#iconeLogin:hover {
+    /*ícone de boneco no login quando passa o mouse*/
+    color: rgba(253, 209, 1, 1);
+    font-size: 1.3rem;
+    transform: scale(1.08);
+    cursor: pointer;
+}
+
+#loginArea span {
+    /*texto "seja bem-vindo"*/
+    color: rgba(253, 209, 1, 1);
+    font-size: .9rem;
+}
+
+#loginArea a {
+    /*texto faça login/cadastre-se*/
+    color: white;
+    font-size: .95rem;
+    text-decoration: none;
+}
+
+#loginArea a:hover {
+    /*texto faça login/cadastre-se quando passa o mouse*/
+    text-decoration: underline;
+}
+
+#loginArea .d-flex.flex-column {
+    /*centraliza as duas frases do login*/
+    text-align: center;
+}
+
+#carrinhoArea {
+    /*carrinho de compras*/
+    color: rgb(0, 0, 0);
+    position: relative;
+}
+
+#carrinhoArea:hover {
+    /*carrinho de compras*/
+    cursor: pointer;
+}
+
+#areaLoginECarrinho {
+    /*distância da área do login e do carrinho da margem direita */
+    margin-right: 3.5rem;
+}
+
+#contadorCarrinho {
+    /*número de itens no carrinho*/
+    font-size: 0.6rem;
+    padding: 0.2rem 0.3rem;
+    border: 1px solid #00000020;
+    background-color: #F75326;
+}
+
+/*CABEÇALHO PARTE DE BAIXO*/
+
+#cabecalhoParteDeBaixo {
+    /*parte de baixo do cabeçalho (transparente)*/
+    background-color: #f75326;
+    opacity: 90%;
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    font-weight: 600;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.text-uppercase.mx-3 {
+    /*opções do menu*/
+    color: rgb(255, 255, 255);
+    font-size: .9rem;
+    transition: transform 0.3s ease;
+}
+
+.nav-link.text-uppercase.mx-3:hover {
+    /*opções do menu quando passa o mouse*/
+    transform: scale(1.1);
+}
+
+#opcaoCategorias {
+    /*opção "categorias"*/
+    color: white;
+}
+
+#fundoFidelidadeCab {
+    /*background da opção "clube fidelidade"*/
+    background-color: rgb(255, 213, 0);
+    border-radius: .2rem;
+    margin-right: .5rem;
+}
+
+#menuIcon {
+    /*esconde o ícone hambúrger em telas grandes*/
+    display: none;
+    color: #F75326;
+}
+
+
+
+
+
+
+/*CORPO DO SITE*/
+
+/*BOTÃO ZAP*/
+
+.btn-zap {
+    /*botão do whatsapp*/
+    position: fixed;
+    bottom: 1.2rem;
+    right: .5rem;
+    background-color: #4fce5d;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: bold;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+    z-index: 1050;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    gap: .8rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-zap:hover {
+    /*botão do whatsapp quando passa o mouse*/
+    transform: scale(1.05);
+    background-color: #1f5c0f;
+}
+
+
+
+
+
+
+/*FORMULÁRIO + IMAGEM*/
+
+.bg-img {
+    /*imagem de fundo*/
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    object-position: 50% 75%;
+}
+
+.overlay {
+    /*camada escura sob a imagem*/
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.74);
+    z-index: -1;
+}
+
+
+
+
+
+
+/*FORMULÁRIO LOGIN*/
+
+.login-card {
+    /*formulário em si*/
+    margin-top: 50%;
+    margin-bottom: 50%;
+    background-color: rgba(238, 236, 231, 0.973);
+    border-radius: .7rem;
+    padding: 1rem 2rem 1rem 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.recupSenha {
+    /*frase "esqueci minha senha"*/
+    font-size: .8rem;
+    margin-bottom: 1.5rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.recupSenha a {
+    /*deixando a frase "esqueci minha senha" preta*/
+    color: #000;
+}
+
+.btnAcessarConta {
+    /*botão "acessar conta"*/
+    background-color: #F75326;
+    border: none;
+    border-radius: .2rem;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
+    font-size: 1.1rem;
+    color: white;
+}
+
+.btnAcessarConta:hover {
+    /*botão "acessar conta" quando passa o mouse*/
+    background-color: #be401d;
+}
+
+.fraseCriarConta {
+    /*frase "criar conta"*/
+    font-size: .9rem;
+    text-align: center;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.fraseCriarConta a {
+    /*deixando a frase "criar conta" preta*/
+    color: #000;
+}
+
+
+
+
+
+
+/*FORMULÁRIO CADASTRO*/
+
+.btnCriarConta {
+    /*botão criar conta*/
+    background-color: #F75326;
+    border: none;
+    border-radius: .2rem;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
+    font-size: 1.1rem;
+    color: white;
+    margin-top: 2rem;
+}
+
+.btnCriarConta:hover {
+    /*botão criar conta quando passa o mouse*/
+    background-color: #be401d;
+}
+
+#cardCadastro {
+    /*margem bottom e top do card cadastro*/
+    margin-top: 50%;
+    margin-bottom: 50%;
+}
+
+
+
+
+
+
+/*RODAPÉ*/
+
+footer {
+    /*parte de fundo do rodapé*/
+    background-color: #F8F1E7;;
+    box-shadow: 0 -0.5rem .5rem rgba(247, 83, 38, 0.24);
+}
+
+.logo-footer {
+    /*logo do rodapé*/
+    max-width: 7rem;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-footer:hover {
+    /*logo do rodapé quando passa o mouse*/
+    transform: scale(1.05);
+}
+
+footer p {
+    /*opções do rodapé*/
+    font-size: 0.9rem;
+    text-align: left;
+    color: #000000;
+    cursor: pointer;
+}
+
+footer p:hover {
+    /*opções do rodapé quando passa o mouse*/
+    text-decoration: underline;
+}
+
+.copy {
+    /*copyright*/
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+}
+
+.bolaFundoPagamento {
+    /*círculo branco atrás de cada bandeira */
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: #fff;
+    display: grid;
+    place-items: center;
+}
+
+.bolaFundoPagamento img {
+    /*tamanho da logo dentro do círculo*/
+    max-width: 90%;
+    max-height: 90%;
+    height: auto;
+    object-fit: contain;
+}
+
+h6 {
+    /*títulos do rodapé*/
+    font-size: 1.1rem;
+    color: #000;
+}
+
+#tituloRedesSociaisRodape {
+    /*impedindo a quebra de linha em "nos acompanhe nas redes sociais"*/
+    white-space: nowrap;
+}
+
+.bg-light{ /*linhas horizontais*/
+    color: #F75326;
+}
+
+#horarioFuncionamentoRodape{ /*tiro o cursor do horário de funcionamento*/
+    pointer-events: none;
+}
+
+.fab.fa-whatsapp.fa-lg{ /*cor do ícono do whatsapp no rodapé*/
+    color: #4fce5d;
+}
+
+.redesSociaisRodape .fa-instagram::before{ /*cor do ícono do instagram no rodapé*/
+    background: radial-gradient(circle at 30% 107%,#fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%,#285AEB 90%);
+    background-clip: text;
+    color: transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*RESPONSIVIDADE*/
+
+@media (min-width: 820px) and (max-width: 1024px) {
+    /*ipad air 820, ipad pro 1024, fold 853 e surface pro 7 912*/
+
+    /*FORMULÁRIOS*/
+    .login-card {
+        /*margem top do card login*/
+        margin-top: 15rem;
+    }
+
+    #cardCadastro {
+        /*margem top do card cadastro*/
+        margin-top: 13rem;
+    }
+
+    .login-card,
+    #cardCadastro { /*aumenta os cards*/
+        transform: scale(1.3);
+    }
+}
+
+@media (max-width: 768px) {
+    /*em telas menores que 767px de largura (referência: ipad mini)*/
+
+    /*CABEÇALHO PARTE DE CIMA*/
+    #cabecalhoParteDeCima {
+        /*parte de cima do cabeçalho*/
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #logoCabecalho {
+        /*logo*/
+        margin-top: 0.2rem;
+    }
+
+    #areaLoginECarrinho {
+        /*área de login e carrinho*/
+        margin-right: 0.8rem;
+    }
+
+    #loginArea span {
+        /*texto "seja bem-vindo"*/
+        font-size: 0.8rem;
+    }
+
+    #loginArea a {
+        /*texto faça login/cadastre-se*/
+        font-size: 0.85rem;
+    }
+
+    #cabecalhoParteDeCima>.flex-grow-1 {
+        /*joga a barra de pesquisa para baixo + margens*/
+        order: 2;
+        flex: 0 0 100%;
+        margin: 1.5rem 0 3rem 0;
+    }
+
+    #barraDePesquisaToda {
+        /*remove as margens internas da barra de pesquisa*/
+        margin: 0;
+    }
+
+    .input-group {
+        /*ajusta a largura da barra de pesquisa*/
+        width: 90%;
+        max-width: 25rem;
+    }
+
+    /*CABEÇALHO PARTE DE BAIXO*/
+    #cabecalhoParteDeBaixo {
+        /*esconde o menu*/
+        display: none;
+    }
+
+    #menuIcon {
+        /*exibe o hambúrguer*/
+        display: inline-block;
+        position: absolute;
+        z-index: 30;
+        top: 80%;
+        padding: 0.5rem;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo {
+        /*menu ao clicar no hambúrguer*/
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 20;
+        background-color: #b43e1a;
+        opacity: 0.9;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo .container {
+        /*layout interno vertical/estilização interna do nav quando aberto*/
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 853px) {
+
+    /*RODAPÉ*/
+    #tituloRedesSociaisRodape {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        white-space: pre;
+    }
+
+    .quebra-sm::after {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        content: "\A";
+        white-space: pre;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /*rodapé não incluindo 768*/
+
+    /*RODAPÉ*/
+    .primeira-linha-rodape {
+        /*permite as quebras de linha*/
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .primeira-linha-rodape>div {
+        /*define as larguras*/
+        flex: 1 1 50%;
+        max-width: 50%;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(1),
+    .primeira-linha-rodape .col-md-2:nth-child(2) {
+        /*primeira linha: logo + fale conosco*/
+        order: 1;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(3),
+    .primeira-linha-rodape .col-md-2:nth-child(4) {
+        /*segunda linha: parceiro + institucional*/
+        order: 2;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(5) {
+        /*terceira linha: redes sociais centralizadas */
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    footer h6 {
+        /*alinhando título com texto */
+        text-align: left;
+    }
+
+    #tituloRedesSociaisRodape {
+        /*centralizando "redes sociais"*/
+        text-align: center;
+    }
+
+    .primeira-linha-rodape .logo-footer {
+        /*tamanho da logo*/
+        max-width: 8rem;
+        margin: 0 auto;
+    }
+}

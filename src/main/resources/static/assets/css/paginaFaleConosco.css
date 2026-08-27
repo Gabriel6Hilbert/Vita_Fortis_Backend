@@ -1,0 +1,933 @@
+/*CSS DA PÁGINA FALE CONOSCO*/
+
+/*CORPO*/
+
+body {
+    /*cor de fundo*/
+    background-color: #eeece7;
+    overflow-x: hidden;
+    /*remove a barra de rolar embaixo*/
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/*CABEÇALHO*/
+
+/*CABEÇALHO PARTE DE CIMA*/
+
+header {
+    /*fixa o cabeçalho mesmo ao rolar a tela*/
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+#cabecalhoParteDeCima {
+    /*parte de cima do cabeçalho*/
+    background-color: #F8F1E7;
+}
+
+#logoCabecalho img {
+    /*logo do cabeçalho*/
+    max-height: 5rem;
+    transition: transform 0.3s ease;
+}
+
+#logoCabecalho img:hover {
+    /*logo do cabeçalho quando passa o mouse*/
+    transform: scale(1.08);
+}
+
+#barraDePesquisa {
+    /*tamanho da barra de pesquisa*/
+    width: 50%;
+    max-width: 25rem;
+}
+
+#barraDePesquisaToda {
+    /*posição da barra de pesquisa com o botão/lupa*/
+    margin-left: 15%;
+    margin-right: 5%;
+}
+
+#botaoLupa {
+    /*parte da lupa na barra de pesquisa*/
+    background-color: #F75326;
+    color: white;
+}
+
+#botaoLupa:hover {
+    /*parte da lupa na barra de pesquisa quando passa o mouse*/
+    background-color: #be401d;
+}
+
+.input-group .btn:hover {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    color: white;
+}
+
+.input-group .form-control:focus {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    border-color: transparent;
+    box-shadow: none;
+}
+
+#iconeLogin {
+    /*ícone de boneco no login*/
+    color: #F75326;
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+#iconeLogin:hover {
+    /*ícone de boneco no login quando passa o mouse*/
+    color: #be401d;
+    font-size: 1.3rem;
+    transform: scale(1.08);
+    cursor: pointer;
+}
+
+#loginArea span {
+    /*texto "seja bem-vindo"*/
+    color: #F75326;
+    font-size: .9rem;
+}
+
+#loginArea a {
+    /*texto faça login/cadastre-se*/
+    color: #000000;
+    font-size: .95rem;
+    text-decoration: none;
+}
+
+#loginArea a:hover {
+    /*texto faça login/cadastre-se quando passa o mouse*/
+    text-decoration: underline;
+}
+
+#loginArea .d-flex.flex-column {
+    /*centraliza as duas frases do login*/
+    text-align: center;
+}
+
+#carrinhoArea {
+    /*carrinho de compras*/
+    color: rgb(0, 0, 0);
+    position: relative;
+}
+
+#carrinhoArea:hover {
+    /*carrinho de compras*/
+    cursor: pointer;
+}
+
+#areaLoginECarrinho {
+    /*distância da área do login e do carrinho da margem direita */
+    margin-right: 3.5rem;
+}
+
+#contadorCarrinho {
+    /*número de itens no carrinho*/
+    font-size: 0.6rem;
+    padding: 0.2rem 0.3rem;
+    border: 1px solid #00000020;
+    background-color: #F75326;
+}
+
+/*CABEÇALHO PARTE DE BAIXO*/
+
+#cabecalhoParteDeBaixo {
+    /*parte de baixo do cabeçalho (transparente)*/
+    background: rgb(247, 83, 38, .9);
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    font-weight: 600;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.text-uppercase.mx-3 {
+    /*opções do menu*/
+    color: rgb(255, 255, 255);
+    font-size: .9rem;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-link.text-uppercase.mx-3:hover {
+    /*opções do menu quando passa o mouse*/
+    transform: scale(1.1);
+}
+
+#opcaoFidelidadeCab {
+    /*opção "clube fidelidade"*/
+    color: white;
+}
+
+#fundoFidelidadeCab {
+    /*background da opção "clube fidelidade"*/
+    background-color: rgb(255, 213, 0);
+    border-radius: .2rem;
+    margin-right: .5rem;
+}
+
+#menuIcon {
+    /*esconde o ícone hambúrger em telas grandes*/
+    display: none;
+    color: #F75326;
+}
+
+
+
+
+
+/*OPÇÃO CATEGORIAS NO CABEÇALHO PARTE DE BAIXO*/
+
+.mega:hover .mega-menu,
+.mega:focus-within .mega-menu,
+.mega.is-open .mega-menu {
+    /*é o que permite abrir*/
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+.mega-menu {
+    /*o fundo branco*/
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: max-content;
+    max-width: calc(100vw);
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 1.2rem 3.2rem rgba(0, 0, 0, .16);
+    padding: 1.2rem;
+    visibility: hidden;
+    max-height: 22rem;
+}
+
+.mega-title-chip {
+    /*nome de cada categoria*/
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .35rem .85rem;
+    border-radius: 100rem;
+    font-weight: 750;
+    font-size: .95rem;
+    background: rgb(255, 226, 218);
+    min-width: 9rem;
+    color: #000000;
+    margin-bottom: .5rem;
+}
+
+.mega-title-chip i {
+    /*ícone de cada categoria*/
+    font-size: 1rem;
+    opacity: .9;
+    color: #F75326;
+}
+
+.mega-col a {
+    /*as várias opções*/
+    display: block;
+    text-decoration: none;
+    color: #000000;
+    font-size: .95rem;
+    padding: .25rem 0;
+    margin-left: .6rem;
+}
+
+.mega-col a:hover {
+    /*as várias opções quando passa o mouse*/
+    text-decoration: underline;
+    transform: translateY(-.06rem);
+}
+
+.mega-grid {
+    /*grid de colunas*/
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.1rem;
+    justify-items: center;
+}
+
+.mega-grid-marcas {
+    /*centralizando o grid de marcas*/
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: center;
+    column-gap: 4rem;
+}
+
+.mega-scroll {
+    /*barra de rolar dentro do mega*/
+    max-height: 18rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 1rem;
+}
+
+.mega-scroll::-webkit-scrollbar {
+    /*largura da barra de rolar*/
+    width: .4rem;
+}
+
+.mega-scroll::-webkit-scrollbar-thumb {
+    /*estética da barra de rolar*/
+    background: rgba(0, 0, 0, 0.199);
+    border-radius: 100rem;
+}
+
+.mega-scroll::-webkit-scrollbar-track {
+    /*estética do trilho da barra de rolar*/
+    background: rgba(0, 0, 0, .06);
+    border-radius: 100rem;
+}
+
+
+
+
+
+/*INÍCIO DO CORPO DO SITE*/
+
+.btn-zap {
+    /*botão do whatsapp*/
+    position: fixed;
+    bottom: 1.2rem;
+    right: .5rem;
+    background-color: #4fce5d;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: bold;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+    z-index: 1050;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    gap: .8rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-zap:hover {
+    /*botão do whatsapp quando passa o mouse*/
+    transform: scale(1.05);
+    background-color: #1f5c0f;
+}
+
+
+
+
+
+/*CONTEÚDO*/
+
+.atendimentoFundo {
+    /*fundo laranja atrás do título*/
+    background-color: rgb(247, 83, 38);
+    padding: 3.5rem 1.2rem;
+    box-shadow: inset 0 -0.25rem 0.37rem rgba(0, 0, 0, .22);
+}
+
+.atendimentoFundo h1 {
+    /*título "central de atendimento"*/
+    color: #fff;
+    text-align: center;
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin: 0;
+}
+
+.atendimentoConteudo {
+    /*margem do fundo (off white)*/
+    padding: 1.6rem 1.5rem 3rem;
+}
+
+.atendimentoLayout {
+    /*disposição do conteúdo aside+main*/
+    display: grid;
+    grid-template-columns: 18rem 1fr;
+    gap: 2rem;
+}
+
+
+
+
+/*ASIDE*/
+
+.atendimentoAside {
+    /*permite que o aside desça ao rolar a tela*/
+    position: sticky;
+    top: 7rem;
+    height: fit-content;
+}
+
+.atendimentoNav {
+    /*estética da nav*/
+    background: #ffffff;
+    border-radius: 1.2rem;
+    padding: .5rem;
+    border-left: .22rem solid #F75326;
+    box-shadow: 0 .9rem 2.6rem rgba(0, 0, 0, .08);
+}
+
+.atendimentoNavItens {
+    /*cada opção do aside*/
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .8rem;
+    border-radius: .9rem;
+    text-decoration: none;
+    color: black;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.atendimentoNavItens i {
+    /*ícones*/
+    width: 1.2rem;
+    text-align: center;
+    color: #222;
+}
+
+.atendimentoNavItens:hover {
+    /*cor de fundo cada opção ao passar o mouse*/
+    background: rgba(0, 0, 0, .04);
+}
+
+.atendimentoSection {
+    /*permite trocar os blocos de conteúdo a partir da escolha no aside + js (mostra)*/
+    display: none;
+}
+
+.atendimentoSection.is-active {
+    /*permite trocar os blocos de conteúdo a partir da escolha no aside + js (esconde)*/
+    display: block;
+}
+
+.atendimentoNavItens.is-active {
+    /*muda o background quando a opção for escolhida no aside*/
+    background: rgba(247, 83, 38, .12);
+    border-radius: .9rem;
+}
+
+
+
+
+
+/*CONTEÚDO DA DIREITA/PRINCIPAL*/
+
+.faleConoscoHead h2 {
+    /*título "fale conosco"*/
+    font-weight: 800;
+    color: #000;
+    font-size: 1.8rem;
+}
+
+.faleConoscoHead p {
+    /*frase/subtítulo*/
+    color: rgba(0, 0, 0, 0.719);
+    max-width: 58rem;
+    font-size: 1rem;
+}
+
+/*TELEFONE*/
+
+.faleTelefone {
+    /*estética do fundo laranjinha*/
+    background: #f753260e;
+    border-radius: .5rem;
+    padding: .8rem;
+    margin-top: 1.4rem;
+    box-shadow: 0.3rem 0.3rem 0.5rem rgba(247, 83, 38, 0.185);
+}
+
+.faleTelefone h3 {
+    /*título "atendimento por telefone"*/
+    font-weight: 700;
+    font-size: .9rem;
+    margin: 0 0 1rem;
+    color: #000;
+}
+
+.cardsInformativos {
+    /*disposição dos cards informativos*/
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: 1.2rem;
+}
+
+.cardsInformativos--two {
+    /*responsividade dos cards informativos*/
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cardInformativo {
+    /*card informativo em si*/
+    background: #fff;
+    border-radius: 1rem;
+    padding: 1rem;
+    text-decoration: none;
+    color: black;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    transition: transform .12s ease, box-shadow .12s ease;
+
+}
+
+.cardInformativo:hover {
+    /*card informativo ao passar o mouse*/
+    transform: translateY(-.08rem);
+    box-shadow: 0 1.2rem 3.2rem rgba(0, 0, 0, .14);
+}
+
+.cardInformativo__icon {
+    /*fundo do ícone do card*/
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: .8rem;
+    background-color: #f7532649;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+}
+
+.cardInformativo__icon i {
+    /*ícone em si do card*/
+    color: black;
+    font-size: 1.1rem;
+}
+
+.cardInformativo__text strong {
+    /*título do card*/
+    display: block;
+    font-weight: 800;
+    color: rgb(0, 0, 0);
+    font-size: .75rem;
+    margin-bottom: .2rem;
+}
+
+.cardInformativo__text span {
+    /*informações/telefone*/
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: #2e2e2e;
+    font-weight: 700;
+    font-size: .92rem;
+}
+
+
+
+
+
+/*PERGUNTAS FREQUENTES*/
+
+.perguntas {
+    /*largura de todo o container*/
+    max-width: 61rem;
+    margin: 0 auto;
+}
+
+.perguntaAoTodo {
+    /*linhas entre as perguntas*/
+    background: transparent;
+    margin-bottom: 1rem;
+}
+
+.aPergunta {
+    /*a caixa (que está invisível) de cada pergunta*/
+    width: 100%;
+    border: 0;
+    padding: .8rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    background: #f753261c;
+    border-radius: .9rem;
+    box-shadow: 0 .4rem 1.2rem rgba(0, 0, 0, .06);
+    margin-bottom: .8rem;
+}
+
+.cabecalhoPergunta {
+    /*distância entre o número e a pergunta*/
+    display: flex;
+    gap: 0.6rem;
+}
+
+.numeroPergunta {
+    /*o número de cada pergunta*/
+    color: #f75326;
+    font-weight: 800;
+    min-width: 1.35rem;
+}
+
+.textoPergunta {
+    /*a pergunta (texto) em si*/
+    font-weight: 600;
+    font-size: .9rem;
+    text-align: left;
+}
+
+.iconePergunta {
+    /*o ícone +*/
+    color: #f75326;
+    font-size: 1.75rem;
+    line-height: 1;
+    transform: translateY(-1px);
+    transition: transform .18s ease;
+}
+
+.aResposta {
+    /*posição da resposta da pergunta*/
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .25s ease;
+}
+
+.textoResposta {
+    /*resposta da pergunta*/
+    padding: 0 .5rem 1rem 2.5rem;
+    color: rgba(0, 0, 0, 0.85);
+    font-size: .9rem;
+}
+
+.perguntaAoTodo.is-open .aResposta {
+    /*estado aberto*/
+    max-height: 19rem;
+}
+
+.perguntaAoTodo.is-open .iconePergunta {
+    /*o ícone + vira um x*/
+    transform: rotate(45deg);
+}
+
+
+
+
+
+/*RODAPÉ*/
+
+footer {
+    /*parte de fundo do rodapé*/
+    background-color: #F8F1E7;
+    ;
+    box-shadow: 0 -0.5rem .5rem rgba(247, 83, 38, 0.24);
+}
+
+.logo-footer {
+    /*logo do rodapé*/
+    max-width: 7rem;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-footer:hover {
+    /*logo do rodapé quando passa o mouse*/
+    transform: scale(1.05);
+}
+
+footer p {
+    /*opções do rodapé*/
+    font-size: 0.9rem;
+    text-align: left;
+    color: #000000;
+    cursor: pointer;
+}
+
+footer p:hover {
+    /*opções do rodapé quando passa o mouse*/
+    text-decoration: underline;
+}
+
+.copy {
+    /*copyright*/
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+}
+
+.bolaFundoPagamento {
+    /*círculo branco atrás de cada bandeira */
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: #fff;
+    display: grid;
+    place-items: center;
+}
+
+.bolaFundoPagamento img {
+    /*tamanho da logo dentro do círculo*/
+    max-width: 90%;
+    max-height: 90%;
+    height: auto;
+    object-fit: contain;
+}
+
+h6 {
+    /*títulos do rodapé*/
+    font-size: 1.1rem;
+    color: #000;
+}
+
+#tituloRedesSociaisRodape {
+    /*impedindo a quebra de linha em "nos acompanhe nas redes sociais"*/
+    white-space: nowrap;
+}
+
+.bg-light {
+    /*linhas horizontais*/
+    color: #F75326;
+}
+
+#horarioFuncionamentoRodape {
+    /*tiro o cursor do horário de funcionamento*/
+    pointer-events: none;
+}
+
+.fab.fa-whatsapp.fa-lg {
+    /*cor do ícono do whatsapp no rodapé*/
+    color: #4fce5d;
+}
+
+.redesSociaisRodape .fa-instagram::before {
+    /*cor do ícono do instagram no rodapé*/
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    background-clip: text;
+    color: transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/*RESPONSIVIDADE*/
+
+@media (max-width: 992px) {
+
+    /*PARTE DE BAIXO DO CABEÇALHO - CATEGORIAS E MARCAS*/
+    .mega-menu {
+        /*o fundo branco*/
+        top: auto;
+        display: none;
+        left: 50%;
+        right: 0;
+        margin: 0 auto;
+        width: 95%;
+        max-height: 22rem;
+    }
+
+    .mega.is-open .mega-menu {
+        /*permite que o mega abra em telas pequenas*/
+        display: block;
+    }
+
+    .mega-grid {
+        /*grid de colunas*/
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .mega-scroll {
+        /*barra de rolar dentro do mega*/
+        max-height: 10rem;
+    }
+
+    /*FALE CONOSCO*/
+    .atendimentoLayout {
+        /*layout de todo o main*/
+        grid-template-columns: 1fr;
+    }
+
+    .atendimentoAside {
+        /*layout do aside*/
+        position: static;
+    }
+
+    .faleTelefone {
+        /*relaciona atendimento por telefone com atendimento por e-mail*/
+        border-radius: 0 0 1rem 1rem;
+    }
+
+    .cardsInformativos {
+        /*layout de TODOs os cards (ex.: os diferentes telefones)*/
+        grid-template-columns: 1fr;
+    }
+
+    .cardInformativo {
+        /*layout de um card (ex.: telefone consumidor, e-mail consumidor)*/
+        grid-template-columns: 1fr;
+    }
+
+   
+}
+
+@media (max-width: 768px) {
+    /*em telas menores que 767px de largura (referência: ipad mini)*/
+
+    /*CABEÇALHO PARTE DE CIMA*/
+    #cabecalhoParteDeCima {
+        /*parte de cima do cabeçalho*/
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #logoCabecalho {
+        /*logo*/
+        margin-top: 0.2rem;
+    }
+
+    #areaLoginECarrinho {
+        /*área de login e carrinho*/
+        margin-right: 0.8rem;
+    }
+
+    #loginArea span {
+        /*texto "seja bem-vindo"*/
+        font-size: 0.8rem;
+    }
+
+    #loginArea a {
+        /*texto faça login/cadastre-se*/
+        font-size: 0.85rem;
+    }
+
+    #cabecalhoParteDeCima>.flex-grow-1 {
+        /*joga a barra de pesquisa para baixo + margens*/
+        order: 2;
+        flex: 0 0 100%;
+        margin: 1.5rem 0 3rem 0;
+    }
+
+    #barraDePesquisaToda {
+        /*remove as margens internas da barra de pesquisa*/
+        margin: 0;
+    }
+
+    .input-group {
+        /*ajusta a largura da barra de pesquisa*/
+        width: 90%;
+        max-width: 25rem;
+    }
+
+    /*CABEÇALHO PARTE DE BAIXO*/
+    #cabecalhoParteDeBaixo {
+        /*esconde o menu*/
+        display: none;
+    }
+
+    #menuIcon {
+        /*exibe o hambúrguer*/
+        display: inline-block;
+        position: absolute;
+        z-index: 30;
+        top: 80%;
+        padding: 0.5rem;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo {
+        /*menu ao clicar no hambúrguer*/
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 20;
+        background-color: #b43e1a;
+        opacity: 0.9;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo .container {
+        /*layout interno vertical/estilização interna do nav quando aberto*/
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #fundoCategorias {
+        /*afasta o background de clube fidelidade do background de categorias*/
+        margin-top: .4rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 853px) {
+
+    /*RODAPÉ*/
+    #tituloRedesSociaisRodape {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        white-space: pre;
+    }
+
+    .quebra-sm::after {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        content: "\A";
+        white-space: pre;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /*rodapé não incluindo 768*/
+
+    /*RODAPÉ*/
+    .primeira-linha-rodape {
+        /*permite as quebras de linha*/
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .primeira-linha-rodape>div {
+        /*define as larguras*/
+        flex: 1 1 50%;
+        max-width: 50%;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(1),
+    .primeira-linha-rodape .col-md-2:nth-child(2) {
+        /*primeira linha: logo + fale conosco*/
+        order: 1;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(3),
+    .primeira-linha-rodape .col-md-2:nth-child(4) {
+        /*segunda linha: parceiro + institucional*/
+        order: 2;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(5) {
+        /*terceira linha: redes sociais centralizadas */
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    footer h6 {
+        /*alinhando título com texto */
+        text-align: left;
+    }
+
+    #tituloRedesSociaisRodape {
+        /*centralizando "redes sociais"*/
+        text-align: center;
+    }
+
+    .primeira-linha-rodape .logo-footer {
+        /*tamanho da logo*/
+        max-width: 8rem;
+        margin: 0 auto;
+    }
+}

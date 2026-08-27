@@ -1,4 +1,4 @@
-package eRHemunerar.demo.exception;
+package VitaFortis.demo.exception;
 
 import lombok.Getter;
 
