@@ -76,13 +76,6 @@ public class Produto {
     @Column(name = "VERSAO")
     private Long versao;
 
-    @Column(name = "RESGATAVEL", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
-    private boolean resgatavel = false;
-
-    @Min(0)
-    @Column(name = "PONTOS_NECESSARIOS")
-    private Integer pontosNecessarios;
-
     @Size(max = 500)
     @Column(name = "IMAGEM_URL", length = 500)
     private String imagemUrl;
@@ -115,22 +108,13 @@ public class Produto {
     /* Regras de consistência */
     @PrePersist
     private void beforeInsert() {
-       validarResgate();
        normalize();
     }
 
     @PreUpdate
     private void beforeUpdate() {
-        validarResgate();
         normalize();
     }
-
-    private void validarResgate() {
-        if (!resgatavel) {
-            pontosNecessarios = null;
-        }
-    }
-
 
     @Transient
     public BigDecimal getValorDesconto() {

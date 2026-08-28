@@ -5,12 +5,17 @@ import VitaFortis.demo.v1.service.ProdutoService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
+import org.springframework.data.domain.Page;
 
 @RestController
 @RequestMapping("/api/v1/admin/produtos")
 public class ProdutoAdminController {
     private final ProdutoService produtos;
     public ProdutoAdminController(ProdutoService produtos) { this.produtos = produtos; }
+    @GetMapping public Page<ProdutoResponseDto> listar(@RequestParam(required=false) String busca,
+            @RequestParam(defaultValue="0") int pagina, @RequestParam(defaultValue="100") int tamanho) {
+        return produtos.listarAdmin(busca, pagina, tamanho);
+    }
     @PostMapping @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     public ProdutoResponseDto criar(@Valid @RequestBody ProdutoRequestDto dto) { return produtos.create(dto); }
     @PutMapping("/{id}") public ProdutoResponseDto atualizar(@PathVariable Long id, @Valid @RequestBody ProdutoRequestDto dto) { return produtos.update(id, dto); }

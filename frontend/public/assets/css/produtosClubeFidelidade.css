@@ -1,0 +1,794 @@
+/*CSS DA PÁGINA DE CLUBE FIDELIDADE*/
+
+/*CORPO*/
+
+body {
+    /*cor de fundo*/
+    background-color: #eeece7;
+    overflow-x: hidden;
+    /*remove a barra de rolar embaixo*/
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/*CABEÇALHO*/
+
+/*CABEÇALHO PARTE DE CIMA*/
+
+header {
+    /*cabeçalho não fixo*/
+    top: 0;
+    z-index: 1000;
+    position: relative;
+}
+
+#cabecalhoParteDeCima {
+    /*parte de cima do cabeçalho*/
+    background-color: #F8F1E7;
+}
+
+#logoCabecalho img {
+    /*logo do cabeçalho*/
+    max-height: 5rem;
+    transition: transform 0.3s ease;
+}
+
+#logoCabecalho img:hover {
+    /*logo do cabeçalho quando passa o mouse*/
+    transform: scale(1.08);
+}
+
+#barraDePesquisa {
+    /*tamanho da barra de pesquisa*/
+    width: 50%;
+    max-width: 25rem;
+}
+
+#barraDePesquisaToda {
+    /*posição da barra de pesquisa com o botão/lupa*/
+    margin-left: 15%;
+    margin-right: 5%;
+}
+
+#botaoLupa {
+    /*parte da lupa na barra de pesquisa*/
+    background-color: #F75326;
+    color: white;
+}
+
+#botaoLupa:hover {
+    /*parte da lupa na barra de pesquisa quando passa o mouse*/
+    background-color: #be401d;
+}
+
+.input-group .btn:hover {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    color: white;
+}
+
+.input-group .form-control:focus {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    border-color: transparent;
+    box-shadow: none;
+}
+
+#iconeLogin {
+    /*ícone de boneco no login*/
+    color: #F75326;
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+#iconeLogin:hover {
+    /*ícone de boneco no login quando passa o mouse*/
+    color: #be401d;
+    font-size: 1.3rem;
+    transform: scale(1.08);
+    cursor: pointer;
+}
+
+#loginArea span {
+    /*texto "seja bem-vindo"*/
+    color: #F75326;
+    font-size: .9rem;
+}
+
+#loginArea a {
+    /*texto faça login/cadastre-se*/
+    color: #000000;
+    font-size: .95rem;
+    text-decoration: none;
+}
+
+#loginArea a:hover {
+    /*texto faça login/cadastre-se quando passa o mouse*/
+    text-decoration: underline;
+}
+
+#loginArea .d-flex.flex-column {
+    /*centraliza as duas frases do login*/
+    text-align: center;
+}
+
+#carrinhoArea {
+    /*carrinho de compras*/
+    color: rgb(0, 0, 0);
+    position: relative;
+}
+
+#carrinhoArea:hover {
+    /*carrinho de compras*/
+    cursor: pointer;
+}
+
+#areaLoginECarrinho {
+    /*distância da área do login e do carrinho da margem direita */
+    margin-right: 3.5rem;
+}
+
+#contadorCarrinho {
+    /*número de itens no carrinho*/
+    font-size: 0.6rem;
+    padding: 0.2rem 0.3rem;
+    border: 1px solid #00000020;
+    background-color: #F75326;
+    min-width: 1rem;      
+    height: 1.1rem;        
+}
+
+/*CABEÇALHO PARTE DE BAIXO*/
+
+#cabecalhoParteDeBaixo {
+    /*parte de baixo do cabeçalho (transparente)*/
+    background-color: #f75326;
+    opacity: 90%;
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    font-weight: 600;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.text-uppercase.mx-3 {
+    /*opções do menu*/
+    color: rgb(255, 255, 255);
+    font-size: .9rem;
+    transition: transform 0.3s ease;
+}
+
+.nav-link.text-uppercase.mx-3:hover {
+    /*opções do menu quando passa o mouse*/
+    transform: scale(1.1);
+}
+
+#opcaoFidelidadeCab {
+    /*opção "clube fidelidade"*/
+    color: white;
+}
+
+#fundoFidelidadeCab {
+    /*background da opção "clube fidelidade"*/
+    background-color: rgb(255, 213, 0);
+    border-radius: .2rem;
+    margin-right: .5rem;
+}
+
+#menuIcon {
+    /*esconde o ícone hambúrger em telas grandes*/
+    display: none;
+    color: #F75326;
+}
+
+
+
+
+
+
+/*INÍCIO DO CORPO DO SITE*/
+
+/*BOTÃO ZAP*/
+
+.btn-zap {
+    /*botão do whatsapp*/
+    position: fixed;
+    bottom: 1.2rem;
+    right: .5rem;
+    background-color: #4fce5d;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: bold;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+    z-index: 1050;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    gap: .8rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-zap:hover {
+    /*botão do whatsapp quando passa o mouse*/
+    transform: scale(1.05);
+    background-color: #1f5c0f;
+}
+
+
+
+
+
+
+/*BANNER*/
+#fundoPaginaClubeFidelidade {
+    /*distância entre o topo/fim e a página*/
+    background: rgba(255, 213, 185, 0.432);
+    padding-top: 3rem;
+    padding-bottom: 1rem;
+}
+
+h1 {
+    /*título parte preta*/
+    color: rgb(0, 0, 0);
+    text-align: left;
+    font-weight: 600;
+    font-size: 2rem;
+}
+
+#clubFidTitulo {
+    /*título clube fidelidade parte amarela*/
+    color: rgb(253, 211, 1);
+    -webkit-text-stroke: .5px #979797;
+    font-size: 2.5rem;
+}
+
+#descricao {
+    /*frase que fala: a cada 1 real...*/
+    color: rgb(0, 0, 0);
+    text-align: left;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+#fundoPaginaClubeFidelidade .clube-hero {
+    /*faz o texto e a imagem ficarem um do lado do outro*/
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#fundoPaginaClubeFidelidade .clube-texto {
+    /*o bloco do texto*/
+    flex: 1;
+    padding-left: 5rem;
+}
+
+#fundoPaginaClubeFidelidade .clube-imagem {
+    /*o bloco/área da imagem*/
+    flex: 1;
+    display: flex;
+}
+
+#fundoPaginaClubeFidelidade .clube-imagem img {
+    /*imagem em si*/
+    width: 50%;
+    height: auto;
+    border-radius: 1rem;
+    object-fit: cover;
+}
+
+.queroParticipar {
+    /*primeiro botão "quero participar"*/
+    background-color: #f54b1c;
+    color: white;
+    padding: .3rem .4rem .3rem .4rem;
+    font-weight: 500;
+    font-size: .9rem;
+    margin-left: 5rem;
+}
+
+.queroParticipar:hover {
+    /*primeiro botão quando passa o mouse*/
+    background-color: #be401d;
+    color: white;
+}
+
+
+
+
+
+
+/*PRODUTOS*/
+
+h2{
+    margin: 1rem 0rem 0rem 3rem;
+    font-weight: 600;
+}
+
+.card.h-100.ofertas {
+    /*o card em si do produto*/
+    box-shadow: .1rem .1rem .6rem #c59d385e;
+    cursor: pointer;
+    border: solid 1px #c59d3877;
+}
+
+.card-img-top.ofertas {
+    /*imagem do produto em promoção*/
+    max-width: 15rem;
+    margin: 1rem auto 0rem auto;
+    transition: transform 0.5s ease;
+}
+
+.card-img-top.ofertas:hover {
+    /*imagem do produto em promoção quando passa o mouse*/
+    transform: scale(1.08);
+    z-index: 0;
+}
+
+.card-title.ofertas{ /*para evitar que a imagem cubra o nome no hover*/
+    z-index: 1;
+}
+
+.card-text.flex-grow-1.ofertas {
+    /*descrição/preço do produto em ofertas*/
+    text-align: center;
+}
+
+.btn.comprarOfertas {
+    /*botão "comprar" nos produtos em oferta*/
+    background-color: #c59d38;
+    color: rgb(255, 255, 255);
+    border: none;
+    font-weight: 650;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+}
+
+.btn.comprarOfertas:hover {
+    /*botões de comprar individuais, mas pegando todos, quando passa o mouse*/
+    background-color: #9a7a2b;
+    transform: scale(1.02);
+}
+
+.btn.comprarOfertas:focus {
+    /*mantém a palavra branca ao clicar no botão*/
+    color: white;
+}
+
+.card.ofertas .card-body{ /*distância entre a imagem e o nome do produto*/
+    padding-top: .1rem; 
+}
+
+
+
+
+
+
+
+
+
+/*card de assinatura*/
+.overlay{ /*camada escura atrás do card de assinatura*/
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.1rem;
+    z-index: 100;
+}
+  
+.hidden{ /*é o que permite o card de assinatura abrir e fechar*/
+    display: none; 
+}
+  
+.modal-assinatura{ /*card em si*/
+    width: min(980px, 100%);
+    max-height: 90vh;
+    background: #fff;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-topo{ /*parte amarela*/
+    background: #ebcc01;
+    color: #fff;
+    padding: 1rem 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+  
+.modal-topo h3{ /*título "clube fidelidade"*/
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+  
+.btn-fechar{ /*o "x" de fechar*/
+    background: transparent;
+    border: 0;
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.modal-conteudo{ /*padding do conteúdo*/
+    padding: 1rem 1.3rem 1.3rem;
+    overflow: auto;
+}
+  
+.modal-sub{ /*palavra "assinatura"*/
+    font-weight: 800;
+    font-size: .8rem;
+    color: #000000;
+}
+
+.lista-planos{ /*primeira linha divisória*/
+    border-top: 1px solid #e8e8e8;
+}
+  
+.plano{ /*cada plano - conjunto*/
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    padding: .7rem .5rem .7rem 0rem;
+    border-bottom: 1px solid #e8e8e8;
+    cursor: pointer;
+}
+  
+.plano input[type="radio"]{ /*borda de fora da bolinha de cada opção*/
+    appearance: none;
+    width: .9rem;
+    height: .9rem;
+    border-radius: 50%;
+    border: 1px solid #ad9601;
+}
+
+.plano input[type="radio"]:checked{ /*bolinha de dentro de cada opção*/
+    background: radial-gradient(circle, #ebcc01 .26rem, transparent .29rem);
+}
+  
+.plano-info{ /*frasezinha explicando*/
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+}
+  
+.plano-info strong{ /*tempo (mensal, bimestral...)*/
+    font-size: .9rem;
+    color: #000000;
+}
+
+.plano-info span{ /*frasezinha explicando*/
+    font-size: .75rem;
+    color: #555;
+}
+
+.modal-rodape{ /*posição do botão*/
+    display: flex;
+    justify-content: flex-end;
+}
+  
+.btn-proximo{ /*botão confirmar assinatura*/
+    border: 0;
+    background: #cfb401; 
+    color: #fff;
+    font-weight: 700;
+    padding: .3rem .5rem;
+    border-radius: .5rem;
+    cursor: pointer;
+}
+
+.btn-proximo:hover{ /*botão confirmar assinatura quando passa o mouse*/
+    background: #a79001; 
+}
+
+.lista-planos{ /*mantém tudo na horizontal*/
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;   
+}
+
+.beneficios{ /*o conteúdo da parte dos benefícios (embaixo)*/
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e8e8e8;
+}
+  
+.beneficios h4{ /*frase "você receberá"*/
+    font-weight: 800;
+    font-size: .8rem;
+    color: #000000;
+}
+
+.beneficiosLista{ /*a lista como um todo, inclusive as frases*/
+    list-style: none;    
+    padding-left: .5rem;
+    font-size: .9rem;
+    color: #000000;
+}
+
+.beneficiosLista .check{ /*cor (amarela) do check*/
+    color: #ebcc01;      
+}
+
+#marcaTexto{ /*frase "vitaDiamante"*/
+    color: #b19901;
+    font-weight: 700;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*RODAPÉ*/
+
+footer {
+    /*parte de fundo do rodapé*/
+    background-color: #F8F1E7;
+    ;
+    box-shadow: 0 -0.5rem .5rem rgba(247, 83, 38, 0.24);
+}
+
+.logo-footer {
+    /*logo do rodapé*/
+    max-width: 7rem;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-footer:hover {
+    /*logo do rodapé quando passa o mouse*/
+    transform: scale(1.05);
+}
+
+footer p {
+    /*opções do rodapé*/
+    font-size: 0.9rem;
+    text-align: left;
+    color: #000000;
+    cursor: pointer;
+}
+
+footer p:hover {
+    /*opções do rodapé quando passa o mouse*/
+    text-decoration: underline;
+}
+
+.copy {
+    /*copyright*/
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+}
+
+.bolaFundoPagamento {
+    /*círculo branco atrás de cada bandeira */
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: #fff;
+    display: grid;
+    place-items: center;
+}
+
+.bolaFundoPagamento img {
+    /*tamanho da logo dentro do círculo*/
+    max-width: 90%;
+    max-height: 90%;
+    height: auto;
+    object-fit: contain;
+}
+
+h6 {
+    /*títulos do rodapé*/
+    font-size: 1.1rem;
+    color: #000;
+}
+
+#tituloRedesSociaisRodape {
+    /*impedindo a quebra de linha em "nos acompanhe nas redes sociais"*/
+    white-space: nowrap;
+}
+
+.bg-light {
+    /*linhas horizontais*/
+    color: #F75326;
+}
+
+#horarioFuncionamentoRodape {
+    /*tiro o cursor do horário de funcionamento*/
+    pointer-events: none;
+}
+
+.fab.fa-whatsapp.fa-lg {
+    /*cor do ícono do whatsapp no rodapé*/
+    color: #4fce5d;
+}
+
+.redesSociaisRodape .fa-instagram::before {
+    /*cor do ícono do instagram no rodapé*/
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    background-clip: text;
+    color: transparent;
+}
+
+
+
+
+
+
+/*RESPONSIVIDADE*/
+@media (max-width: 768px) {
+    /*em telas menores que 768px de largura (referência: ipad mini)*/
+
+    /*CABEÇALHO PARTE DE CIMA*/
+    #cabecalhoParteDeCima {
+        /*parte de cima do cabeçalho*/
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #logoCabecalho {
+        /*logo*/
+        margin-top: 0.2rem;
+    }
+
+    #areaMeuPerfil {
+        /*área de login e carrinho*/
+        margin-right: 0.8rem;
+    }
+
+    #meuPerfilArea a {
+        /*texto faça login/cadastre-se*/
+        font-size: 0.85rem;
+    }
+
+    #cabecalhoParteDeCima>.flex-grow-1 {
+        /*joga a barra de pesquisa para baixo + margens*/
+        order: 2;
+        flex: 0 0 100%;
+        margin: 1.5rem 0 3rem 0;
+    }
+
+    #barraDePesquisaToda {
+        /*remove as margens internas da barra de pesquisa*/
+        margin: 0;
+    }
+
+    .input-group {
+        /*ajusta a largura da barra de pesquisa*/
+        width: 90%;
+        max-width: 25rem;
+    }
+
+    /*CABEÇALHO PARTE DE BAIXO*/
+    #cabecalhoParteDeBaixo {
+        /*esconde o menu*/
+        display: none;
+        top: 0;
+        position: sticky;
+    }
+
+    #menuIcon {
+        /*exibe o hambúrguer*/
+        display: inline-block;
+        position: absolute;
+        z-index: 30;
+        top: 80%;
+        padding: 0.5rem;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo {
+        /*menu ao clicar no hambúrguer*/
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 20;
+        background-color: #b43e1a;
+        opacity: 0.9;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo .container {
+        /*layout interno vertical/estilização interna do nav quando aberto*/
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 853px) {
+
+    /*RODAPÉ*/
+    #tituloRedesSociaisRodape {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        white-space: pre;
+    }
+
+    .quebra-sm::after {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        content: "\A";
+        white-space: pre;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /*rodapé não incluindo 768*/
+
+    /*RODAPÉ*/
+    .primeira-linha-rodape {
+        /*permite as quebras de linha*/
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .primeira-linha-rodape>div {
+        /*define as larguras*/
+        flex: 1 1 50%;
+        max-width: 50%;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(1),
+    .primeira-linha-rodape .col-md-2:nth-child(2) {
+        /*primeira linha: logo + fale conosco*/
+        order: 1;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(3),
+    .primeira-linha-rodape .col-md-2:nth-child(4) {
+        /*segunda linha: parceiro + institucional*/
+        order: 2;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(5) {
+        /*terceira linha: redes sociais centralizadas */
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    footer h6 {
+        /*alinhando título com texto */
+        text-align: left;
+    }
+
+    #tituloRedesSociaisRodape {
+        /*centralizando "redes sociais"*/
+        text-align: center;
+    }
+
+    .primeira-linha-rodape .logo-footer {
+        /*tamanho da logo*/
+        max-width: 8rem;
+        margin: 0 auto;
+    }
+}

@@ -13,7 +13,7 @@ public class PedidoController {
     private final PedidoService pedidos;
     public PedidoController(PedidoService pedidos) { this.pedidos = pedidos; }
     @PostMapping @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
-    public PedidoResponseDto criar(@Valid @RequestBody PedidoRequestDto dto) { return pedidos.criar(dto); }
-    @GetMapping("/usuario/{usuarioId}") public List<PedidoResponseDto> usuario(@PathVariable Long usuarioId) { return pedidos.listarUsuario(usuarioId); }
+    public PedidoResponseDto criar(@Valid @RequestBody PedidoRequestDto dto, Authentication auth) { return pedidos.criar(dto, auth.getName()); }
+    @GetMapping("/usuario/{usuarioId}") public List<PedidoResponseDto> usuario(@PathVariable Long usuarioId, Authentication auth) { return pedidos.listarUsuario(usuarioId, auth.getName()); }
     @GetMapping("/{id}") public PedidoResponseDto acompanhar(@PathVariable Long id, Authentication auth) { return pedidos.acompanhar(id, auth.getName()); }
 }

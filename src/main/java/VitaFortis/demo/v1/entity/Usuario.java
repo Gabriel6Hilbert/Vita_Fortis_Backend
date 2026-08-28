@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -53,11 +54,6 @@ public class Usuario {
     @Column(name = "TELEFONE", length = 20)
     private String telefone;
 
-    @Min(0)
-    @Column(name = "PONTOS_FIDELIDADE", nullable = false)
-    @Builder.Default
-    private int pontosFidelidade = 0;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "TIPO_USUARIO", nullable = false, length = 30)
     private TipoUsuario tipo;
@@ -68,6 +64,17 @@ public class Usuario {
 
     @Column(name = "PERMISSAO_RELATORIOS", nullable = false)
     private boolean permissaoRelatorios;
+
+    @Column(name = "SALDO_CASHBACK", nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal saldoCashback = BigDecimal.ZERO;
+
+    @Column(name = "ACEITA_COMUNICACOES", nullable = false)
+    private boolean aceitaComunicacoes;
+
+    /** Compatibilidade temporaria com a coluna obrigatoria do banco legado. Nao representa funcionalidade ativa. */
+    @Column(name = "PONTOS_FIDELIDADE", nullable = false)
+    private int legadoPontosFidelidade;
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false)

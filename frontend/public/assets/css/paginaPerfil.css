@@ -1,0 +1,384 @@
+/*CSS DA PÁGINA DE PERFIL*/
+
+/*cores do documento:
+
+rgba(253, 209, 1, 0.8) amarelo mais claro;
+rgba(253, 209, 1, 1) ou #fdd101 amarelo mais escuro;
+rgba(170, 142, 0, 0.8) dourado;
+linear-gradient(180deg, #1b1b1b, #be2929) cabeçalho vinho e preto;
+linear-gradient(180deg, #dd2424, #131313) botão quando passa o mouse - vermelho e quase preto
+rgba(158, 136, 25, 0.8) cor do botão "comprar" nos produtos em oferta
+
+
+fundo off white do cabeçalho #F8F1E7
+fundo off white do corpo do site #eeece7
+detalhes laranja #F75326
+laranja escuro (hover) #be401d
+*/
+
+/*CORPO*/
+
+body {
+    /*cor de fundo*/
+    background-color: #eeece7;
+    overflow-x: hidden;
+    /*remove a barra de rolar embaixo*/
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/*CABEÇALHO*/
+
+/*CABEÇALHO PARTE DE CIMA*/
+
+header {
+    /*cabeçalho*/
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.068);
+}
+
+#cabecalhoParteDeCima {
+    /*parte de cima do cabeçalho*/
+    background-color: #F8F1E7;
+}
+
+#logoCabecalho img {
+    /*logo do cabeçalho*/
+    max-height: 5rem;
+    transition: transform 0.3s ease;
+}
+
+#logoCabecalho img:hover {
+    /*logo do cabeçalho quando passa o mouse*/
+    transform: scale(1.08);
+}
+
+h1{ /*título minha conta*/
+    text-align: left;
+    font-size: 1rem;
+    margin: 0 0 0 2rem;
+}
+
+
+
+
+
+
+/*INÍCIO DO CORPO DO SITE*/
+
+.btn-zap {
+    /*botão do whatsapp*/
+    position: fixed;
+    bottom: 1.2rem;
+    right: .5rem;
+    background-color: #4fce5d;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: bold;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+    z-index: 1050;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    gap: .8rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-zap:hover {
+    /*botão do whatsapp quando passa o mouse*/
+    transform: scale(1.05);
+    background-color: #1f5c0f;
+}
+
+
+
+
+
+:root{
+    --bg: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --card: #ffffff;
+  
+    --accent: #1d4ed8;         /* azul do "ativo" */
+    --accent-soft: rgba(29, 78, 216, .18);
+  }
+  
+  *{ box-sizing: border-box; }
+  
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  
+  .conta{
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 18rem 1fr; /* sidebar + conteudo */
+  }
+  
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    border-right: 0.0625rem solid var(--border);
+    padding: 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
+  .perfil{
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+  
+  .avatar{
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999rem;
+    background: #d1d5db;
+  }
+  
+  .perfil-ola{
+    display: block;
+    font-size: .95rem;
+    color: var(--muted);
+    line-height: 1.1;
+  }
+  
+  .perfil-nome{
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  
+  .menu{
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+  }
+  
+  .menu-item{
+    position: relative;
+    padding: .75rem .75rem;
+    border-radius: .75rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: .95rem;
+    font-weight: 600;
+  }
+  
+  .menu-item:hover{
+    background: #f9fafb;
+    color: var(--text);
+  }
+  
+  .menu-item.ativo{
+    color: var(--text);
+    background: #ffffff;
+  }
+  
+  .menu-item.ativo::before{
+    content: "";
+    position: absolute;
+    left: -1rem;
+    top: .6rem;
+    bottom: .6rem;
+    width: .25rem;
+    border-radius: 999rem;
+    background: var(--accent);
+  }
+  
+  .sair{
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 0.0625rem solid var(--border);
+  }
+  
+  .sair-btn{
+    color: #374151;
+  }
+  
+  /* ===== CONTEÚDO ===== */
+  .conteudo{
+    padding: 1.5rem 2rem;
+  }
+  
+  .topo{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-bottom: 1rem;
+  }
+  
+  .titulo{
+    margin: 0;
+    font-size: 2.25rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+  
+  /* layout cards */
+  .grid-cards{
+    display: grid;
+    grid-template-columns: 1.2fr .8fr; /* card grande + card menor */
+    gap: 1.25rem;
+    align-items: start;
+  }
+  
+  .card{
+    background: var(--card);
+    border: 0.0625rem solid var(--border);
+    border-radius: .75rem;
+    padding: 1.25rem;
+  }
+  
+  /* CARD DADOS */
+  .card-dados{
+    position: relative;
+    min-height: 26rem;
+  }
+  
+  .grid-dados{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.75rem 2.25rem;
+    padding-top: .25rem;
+  }
+  
+  .campo .label{
+    font-size: .95rem;
+    color: #111827;
+    font-weight: 700;
+    margin-bottom: .25rem;
+  }
+  
+  .campo .valor{
+    font-size: .95rem;
+    color: var(--muted);
+  }
+  
+  /* "EDITAR" no canto inferior direito do card */
+  .editar{
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1rem;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: .9rem;
+    letter-spacing: .04em;
+    color: var(--accent);
+  }
+  
+  .editar:hover{
+    text-decoration: underline;
+  }
+  
+  /* CARD NEWSLETTER */
+  .card-news .card-titulo{
+    margin: 0 0 .25rem;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+  
+  .card-news .card-sub{
+    margin: 0 0 1rem;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+  
+  /* checkbox */
+  .check{
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    font-size: .95rem;
+    color: #111827;
+  }
+  
+  .check input{
+    margin-top: .2rem;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*RESPONSIVIDADE*/
+
+
+@media (max-width: 768px) {
+    /*em telas menores que 767px de largura (referência: ipad mini)*/
+
+    /*CABEÇALHO PARTE DE CIMA*/
+    #cabecalhoParteDeCima {
+        /*parte de cima do cabeçalho*/
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #logoCabecalho {
+        /*logo*/
+        margin-top: 0.2rem;
+    }   
+}
+
+
+@media (max-width: 62rem){
+    .conta{
+      grid-template-columns: 16rem 1fr;
+    }
+    .grid-cards{
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 48rem){
+    .conta{
+      grid-template-columns: 1fr;
+    }
+    .sidebar{
+      border-right: none;
+      border-bottom: 0.0625rem solid var(--border);
+    }
+    .grid-dados{
+      grid-template-columns: 1fr;
+    }
+    .conteudo{
+      padding: 1.25rem 1rem;
+    }
+    .titulo{
+      font-size: 1.75rem;
+    }
+  }
+
+
+

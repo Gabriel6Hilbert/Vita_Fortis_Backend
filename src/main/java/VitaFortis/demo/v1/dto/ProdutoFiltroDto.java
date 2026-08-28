@@ -18,7 +18,6 @@ public class ProdutoFiltroDto {
     private BigDecimal precoMin;
     private BigDecimal precoMax;
     private CategoriaProduto categoria;
-    private Boolean resgatavel;
     private Set<String> objetivos;
     private Set<String> esportes;
     private Boolean vegano;

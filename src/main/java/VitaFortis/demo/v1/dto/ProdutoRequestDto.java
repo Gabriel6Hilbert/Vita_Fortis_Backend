@@ -37,17 +37,7 @@ public class ProdutoRequestDto {
     @NotNull
     private CategoriaProduto categoria;
 
-    private boolean resgatavel;
-
-    @Min(0)
-    private Integer pontosNecessarios;
-
     @Size(max = 500)
     private String imagemUrl;
-
-    @AssertTrue(message = "Quando resgatável, 'pontosNecessarios' é obrigatório")
-    public boolean isPontosValidos() {
-        return !resgatavel || pontosNecessarios != null;
-    }
 
 }

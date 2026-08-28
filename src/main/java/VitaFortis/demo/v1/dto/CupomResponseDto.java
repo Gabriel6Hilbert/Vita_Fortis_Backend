@@ -20,4 +20,7 @@ public class CupomResponseDto {
     private boolean ativo;
     private LocalDateTime dataCadastro;
     private LocalDateTime dataVencimento;
+    private Long colaboradorId;
+    private String colaboradorNome;
+    private BigDecimal percentualCashback;
 }

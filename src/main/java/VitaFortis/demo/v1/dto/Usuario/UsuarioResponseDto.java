@@ -13,6 +13,8 @@ public class UsuarioResponseDto {
     private String cpf;
     private String telefone;
     private TipoUsuario tipoUsuario;
-    private int pontosFidelidade;
     private boolean ativo;
+    private boolean aceitaComunicacoes;
+    private boolean permissaoRelatorios;
+    private java.math.BigDecimal saldoCashback;
 }

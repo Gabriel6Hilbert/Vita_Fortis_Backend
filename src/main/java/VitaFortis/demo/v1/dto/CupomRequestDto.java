@@ -29,4 +29,10 @@ public class CupomRequestDto {
     private BigDecimal minSubtotal;
 
     private LocalDateTime dataVencimento;
+
+    private Long colaboradorId;
+
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    private BigDecimal percentualCashback;
 }

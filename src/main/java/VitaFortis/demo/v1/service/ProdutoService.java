@@ -10,6 +10,7 @@ import VitaFortis.demo.v1.mapper.ProdutoMapper;
 import VitaFortis.demo.v1.repository.ProdutoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -50,14 +51,6 @@ public class ProdutoService {
         if (entity.getPreco().signum() < 0) throw new IllegalArgumentException("Preço invalido");
         if (entity.getQuantidadeEstoque() < 0) throw new IllegalArgumentException("Estoque invalido");
         if (entity.getCategoria() == null) throw new IllegalArgumentException("Categoria obrigatorio");
-        if (entity.isResgatavel()) {
-            if (entity.getPontosNecessarios() == null || entity.getPontosNecessarios() < 0) {
-            throw new IllegalArgumentException("Pontos necessários devem ser informados e >= 0 para produto resgatável.");
-            }
-        } else {
-            entity.setPontosNecessarios(null);
-        }
-
         Produto saved = produtoRepository.save(entity);
         return produtoMapper.toResponseDto(saved);
     }
@@ -79,14 +72,6 @@ public class ProdutoService {
         if (entity.getPreco() == null || entity.getPreco().signum() < 0) throw new IllegalArgumentException("Preço invalido");
         if (entity.getQuantidadeEstoque() == null || entity.getQuantidadeEstoque() < 0) throw new IllegalArgumentException("Estoque invalido");
         if (entity.getCategoria() == null) throw new IllegalArgumentException("Categoria obrigatorio");
-        if (entity.isResgatavel()) {
-            if (entity.getPontosNecessarios() == null || entity.getPontosNecessarios() < 0) {
-                throw new IllegalArgumentException("Pontos necessarios devem ser informados e >= 0 para produto.");
-            }
-        }else {
-            entity.setPontosNecessarios(null);
-        }
-
         if (entity.isAtivo() && entity.getQuantidadeEstoque() == 0) {
             throw new IllegalArgumentException("Não é possível ativar um produto sem estoque.");
         }
@@ -150,6 +135,17 @@ public class ProdutoService {
         Produto p = produtoRepository.findById(produtoId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
         return produtoMapper.toResponseDto(p);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProdutoResponseDto> listarAdmin(String busca, int pagina, int tamanho) {
+        String termo = busca == null ? "" : busca.trim().toLowerCase();
+        var todos = produtoRepository.findAll(Sort.by(Sort.Order.asc("nome").ignoreCase())).stream()
+                .filter(p -> termo.isBlank() || ((p.getNome()+" "+p.getCodigo()+" "+(p.getMarca()==null?"":p.getMarca())).toLowerCase().contains(termo)))
+                .map(produtoMapper::toResponseDto).toList();
+        int page = Math.max(0, pagina), size = Math.max(1, Math.min(500, tamanho));
+        int inicio = Math.min(page * size, todos.size()), fim = Math.min(inicio + size, todos.size());
+        return new PageImpl<>(todos.subList(inicio, fim), PageRequest.of(page, size), todos.size());
     }
 
     @Transactional(readOnly = true)

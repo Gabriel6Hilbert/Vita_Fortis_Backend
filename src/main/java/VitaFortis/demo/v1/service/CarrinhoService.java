@@ -11,6 +11,7 @@ import VitaFortis.demo.v1.mapper.CarrinhoMapper;
 import VitaFortis.demo.v1.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -100,7 +101,8 @@ public class CarrinhoService {
 
     //ADCIONAR ITEM NO CARRINHO
     @Transactional
-    public CarrinhoResponseDto adcionarItem(Long usuarioId, CarrinhoItemRequestDto dto) {
+    public CarrinhoResponseDto adcionarItem(Long usuarioId, CarrinhoItemRequestDto dto, String emailAutenticado) {
+       validarProprietario(usuarioId, emailAutenticado);
        if (dto.getQuantidade() <= 0) {
        throw new IllegalArgumentException("Quantidade deve ser maior que 0");
        }
@@ -135,28 +137,30 @@ public class CarrinhoService {
        recalcularTotais(carrinho);
        carrinhoRepository.save(carrinho);
 
-       return carrinhoMapper.toResponseDto(carrinho);
+       return resposta(carrinho);
     }
 
     //OBTER CARRINHO
     @Transactional
-    public CarrinhoResponseDto obterCarrinho (Long usuarioId) {
+    public CarrinhoResponseDto obterCarrinho (Long usuarioId, String emailAutenticado) {
+        validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndAtivoTrue(usuarioId)
                 .orElseGet(() -> getOrCreateAtivoEntity(usuarioId));
-        return carrinhoMapper.toResponseDto(carrinho);
+        return resposta(carrinho);
     }
 
     //CASO O CARRINHO EXISTA ELE PEGA O QUE JA TEM COM OS PRODUTOS
     @Transactional(readOnly = true)
     public CarrinhoResponseDto obterCarrinhoSeExistir(Long usuarioId) {
         return carrinhoRepository.findByUsuarioIdAndAtivoTrue(usuarioId)
-                .map(carrinhoMapper::toResponseDto)
+                .map(this::resposta)
                 .orElse(null);
     }
 
     //LIMPA TODO O CARRINHO
     @Transactional
-    public CarrinhoResponseDto limparCarrinho (Long usuarioId) {
+    public CarrinhoResponseDto limparCarrinho (Long usuarioId, String emailAutenticado) {
+        validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
 
         carrinhoItemRepository.deleteAllByCarrinhoId(carrinho.getId());
@@ -166,12 +170,13 @@ public class CarrinhoService {
         carrinho.setTotal(BigDecimal.ZERO);
 
         carrinhoRepository.save(carrinho);
-        return carrinhoMapper.toResponseDto(carrinho);
+        return resposta(carrinho);
     }
 
     //ATUALIZA QUANTIDADE DOS ITENS DO CARRINHO
     @Transactional
-    public CarrinhoResponseDto atualizarQuantidade(Long usuarioId, CarrinhoItemRequestDto dto) {
+    public CarrinhoResponseDto atualizarQuantidade(Long usuarioId, CarrinhoItemRequestDto dto, String emailAutenticado) {
+        validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
 
         CarrinhoItem item = carrinhoItemRepository.findByItemIdAndCarrinhoId(dto.getItemId(), carrinho.getId())
@@ -195,11 +200,12 @@ public class CarrinhoService {
         }
         recalcularTotais(carrinho);
         carrinhoRepository.save(carrinho);
-        return carrinhoMapper.toResponseDto(carrinho);
+        return resposta(carrinho);
     }
 
     //REMOVE ITEM
-    public CarrinhoResponseDto removeItem (Long usuarioId, Long itemId, int delta) {
+    public CarrinhoResponseDto removeItem (Long usuarioId, Long itemId, int delta, String emailAutenticado) {
+        validarProprietario(usuarioId, emailAutenticado);
         if (delta <= 0) {
             throw new IllegalArgumentException("Quantidade insuficiente");
         }
@@ -224,11 +230,12 @@ public class CarrinhoService {
         recalcularTotais(carrinho);
         carrinhoRepository.save(carrinho);
 
-        return carrinhoMapper.toResponseDto(carrinho);
+        return resposta(carrinho);
     }
 
     //CUPOM
-    public CarrinhoResponseDto aplicarCupom (Long usuarioId, String codigo) {
+    public CarrinhoResponseDto aplicarCupom (Long usuarioId, String codigo, String emailAutenticado) {
+        validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
 
         BigDecimal subtotal = calcularSubtotal(carrinho);
@@ -244,12 +251,13 @@ public class CarrinhoService {
 
         recalcularTotais(carrinho);
         carrinhoRepository.save(carrinho);
-        return carrinhoMapper.toResponseDto(carrinho);
+        return resposta(carrinho);
     }
 
     //REMOVE CUPOM
     @Transactional
-    public CarrinhoResponseDto removerCupom(Long usuarioId) {
+    public CarrinhoResponseDto removerCupom(Long usuarioId, String emailAutenticado) {
+        validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
         BigDecimal subtotal = calcularSubtotal(carrinho);
 
@@ -258,7 +266,29 @@ public class CarrinhoService {
 
         recalcularTotais(carrinho);
         carrinhoRepository.save(carrinho);
-        return carrinhoMapper.toResponseDto(carrinho);
+        return resposta(carrinho);
+    }
+
+    private CarrinhoResponseDto resposta(Carrinho carrinho) {
+        CarrinhoResponseDto dto = carrinhoMapper.toResponseDto(carrinho);
+        if (carrinho.getCupomCodigo() != null) {
+            cupomRepository.findByCodigoIgnoreCase(carrinho.getCupomCodigo()).ifPresent(cupom -> {
+                dto.setCupomId(cupom.getId());
+                if (cupom.getColaborador() != null && cupom.getPercentualCashback() != null) {
+                    dto.setColaboradorNome(cupom.getColaborador().getNome());
+                    dto.setCashbackColaborador(carrinho.getSubtotal().subtract(carrinho.getDescontos())
+                            .multiply(cupom.getPercentualCashback()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+                }
+            });
+        }
+        return dto;
+    }
+
+    private Usuario validarProprietario(Long usuarioId, String emailAutenticado) {
+        Usuario atual = usuarioRepository.findByEmail(emailAutenticado.trim().toLowerCase())
+                .orElseThrow(() -> new AccessDeniedException("Usuario nao autenticado"));
+        if (!atual.getId().equals(usuarioId)) throw new AccessDeniedException("Acesso negado ao carrinho");
+        return atual;
     }
 
 

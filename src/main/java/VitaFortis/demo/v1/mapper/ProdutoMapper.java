@@ -18,7 +18,6 @@ public interface ProdutoMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "versao", ignore = true)
     @Mapping(target = "ativo",ignore = true)
-    @Mapping(target = "pontosNecessarios", source = "pontosNecessarios")
     @Mapping(target = "nome", qualifiedByName = "trimOrNull")
     @Mapping(target = "descricao", qualifiedByName = "trimOrNull")
     Produto toEntity(ProdutoRequestDto produtoRequestDto);
@@ -37,13 +36,6 @@ public interface ProdutoMapper {
         if (value == null)return null;
         String t = value.trim();
         return t.isEmpty() ? null : t;
-    }
-
-    @AfterMapping
-    default void ajustarPontosResgate (@MappingTarget Produto entity) {
-        if (!entity.isResgatavel()) {
-            entity.setPontosNecessarios(null);
-        }
     }
 
 }

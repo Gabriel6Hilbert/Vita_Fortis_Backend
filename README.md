@@ -1,6 +1,6 @@
 # Vita Fortis
 
-Aplicacao completa da Vita Fortis: API em Spring Boot e interface React compilada dentro do proprio backend.
+Aplicacao completa da Vita Fortis: API em Spring Boot e interface React compilada dentro do proprio backend. O codigo-fonte React fica em `frontend` e o build servido pelo Spring fica em `src/main/resources/static`.
 
 Ao iniciar o Spring Boot, o site e a API ficam disponíveis no mesmo endereco:
 
@@ -58,16 +58,45 @@ Para gerar o arquivo executavel:
 java -jar target/demo-0.0.1-SNAPSHOT.jar
 ```
 
-## Atualizando o frontend incorporado
-
-O build pronto do React fica em `src/main/resources/static`. Caso o projeto frontend seja alterado, execute nele:
+## Desenvolvimento do frontend
 
 ```powershell
+cd frontend
+pnpm install
+pnpm dev
+```
+
+O Vite inicia em `http://localhost:5173` e encaminha `/api` para o backend em `http://localhost:5001`.
+
+## Atualizando o frontend incorporado
+
+O build pronto do React fica em `src/main/resources/static`. Caso o projeto frontend seja alterado, execute:
+
+```powershell
+cd frontend
 pnpm install
 pnpm build
 ```
 
-Em seguida, substitua o conteudo de `src/main/resources/static` pelo conteudo gerado na pasta `dist` e valide novamente o backend.
+Em seguida, substitua o conteudo de `src/main/resources/static` pelo conteudo gerado em `frontend/dist` e valide novamente o backend.
+
+## Checkout e integracoes
+
+- Retirada nao cobra frete.
+- Entrega exige um endereco cadastrado.
+- O frete local usa `vita-fortis.checkout.frete-fixo` e `vita-fortis.checkout.prazo-padrao-dias`.
+- `PagamentoLocalGateway` gera uma referencia segura para desenvolvimento. A integracao real com PagBank deve implementar `PagamentoGateway` quando as credenciais forem fornecidas.
+- Nenhum numero ou CVV de cartao e armazenado.
+
+## Principais APIs adicionadas
+
+- `GET/POST/PUT/DELETE /api/v1/usuarios/{usuarioId}/enderecos`
+- `GET/PUT /api/v1/me`
+- `PUT /api/v1/me/senha`
+- `GET /api/v1/colaborador/cashback`
+- `POST /api/v1/admin/colaboradores/{id}/cashback/ajustes`
+- `POST /api/v1/admin/colaboradores/{id}/cashback/baixas`
+- `GET /api/v1/admin/relatorios/{tipo}.csv?inicio=AAAA-MM-DD&fim=AAAA-MM-DD`
 
 As rotas do React sao encaminhadas para `index.html` pelo `SpaForwardController`, enquanto as rotas iniciadas por `/api` continuam atendidas pelos controllers Spring.
 

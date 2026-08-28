@@ -6,6 +6,8 @@ import VitaFortis.demo.v1.entity.Cupom;
 import VitaFortis.demo.v1.enums.CupomTipo;
 import VitaFortis.demo.v1.mapper.CupomMapper;
 import VitaFortis.demo.v1.repository.CupomRepository;
+import VitaFortis.demo.v1.repository.UsuarioRepository;
+import VitaFortis.demo.v1.enums.TipoUsuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +18,12 @@ import java.util.List;
 public class CupomService {
     private final CupomRepository repository;
     private final CupomMapper mapper;
+    private final UsuarioRepository usuarios;
 
-    public CupomService(CupomRepository repository, CupomMapper mapper) {
+    public CupomService(CupomRepository repository, CupomMapper mapper, UsuarioRepository usuarios) {
         this.repository = repository;
         this.mapper = mapper;
+        this.usuarios = usuarios;
     }
 
     @Transactional
@@ -30,6 +34,7 @@ public class CupomService {
         Cupom cupom = mapper.toEntity(dto);
         cupom.setCodigo(codigo);
         cupom.setAtivo(true);
+        vincularColaborador(cupom, dto.getColaboradorId());
         return mapper.toDto(repository.save(cupom));
     }
 
@@ -42,6 +47,7 @@ public class CupomService {
                 .filter(outro -> !outro.getId().equals(id))
                 .ifPresent(outro -> { throw new IllegalArgumentException("Codigo de cupom ja cadastrado"); });
         mapper.updateFromDto(dto, cupom);
+        vincularColaborador(cupom, dto.getColaboradorId());
         return mapper.toDto(repository.save(cupom));
     }
 
@@ -68,5 +74,22 @@ public class CupomService {
         if (dto.getDataVencimento() != null && dto.getDataVencimento().isBefore(java.time.LocalDateTime.now())) {
             throw new IllegalArgumentException("Data de vencimento deve estar no futuro");
         }
+    }
+
+    private void vincularColaborador(Cupom cupom, Long colaboradorId) {
+        if (colaboradorId == null) {
+            cupom.setColaborador(null);
+            cupom.setPercentualCashback(null);
+            return;
+        }
+        if (cupom.getPercentualCashback() == null || cupom.getPercentualCashback().signum() <= 0) {
+            throw new IllegalArgumentException("Percentual de cashback obrigatorio para cupom de colaborador");
+        }
+        var colaborador = usuarios.findById(colaboradorId)
+                .orElseThrow(() -> new IllegalArgumentException("Colaborador nao encontrado"));
+        if (colaborador.getTipo() != TipoUsuario.COLABORADOR) {
+            throw new IllegalArgumentException("Usuario informado nao possui perfil COLABORADOR");
+        }
+        cupom.setColaborador(colaborador);
     }
 }

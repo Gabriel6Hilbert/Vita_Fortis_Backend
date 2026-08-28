@@ -12,5 +12,7 @@ public class PedidoAdminController {
     private final PedidoService pedidos;
     public PedidoAdminController(PedidoService pedidos) { this.pedidos = pedidos; }
     @GetMapping public List<PedidoResponseDto> listar() { return pedidos.listarTodos(); }
-    @PatchMapping("/{id}/status") public PedidoResponseDto status(@PathVariable Long id, @RequestParam StatusCompra valor) { return pedidos.alterarStatus(id, valor); }
+    @PatchMapping("/{id}/status") public PedidoResponseDto status(@PathVariable Long id, @RequestParam StatusCompra valor, @RequestParam(required = false) String observacao) { return pedidos.alterarStatus(id, valor, observacao); }
+    @PatchMapping("/{id}/pagamento/aprovar") public PedidoResponseDto aprovarPagamento(@PathVariable Long id, @RequestParam(required=false) String observacao) { return pedidos.confirmarPagamento(id, true, observacao); }
+    @PatchMapping("/{id}/pagamento/recusar") public PedidoResponseDto recusarPagamento(@PathVariable Long id, @RequestParam(required=false) String observacao) { return pedidos.confirmarPagamento(id, false, observacao); }
 }

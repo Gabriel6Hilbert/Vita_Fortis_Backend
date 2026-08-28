@@ -1,0 +1,1152 @@
+/*CSS DA PÁGINA DE INFORMAÇÕES SOBRE O PRODUTO SELECIONADO*/
+
+/*CORPO*/
+
+body {
+    /*cor de fundo*/
+    background-color: #f0e8d5;
+    overflow-x: hidden;
+    /*remove a barra de rolar embaixo*/
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+
+
+
+
+/*CABEÇALHO*/
+
+/*CABEÇALHO PARTE DE CIMA*/
+
+header {
+    /*fixa o cabeçalho mesmo ao rolar a tela*/
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+#cabecalhoParteDeCima {
+    /*parte de cima do cabeçalho*/
+    background-color: #F8F1E7;
+}
+
+#logoCabecalho img {
+    /*logo do cabeçalho*/
+    max-height: 5rem;
+    transition: transform 0.3s ease;
+}
+
+#logoCabecalho img:hover {
+    /*logo do cabeçalho quando passa o mouse*/
+    transform: scale(1.08);
+}
+
+#barraDePesquisa {
+    /*tamanho da barra de pesquisa*/
+    width: 50%;
+    max-width: 25rem;
+}
+
+#barraDePesquisaToda {
+    /*posição da barra de pesquisa com o botão/lupa*/
+    margin-left: 15%;
+    margin-right: 5%;
+}
+
+#botaoLupa {
+    /*parte da lupa na barra de pesquisa*/
+    background-color: #F75326;
+    color: white;
+}
+
+#botaoLupa:hover {
+    /*parte da lupa na barra de pesquisa quando passa o mouse*/
+    background-color: #be401d;
+}
+
+.input-group .btn:hover {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    color: white;
+}
+
+.input-group .form-control:focus {
+    /*lupa da caixa de pesquisa quando passa o mouse em cima*/
+    border-color: transparent;
+    box-shadow: none;
+}
+
+#iconeLogin {
+    /*ícone de boneco no login*/
+    color: #F75326;
+    font-size: 1.3rem;
+    transition: transform 0.3s ease;
+}
+
+#iconeLogin:hover {
+    /*ícone de boneco no login quando passa o mouse*/
+    color: #be401d;
+    font-size: 1.3rem;
+    transform: scale(1.08);
+    cursor: pointer;
+}
+
+#loginArea span {
+    /*texto "seja bem-vindo"*/
+    color: #F75326;
+    font-size: .9rem;
+}
+
+#loginArea a {
+    /*texto faça login/cadastre-se*/
+    color: #000000;
+    font-size: .95rem;
+    text-decoration: none;
+}
+
+#loginArea a:hover {
+    /*texto faça login/cadastre-se quando passa o mouse*/
+    text-decoration: underline;
+}
+
+#loginArea .d-flex.flex-column {
+    /*centraliza as duas frases do login*/
+    text-align: center;
+}
+
+#carrinhoArea {
+    /*carrinho de compras*/
+    color: rgb(0, 0, 0);
+    position: relative;
+}
+
+#carrinhoArea:hover {
+    /*carrinho de compras*/
+    cursor: pointer;
+}
+
+#areaLoginECarrinho {
+    /*distância da área do login e do carrinho da margem direita */
+    margin-right: 3.5rem;
+}
+
+#contadorCarrinho {
+    /*número de itens no carrinho*/
+    font-size: 0.6rem;
+    padding: 0.2rem 0.3rem;
+    border: 1px solid #00000020;
+    background-color: #F75326;
+}
+
+/*CABEÇALHO PARTE DE BAIXO*/
+
+#cabecalhoParteDeBaixo {
+    /*parte de baixo do cabeçalho (transparente)*/
+    background: rgb(247, 83, 38, .9);
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    font-weight: 600;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+}
+
+.nav-link.text-uppercase.mx-3 {
+    /*opções do menu*/
+    color: rgb(255, 255, 255);
+    font-size: .9rem;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-link.text-uppercase.mx-3:hover {
+    /*opções do menu quando passa o mouse*/
+    transform: scale(1.1);
+}
+
+#opcaoFidelidadeCab {
+    /*opção "clube fidelidade"*/
+    color: white;
+}
+
+#fundoFidelidadeCab {
+    /*background da opção "clube fidelidade"*/
+    background-color: rgb(255, 213, 0);
+    border-radius: .2rem;
+    margin-right: .5rem;
+}
+
+#menuIcon {
+    /*esconde o ícone hambúrger em telas grandes*/
+    display: none;
+    color: #F75326;
+}
+
+
+
+
+
+/*OPÇÃO CATEGORIAS NO CABEÇALHO PARTE DE BAIXO*/
+
+.mega:hover .mega-menu,
+.mega:focus-within .mega-menu,
+.mega.is-open .mega-menu {
+    /*é o que permite abrir*/
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+.mega-menu {
+    /*o fundo branco*/
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: max-content;
+    max-width: calc(100vw);
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 1.2rem 3.2rem rgba(0, 0, 0, .16);
+    padding: 1.2rem;
+    visibility: hidden;
+    max-height: 22rem;
+}
+
+.mega-title-chip {
+    /*nome de cada categoria*/
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .35rem .85rem;
+    border-radius: 100rem;
+    font-weight: 750;
+    font-size: .95rem;
+    background: rgb(255, 226, 218);
+    min-width: 9rem;
+    color: #000000;
+    margin-bottom: .5rem;
+}
+
+.mega-title-chip i {
+    /*ícone de cada categoria*/
+    font-size: 1rem;
+    opacity: .9;
+    color: #F75326;
+}
+
+.mega-col a {
+    /*as várias opções*/
+    display: block;
+    text-decoration: none;
+    color: #000000;
+    font-size: .95rem;
+    padding: .25rem 0;
+    margin-left: .6rem;
+}
+
+.mega-col a:hover {
+    /*as várias opções quando passa o mouse*/
+    text-decoration: underline;
+    transform: translateY(-.06rem);
+}
+
+.mega-grid {
+    /*grid de colunas*/
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 1.1rem;
+    justify-items: center;
+}
+
+.mega-grid-marcas {
+    /*centralizando o grid de marcas*/
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: center;
+    column-gap: 4rem;
+}
+
+.mega-scroll {
+    /*barra de rolar dentro do mega*/
+    max-height: 18rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 1rem;
+}
+
+.mega-scroll::-webkit-scrollbar {
+    /*largura da barra de rolar*/
+    width: .4rem;
+}
+
+.mega-scroll::-webkit-scrollbar-thumb {
+    /*estética da barra de rolar*/
+    background: rgba(0, 0, 0, 0.199);
+    border-radius: 100rem;
+}
+
+.mega-scroll::-webkit-scrollbar-track {
+    /*estética do trilho da barra de rolar*/
+    background: rgba(0, 0, 0, .06);
+    border-radius: 100rem;
+}
+
+
+
+
+
+/*INÍCIO DO CORPO DO SITE*/
+
+.btn-zap {
+    /*botão do whatsapp*/
+    position: fixed;
+    bottom: 1.2rem;
+    right: .5rem;
+    background-color: #4fce5d;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.7rem 0.5rem 0.7rem;
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: bold;
+    box-shadow: 0 0.25rem 0.37rem rgba(0, 0, 0, 0.3);
+    z-index: 1050;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease;
+    gap: .8rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-zap:hover {
+    /*botão do whatsapp quando passa o mouse*/
+    transform: scale(1.05);
+    background-color: #1f5c0f;
+}
+
+
+
+
+
+/*INÍCIO DAS INFORMAÇÕES SOBRE OS PRODUTOS*/
+
+/*PRODUTO*/
+
+.containerProduto {
+    /*distâncias e largura do container todo*/
+    width: 95%;
+    margin: 3rem auto 2rem;
+}
+
+.gradeProduto {
+    /*produto e informações + aside*/
+    display: grid;
+    grid-template-columns: 1.12fr .88fr;
+    gap: 1.4rem;
+    align-items: start;
+    grid-template-areas: /*desenha o “mapa” com nomes (imagem/compra/infos)*/
+    "imagem compra"
+    "infos  compra";
+}
+
+.gradeProduto > .blocoCompra{ /*diz em qual desses nomes (definidos em .gradeProduto) cada elemento vai ficar*/
+    grid-area: compra;
+}
+
+.cardProduto {
+    /*o fundo do card de produto (atrás da imagem) + informações + aside*/
+    background: rgb(255, 255, 255);
+    border-radius: 1.3rem;
+    box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, .35);
+    padding: 1.1rem;
+}
+
+.imagemProduto {
+    /*o fundo da imagem do produto*/
+    border-radius: 1.3rem;
+    background: #eeece7;
+    justify-content: center;
+    display: grid;
+    box-shadow: .5rem .5rem .5rem rgba(0, 0, 0, 0.151);
+}
+
+.imagemProduto img {
+    /*a imagem do produto em si*/
+    width: 90%;
+    height: 90%;
+    object-fit: cover;
+    padding-top: 2rem;
+    margin-top: .6rem;
+}
+
+.secoesInformacoes {
+    /*toda a parte dos cards de informações*/
+    display: grid;
+    gap: .5rem;
+}
+
+.abaBotoes {
+    /*o conjunto dos botões "descrição, como usar..." - layout*/
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    margin-bottom: .5rem;
+}
+
+.aba-botao {
+    /*estética dos botões*/
+    background-color: #f7532652;
+    padding: .4rem .85rem;
+    border-radius: 100rem;
+    border: 1px solid rgba(255, 106, 0, .55);
+    color: rgba(0, 0, 0, 0.884);
+    font-weight: 700;
+    font-size: .92rem;
+    transition: transform .15s ease;
+}
+
+.aba-botao:hover {
+    /*botão quando passa o mouse*/
+    transform: translateY(-.06rem);
+    background-color: #f7532680;
+    color: #000;
+}
+
+.abaConteudo {
+    /*fundo de cada "card" de informações (cinza)*/
+    border-radius: 1.3rem;
+    background: #eeece7;
+    padding: .8rem;
+}
+
+.abaConteudo h3 {
+    /*título de cada card*/
+    color: #000;
+    margin: .1rem 0 .6rem;
+    font-size: 1.1rem;
+}
+
+.abaConteudo p,
+.abaConteudo li {
+    /*o texto e as listas dentro de cada card*/
+    color: rgba(0, 0, 0, 0.78);
+    font-size: .9rem;
+}
+
+.tabelaNutricional {
+    /*a tabela em si*/
+    width: 100%;
+    border-radius: 1.3rem;
+    border: 1px solid rgba(0, 0, 0, 0.212);
+    margin-top: .6rem;
+}
+
+.tabelaNutricional th,
+.tabelaNutricional td {
+    /*linhas interiores, títulos e informações*/
+    padding: .2rem .2rem;
+    border: 1px solid rgba(0, 0, 0, 0.212);
+    font-size: .95rem;
+    color: #000;
+}
+
+
+
+
+
+/*ASIDE*/
+
+.blocoCompra {
+    /*layout do bloco de compra à direita*/
+    position: sticky;
+    top: 1rem;
+}
+
+.tituloProduto {
+    /*nome do produto*/
+    color: #000;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.subtituloProduto {
+    /*descrição do produto*/
+    color: rgba(0, 0, 0, 0.788);
+    font-size: 1rem;
+}
+
+.cardPreco {
+    /*o bloco de preço*/
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: .5rem 1rem;
+    border-radius: 1.3rem;
+    border: 1px solid rgba(0, 0, 0, 0.158);
+    background: rgb(255, 255, 255);
+}
+
+.precoAntigo {
+    /*preço antigo riscado*/
+    font-size: .8rem;
+    color: rgba(0, 0, 0, 0.555);
+    text-decoration: line-through;
+}
+
+.precoAtual {
+    /*preço atual grande*/
+    font-size: 2rem;
+    font-weight: 950;
+    color: rgb(0, 0, 0);
+}
+
+.parcelamento {
+    /*frase de parcelamento*/
+    margin-top: .25rem;
+    font-size: .7rem;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.economia {
+    /*tagzinha de economia*/
+    background-color: #f7532652;
+    font-weight: 600;
+    font-size: .8rem;
+    padding: .3rem .8rem;
+    border-radius: 100rem;
+    border: 1px solid rgba(255, 106, 0, .55);
+    color: rgba(0, 0, 0, 0.884);
+    white-space: nowrap;
+}
+
+.opcoesCompra {
+    /*layout da parte de sabor, quantidade e botões*/
+    display: grid;
+    gap: .85rem;
+    margin-top: 2rem;
+}
+
+.campoForm label {
+    /*nome "sabor" e "quantidade"*/
+    margin-bottom: .35rem;
+    font-size: 1rem;
+    color: rgb(0, 0, 0);
+}
+
+select,
+input {
+    /*estética das caixinhas de seleção*/
+    width: 100%;
+    padding: .5rem .7rem;
+    border-radius: .7rem;
+    border: 1px solid rgba(0, 0, 0, 0.158);
+    background: rgb(255, 255, 255);
+    color: black;
+    outline: none;
+    margin-bottom: .5rem;
+}
+
+select:focus,
+input:focus {
+    /*quando clica nas caixinhas de seleção*/
+    border-color: rgba(255, 106, 0, .65);
+    box-shadow: 0 0 0 .25rem rgba(255, 106, 0, .14);
+}
+
+.quantidade {
+    /*o bloco/os dois botões de + e -*/
+    display: flex;
+}
+
+.btn-quantidade {
+    /*os botões + e - em si*/
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: transform .12s ease;
+    background-color: transparent;
+    border: none;
+    color: #000;
+}
+
+.btn-quantidade:hover {
+    /*os botões + e - ao passar o mouse*/
+    transform: translateY(-.06rem);
+}
+
+.input-quantidade {
+    /*o número/valor da quantidade*/
+    text-align: center;
+}
+
+.acoes-compra {
+    /*layout dos dois botões*/
+    display: grid;
+    gap: .7rem;
+}
+
+.botao {
+    /*estilo dos dois botões*/
+    font-weight: 700;
+    border: none;
+    transition: transform .14s ease, filter .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+
+.btnComprar {
+    /*botão comprar agora*/
+    background-color: #F75326;
+    color: #ffffff;
+    box-shadow: .1rem .1rem .3rem rgba(0, 0, 0, 0.493);
+    padding: .8rem .8rem;
+    width: 80%;
+    border-radius: .6rem;
+    margin: 1rem auto 0;
+    font-size: 1.2rem;
+}
+
+.btnComprar:hover {
+    /*botão comprar agora quando passa o mouse*/
+    transform: translateY(-.08rem);
+    background-color: #ff3d08;
+    filter: brightness(1.06);
+}
+
+.btnCarrinho {
+    /*botão adicionar ao carrinho*/
+    background: #f75326b4;
+    color: #160303;
+    box-shadow: .1rem .1rem .3rem rgba(0, 0, 0, 0.493);
+    padding: .4rem .4rem;
+    width: 50%;
+    border-radius: .5rem;
+    margin: 0 auto;
+    font-size: .9rem;
+}
+
+.btnCarrinho:hover {
+    /*botão adicionar ao carrinho quando passa o mouse*/
+    transform: translateY(-.08rem);
+    filter: brightness(1.06);
+}
+
+.destaqueProduto {
+    /*layout das 3 caixinhas de destaque*/
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .7rem;
+    margin-top: 1.5rem;
+}
+
+.destaque {
+    /*a caixinha dos destaques*/
+    border: 1px solid rgba(0, 0, 0, 0.158);
+    border-radius: 1.3rem;
+    background: rgba(255, 255, 255, 0.918);
+    padding: .6rem .6rem;
+    display: flex;
+    min-height: 4.6rem;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.destaque p {
+    /*título de cada destaque*/
+    display: block;
+    font-size: .92rem;
+    margin-bottom: .1rem;
+    color: rgb(0, 0, 0);
+    font-weight: 600;
+}
+
+.destaque span {
+    /*texto de cada destaque*/
+    display: block;
+    font-size: .85rem;
+    color: rgba(0, 0, 0, 0.877);
+}
+
+
+
+
+
+/*PRODUTOS RELACIONADOS*/
+
+section.relacionados {
+    /*toda a seção*/
+    margin-top: 4rem;
+}
+
+section.relacionados h2 {
+    /*título*/
+    margin: .5rem 0 .7rem;
+    font-size: 1.5rem;
+    color: rgba(0, 0, 0, .85);
+    font-weight: 600;
+}
+
+.cardsRelacionados { /*garante 2 cards por linha*/
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+    max-width: 38rem; /*limito a largura do bloco, tirar quando eu adicionar mais produtos*/
+}
+
+.card.h-100.relacionados {
+    /*o card em si*/
+    border-radius: 1rem;
+    border: 1px solid rgba(0, 0, 0, .08);
+    background: #fff;
+    box-shadow: .1rem .1rem .6rem rgba(100, 100, 100, .5);
+    cursor: pointer;
+    transition: transform .2s ease;
+}
+
+.imagemRelacionado {
+    /*o conjunto da imagem*/
+    display: flex;
+    justify-content: center;
+    padding: 1rem 1rem 0;
+}
+
+.card-img-top.relacionados {
+    /*a imagem em si*/
+    width: 100%;
+    max-width: 10rem;
+    height: auto;
+    margin: 0;
+    transition: transform 0.5s ease;
+}
+
+.cardRelacionado:hover .card-img-top.relacionados {
+    /*hover da imagem*/
+    transform: scale(1.08);
+}
+
+.produtoTitulo.relacionados {
+    /*o nome do produto*/
+    font-size: .95rem;
+    font-weight: 700;
+    color: rgba(0, 0, 0, .9);
+}
+
+.cardsRelacionados .fs-4{ /*tamanho do valor/preço*/
+    font-size: 1.25rem !important;
+}
+
+.btn.comprarOfertas {
+    /*botão comprar*/
+    width: 90%;
+    background-color: #F75326;
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    padding: .5rem .9rem;
+    border-radius: .75rem;
+    transition: transform .2s ease, background-color .2s ease;
+    white-space: nowrap;
+    margin: 0 auto;
+}
+
+.btn.comprarOfertas:hover {
+    /*hover no botão comprar*/
+    background-color: #be401d;
+    transform: scale(1.02);
+    color: #fff;
+}
+
+.btn.comprarOfertas:focus {
+    /*botão comprar quando clica*/
+    color: #fff;
+}
+
+.favorito-btn {
+    /*tirando o fundo cinza do botão de coração/favorito*/
+    background-color: transparent;
+    border: none;
+    z-index: 1;
+}
+
+.favorito-btn:hover {
+    /*tirando o fundo cinza do botão de coração/favorito quando passa o mouse*/
+    background-color: transparent;
+    border: none;
+}
+
+.favorito-btn i {
+    /*coração em si*/
+    font-size: 1.1rem;
+    color: #F75326;
+}
+
+.favorito-btn:hover i::before {
+    /*coração preenchido ao passar o mouse*/
+    content: "\f415";
+    color: #F75326;
+}
+
+.favorito-btn {
+    /*botão de favorito sempre clicável por cima*/
+    z-index: 5;
+}
+
+
+
+
+
+/*RODAPÉ*/
+
+footer {
+    /*parte de fundo do rodapé*/
+    background-color: #F8F1E7;
+    ;
+    box-shadow: 0 -0.5rem .5rem rgba(247, 83, 38, 0.24);
+}
+
+.logo-footer {
+    /*logo do rodapé*/
+    max-width: 7rem;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-footer:hover {
+    /*logo do rodapé quando passa o mouse*/
+    transform: scale(1.05);
+}
+
+footer p {
+    /*opções do rodapé*/
+    font-size: 0.9rem;
+    text-align: left;
+    color: #000000;
+    cursor: pointer;
+}
+
+footer p:hover {
+    /*opções do rodapé quando passa o mouse*/
+    text-decoration: underline;
+}
+
+.copy {
+    /*copyright*/
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    pointer-events: none;
+}
+
+.bolaFundoPagamento {
+    /*círculo branco atrás de cada bandeira */
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: #fff;
+    display: grid;
+    place-items: center;
+}
+
+.bolaFundoPagamento img {
+    /*tamanho da logo dentro do círculo*/
+    max-width: 90%;
+    max-height: 90%;
+    height: auto;
+    object-fit: contain;
+}
+
+h6 {
+    /*títulos do rodapé*/
+    font-size: 1.1rem;
+    color: #000;
+}
+
+#tituloRedesSociaisRodape {
+    /*impedindo a quebra de linha em "nos acompanhe nas redes sociais"*/
+    white-space: nowrap;
+}
+
+.bg-light {
+    /*linhas horizontais*/
+    color: #F75326;
+}
+
+#horarioFuncionamentoRodape {
+    /*tiro o cursor do horário de funcionamento*/
+    pointer-events: none;
+}
+
+.fab.fa-whatsapp.fa-lg {
+    /*cor do ícono do whatsapp no rodapé*/
+    color: #4fce5d;
+}
+
+.redesSociaisRodape .fa-instagram::before {
+    /*cor do ícono do instagram no rodapé*/
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    background-clip: text;
+    color: transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*RESPONSIVIDADE*/
+
+@media (max-width: 992px) {
+
+    /*PARTE DE BAIXO DO CABEÇALHO - CATEGORIAS E MARCAS*/
+
+    .mega-menu {
+        /*o fundo branco*/
+        top: auto;
+        display: none;
+        left: 50%;
+        right: 0;
+        margin: 0 auto;
+        width: 95%;
+        max-height: 22rem;
+    }
+
+    .mega.is-open .mega-menu {
+        /*permite que o mega abra em telas pequenas*/
+        display: block;
+    }
+
+    .mega-grid {
+        /*grid de colunas*/
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .mega-scroll {
+        /*barra de rolar dentro do mega*/
+        max-height: 10rem;
+    }
+}
+
+@media (min-width: 820px) and (max-width: 829px) {
+    /*dimensões do ipad air*/
+
+    /*BOTÕES AMARELOS DE CATEGORIAS NO CORPO DO SITE*/
+    #botoesCategoriasCorpo {
+        /*margem esquerda no ipad air*/
+        margin-left: 0.3rem;
+    }
+
+    /*ESPORTES*/
+    .titulo-seu-esporte h3 {
+        /*título qual é sua atividade física*/
+        font-size: 2rem;
+    }
+
+    .titulo-seu-esporte {
+        /*distância do título pros cards*/
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    /*em telas menores que 767px de largura (referência: ipad mini)*/
+
+    /*CABEÇALHO PARTE DE CIMA*/
+    #cabecalhoParteDeCima {
+        /*parte de cima do cabeçalho*/
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #logoCabecalho {
+        /*logo*/
+        margin-top: 0.2rem;
+    }
+
+    #areaLoginECarrinho {
+        /*área de login e carrinho*/
+        margin-right: 0.8rem;
+    }
+
+    #loginArea span {
+        /*texto "seja bem-vindo"*/
+        font-size: 0.8rem;
+    }
+
+    #loginArea a {
+        /*texto faça login/cadastre-se*/
+        font-size: 0.85rem;
+    }
+
+    #cabecalhoParteDeCima>.flex-grow-1 {
+        /*joga a barra de pesquisa para baixo + margens*/
+        order: 2;
+        flex: 0 0 100%;
+        margin: 1.5rem 0 3rem 0;
+    }
+
+    #barraDePesquisaToda {
+        /*remove as margens internas da barra de pesquisa*/
+        margin: 0;
+    }
+
+    .input-group {
+        /*ajusta a largura da barra de pesquisa*/
+        width: 90%;
+        max-width: 25rem;
+    }
+
+    /*CABEÇALHO PARTE DE BAIXO*/
+    #cabecalhoParteDeBaixo {
+        /*esconde o menu*/
+        display: none;
+    }
+
+    #menuIcon {
+        /*exibe o hambúrguer*/
+        display: inline-block;
+        position: absolute;
+        z-index: 30;
+        top: 80%;
+        padding: 0.5rem;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo {
+        /*menu ao clicar no hambúrguer*/
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 20;
+        background-color: #b43e1a;
+        opacity: 0.9;
+    }
+
+    #menuToggle:checked+#cabecalhoParteDeBaixo .container {
+        /*layout interno vertical/estilização interna do nav quando aberto*/
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #fundoCategorias {
+        /*afasta o background de clube fidelidade do background de categorias*/
+        margin-top: .4rem;
+    }
+
+    /*PRODUTO E A PARTE DE COMPRA*/ 
+
+    .gradeProduto{ /*define a ordem das seções da página em telas pequenas*/
+        grid-template-columns: 1fr;
+        grid-template-areas: "imagem" "compra""infos";
+    }
+
+    .blocoCompra{ /*posiciona o aside de compra*/
+        position: static;
+        top: auto;
+    }
+
+    .tituloProduto {
+        /*nome do produto*/
+        margin-top: 1rem;
+    }
+
+    .destaqueProduto {
+        /*layout das 3 caixinhas de destaque*/
+        margin-top: 2rem;
+    }
+
+    section.relacionados {
+        /*toda a seção*/
+        margin-top: 3rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 853px) {
+
+    /*RODAPÉ*/
+    #tituloRedesSociaisRodape {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        white-space: pre;
+    }
+
+    .quebra-sm::after {
+        /*forçando a quebra de "nos acompanhe nas redes sociais" em telas pequenas*/
+        content: "\A";
+        white-space: pre;
+    }
+}
+
+@media (max-width: 767.98px) {
+    /*rodapé não incluindo 768*/
+
+    /*RODAPÉ*/
+    .primeira-linha-rodape {
+        /*permite as quebras de linha*/
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .primeira-linha-rodape>div {
+        /*define as larguras*/
+        flex: 1 1 50%;
+        max-width: 50%;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(1),
+    .primeira-linha-rodape .col-md-2:nth-child(2) {
+        /*primeira linha: logo + fale conosco*/
+        order: 1;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(3),
+    .primeira-linha-rodape .col-md-2:nth-child(4) {
+        /*segunda linha: parceiro + institucional*/
+        order: 2;
+    }
+
+    .primeira-linha-rodape .col-md-2:nth-child(5) {
+        /*terceira linha: redes sociais centralizadas */
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    footer h6 {
+        /*alinhando título com texto */
+        text-align: left;
+    }
+
+    #tituloRedesSociaisRodape {
+        /*centralizando "redes sociais"*/
+        text-align: center;
+    }
+
+    .primeira-linha-rodape .logo-footer {
+        /*tamanho da logo*/
+        max-width: 8rem;
+        margin: 0 auto;
+    }
+}
+

@@ -15,7 +15,6 @@ public class SpaForwardController {
             "/conta",
             "/pedidos",
             "/admin",
-            "/clube",
             "/favoritos",
             "/ofertas",
             "/novidades",

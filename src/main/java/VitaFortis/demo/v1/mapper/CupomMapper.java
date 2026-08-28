@@ -8,12 +8,15 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CupomMapper {
 
+    @Mapping(target = "colaboradorId", expression = "java(cupom.getColaborador() == null ? null : cupom.getColaborador().getId())")
+    @Mapping(target = "colaboradorNome", expression = "java(cupom.getColaborador() == null ? null : cupom.getColaborador().getNome())")
     CupomResponseDto toDto(Cupom cupom);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "ativo", ignore = true)
     @Mapping(target = "dataCadastro", ignore = true)
     @Mapping(target = "codigo", qualifiedByName = "normalizeCodigo")
+    @Mapping(target = "colaborador", ignore = true)
     Cupom toEntity(CupomRequestDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -21,6 +24,7 @@ public interface CupomMapper {
     @Mapping(target = "ativo", ignore = true)
     @Mapping(target = "dataCadastro", ignore = true)
     @Mapping(target = "codigo", qualifiedByName = "normalizeCodigo")
+    @Mapping(target = "colaborador", ignore = true)
     void updateFromDto(CupomRequestDto dto, @MappingTarget Cupom entity);
 
     @Named("normalizeCodigo")

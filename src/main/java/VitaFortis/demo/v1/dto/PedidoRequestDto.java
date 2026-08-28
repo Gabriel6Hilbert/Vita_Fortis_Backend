@@ -1,6 +1,8 @@
 package VitaFortis.demo.v1.dto;
 
+import VitaFortis.demo.v1.enums.FormaRecebimento;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -20,7 +22,12 @@ public class PedidoRequestDto {
     private List<ItemCompraRequestDto> itens;
 
     private Long cupomId;
-    private String enderecoEntrega;
+
+    @NotNull
+    private FormaRecebimento formaRecebimento;
+
+    private Long enderecoId;
+
+    @NotBlank
     private String formaPagamento;
-    private String referenciaPagamento;
 }

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import VitaFortis.demo.v1.dto.PerfilAtualizacaoDto;
+import VitaFortis.demo.v1.dto.AlteracaoSenhaDto;
 
 @Service
 public class UsuarioService {
@@ -27,6 +29,15 @@ public class UsuarioService {
 
     @Transactional
     public UsuarioResponseDto create(UsuarioRequestDto usuarioRequestDto) {
+        return criarComTipo(usuarioRequestDto, TipoUsuario.CLIENTE);
+    }
+
+    @Transactional
+    public UsuarioResponseDto criarColaborador(UsuarioRequestDto usuarioRequestDto) {
+        return criarComTipo(usuarioRequestDto, TipoUsuario.COLABORADOR);
+    }
+
+    private UsuarioResponseDto criarComTipo(UsuarioRequestDto usuarioRequestDto, TipoUsuario tipo) {
         final String emailNormalizado = usuarioRequestDto.getEmail().trim().toLowerCase();
 
         if (usuarioRepository.existsByEmail(emailNormalizado)) {
@@ -36,7 +47,7 @@ public class UsuarioService {
         Usuario usuario = usuarioMapper.toEntity(usuarioRequestDto);
         usuario.setEmail(emailNormalizado);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-        usuario.setTipo(TipoUsuario.CLIENTE);
+        usuario.setTipo(tipo);
 
         Usuario saved = usuarioRepository.save(usuario);
         return  usuarioMapper.toResponseDto(saved);
@@ -91,6 +102,40 @@ public class UsuarioService {
         Usuario usuario = buscarEntidade(id);
         usuario.setAtivo(ativo);
         return usuarioMapper.toResponseDto(usuarioRepository.save(usuario));
+    }
+
+    @Transactional
+    public UsuarioResponseDto alterarPermissaoRelatorios(Long id, boolean valor) {
+        Usuario usuario = buscarEntidade(id);
+        if (usuario.getTipo() != TipoUsuario.COLABORADOR) {
+            throw new IllegalArgumentException("Permissao de relatorios se aplica apenas a colaborador");
+        }
+        usuario.setPermissaoRelatorios(valor);
+        return usuarioMapper.toResponseDto(usuarioRepository.save(usuario));
+    }
+
+    @Transactional
+    public UsuarioResponseDto atualizarPerfil(String email, PerfilAtualizacaoDto dto) {
+        Usuario usuario = buscarPorEmailEntidade(email);
+        usuario.setNome(dto.nome().trim());
+        usuario.setTelefone(dto.telefone() == null || dto.telefone().isBlank() ? null : dto.telefone().trim());
+        usuario.setAceitaComunicacoes(dto.aceitaComunicacoes());
+        return usuarioMapper.toResponseDto(usuarioRepository.save(usuario));
+    }
+
+    @Transactional
+    public void alterarSenha(String email, AlteracaoSenhaDto dto) {
+        Usuario usuario = buscarPorEmailEntidade(email);
+        if (!passwordEncoder.matches(dto.senhaAtual(), usuario.getSenha())) {
+            throw new IllegalArgumentException("Senha atual invalida");
+        }
+        usuario.setSenha(passwordEncoder.encode(dto.novaSenha()));
+        usuarioRepository.save(usuario);
+    }
+
+    private Usuario buscarPorEmailEntidade(String email) {
+        return usuarioRepository.findByEmail(email.trim().toLowerCase())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario nao encontrado"));
     }
 
     private Usuario buscarEntidade(Long id) {

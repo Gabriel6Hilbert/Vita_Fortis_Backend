@@ -25,8 +25,6 @@ public class ProdutoResponseDto {
     private int quantidadeEstoque;
     private CategoriaProduto categoria;
     private boolean ativo;
-    private boolean resgatavel;
-    private Integer pontosNecessarios;
     private String imagemUrl;
     private Set<String> objetivos;
     private Set<String> esportes;

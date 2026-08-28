@@ -48,6 +48,15 @@ public class Cupom {
     @Column(name="MIN_SUBTOTAL", precision=12, scale=2)
     private BigDecimal minSubtotal;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COLABORADOR_ID")
+    private Usuario colaborador;
+
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
+    @Column(name = "PERCENTUAL_CASHBACK", precision = 5, scale = 2)
+    private BigDecimal percentualCashback;
+
     @CreationTimestamp
     @Column(name = "DATA_CADASTRO", nullable = false, updatable = false)
     private LocalDateTime dataCadastro;

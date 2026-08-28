@@ -21,7 +21,6 @@ public final class FiltroProduto {
                 marcaIgual(f.getMarca()),
                 categoriaIgual(f.getCategoria()),
                 precoEntre(f.getPrecoMin(), f.getPrecoMax()),
-                resgatavelIgual(f.getResgatavel()),
                 conjuntoContem("objetivos", f.getObjetivos()), conjuntoContem("esportes", f.getEsportes()),
                 booleano("vegano", f.getVegano()), booleano("vegetariano", f.getVegetariano()),
                 booleano("linhaClinica", f.getLinhaClinica()), booleano("lancamento", f.getLancamento()),
@@ -86,12 +85,6 @@ public final class FiltroProduto {
             return (min != null) ? cb.greaterThanOrEqualTo(preco, min)
                     : cb.lessThanOrEqualTo(preco, max);
         };
-    }
-
-    private static Specification<Produto> resgatavelIgual(Boolean r) {
-        return (root, q, cb) -> (r == null)
-                ? cb.conjunction()
-                : (r ? cb.isTrue(root.get("resgatavel")) : cb.isFalse(root.get("resgatavel")));
     }
 
     private static Specification<Produto> booleano(String campo, Boolean valor) {

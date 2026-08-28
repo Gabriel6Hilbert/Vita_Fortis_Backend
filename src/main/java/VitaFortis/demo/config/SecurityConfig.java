@@ -42,12 +42,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/assets/**", "/*.html", "/catalogo", "/produto/**",
-                                "/entrar", "/sacola", "/conta", "/pedidos", "/admin", "/clube", "/favoritos",
+                                "/entrar", "/sacola", "/conta", "/pedidos", "/admin", "/favoritos",
                                 "/ofertas", "/novidades", "/kits", "/sobre", "/politicas", "/faq",
                                 "/trabalhe-conosco", "/contato", "/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/produtos/**", "/api/v1/loja").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/admin/metricas/**").hasAnyRole("ADMIN", "COLABORADOR")
+                        .requestMatchers("/api/v1/colaborador/**").hasRole("COLABORADOR")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .httpBasic(basic -> {})

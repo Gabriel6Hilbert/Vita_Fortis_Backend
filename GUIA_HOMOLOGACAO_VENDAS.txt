@@ -1,0 +1,105 @@
+GUIA DE HOMOLOGACAO DE VENDAS SEM GATEWAY
+
+Este documento descreve como testar o fluxo comercial completo da Vita Fortis usando pagamento local simulado. Nenhum pagamento real e realizado e nenhum dado de cartao e armazenado.
+
+PREPARACAO
+
+1. Inicie o MySQL configurado em application.properties.
+2. Gere os dados idempotentes de homologacao executando:
+   .\mvnw.cmd test
+3. Compile o frontend com:
+   cd frontend
+   pnpm build
+4. Inicie a aplicacao em http://localhost:5001/
+
+CONTAS DE HOMOLOGACAO
+
+Todas utilizam a senha: Teste@123
+
+- ADMIN: admin@vitafortis.test
+  Aprovar ou recusar pagamento, atualizar pedidos e consultar o painel.
+- COLABORADOR: colaborador@vitafortis.test
+  Consultar cupom, vendas, saldo e extrato de cashback.
+- CLIENTE: cliente@vitafortis.test
+  Executar a compra principal.
+- CLIENTE 2: cliente2@vitafortis.test
+  Testar isolamento entre contas.
+
+DADOS PREPARADOS
+
+- HML-WHEY: produto ativo com estoque normal.
+- HML-CREATINA: produto ativo com estoque baixo.
+- HML-ZERO: produto ativo sem estoque.
+- HML-INATIVO: produto inativo, visivel apenas no painel administrativo.
+- COLAB10: 10% de desconto, vinculado ao colaborador, gerando 5% de cashback.
+
+ROTEIRO PRINCIPAL DE VENDA
+
+1. Entre como cliente@vitafortis.test.
+2. Abra o catalogo e acesse HML-WHEY.
+3. Adicione uma ou mais unidades a sacola.
+4. Aplique o cupom COLAB10.
+5. Confira subtotal, desconto, total e cashback.
+6. Escolha retirada ou entrega e uma forma de pagamento simulada.
+7. Clique em Revisar pedido.
+8. Confira a revisao e clique em Confirmar pedido.
+9. Em Meus pedidos, confirme status PENDENTE e pagamento PENDENTE.
+10. Entre como administrador.
+11. No painel de pedidos, aprove o pagamento simulado.
+12. Confirme PAGAMENTO_APROVADO.
+13. Avance para EM_SEPARACAO, ENVIADO e ENTREGUE.
+14. Entre como colaborador e confira venda, cupom e credito no extrato.
+
+CENARIOS OBRIGATORIOS
+
+Pagamento recusado:
+- Crie outro pedido e use Recusar no painel administrativo.
+- O pedido deve ser cancelado, o pagamento deve ficar RECUSADO e o estoque deve retornar.
+
+Cancelamento depois da aprovacao:
+- Aprove um pedido e depois cancele antes da entrega.
+- Estoque e total vendido devem ser revertidos.
+- O cashback deve receber um unico estorno.
+
+Estoque:
+- HML-ZERO nao pode ser comprado.
+- Quantidade maior que o estoque de HML-CREATINA deve falhar.
+- HML-INATIVO nao deve aparecer no catalogo publico.
+
+Cupons:
+- COLAB10 deve aplicar desconto e cashback.
+- Cupom inexistente, inativo ou vencido deve ser rejeitado.
+
+Seguranca:
+- cliente2@vitafortis.test nao pode acessar o carrinho do primeiro cliente.
+- Um cliente nao pode consultar pedidos de outro cliente.
+- Colaborador nao pode consultar pedidos arbitrarios.
+- Colaborador nao pode acessar administracao.
+- Cliente nao pode acessar a area do colaborador.
+
+RESPONSIVIDADE
+
+Repetir catalogo, produto, sacola, revisao e pedidos em celular e desktop. Conferir menus, tabelas, formularios, mensagens, estados vazios e botoes desabilitados.
+
+REGRAS IMPLEMENTADAS
+
+- Carrinho, favoritos e enderecos protegidos por proprietario.
+- Somente ADMIN consulta pedidos de terceiros.
+- Colaborador ve apenas pedidos associados aos seus cupons.
+- Pedido pendente nao segue para separacao sem pagamento aprovado.
+- Pagamento nao pode ser aprovado ou recusado duas vezes.
+- Recusa cancela o pedido e devolve estoque.
+- Aprovacao gera cashback.
+- Cancelamento posterior gera estorno auditavel.
+- Pedido exige revisao explicita antes da confirmacao.
+
+MELHORIAS POSTERIORES
+
+- Integrar gateway real com webhook idempotente.
+- Expirar pedidos pendentes e liberar estoque automaticamente.
+- Adicionar testes automatizados de navegador.
+- Usar banco exclusivo para homologacao.
+- Adicionar migracoes versionadas.
+- Implementar e-mail transacional e recuperacao de senha.
+- Adicionar logs operacionais e observabilidade.
+- Definir politica comercial de reserva de estoque e prazo de pagamento.
