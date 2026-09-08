@@ -18,6 +18,7 @@ public interface CarrinhoItemMapper {
     @Mapping(source = "itemId", target = "itemId")
     @Mapping(source = "produto.id",  target = "produtoId")
     @Mapping(source = "produto.nome", target = "produtoNome")
+    @Mapping(source = "produto.imagemUrl", target = "produtoImagemUrl")
     @Mapping(source = "quantidade", target = "quantidade")
     @Mapping(target = "subtotal", expression = "java(entity.getPrecoUnitario().multiply(java.math.BigDecimal.valueOf(entity.getQuantidade())))")
     CarrinhoItemResponseDto toResponseDto(CarrinhoItem entity);

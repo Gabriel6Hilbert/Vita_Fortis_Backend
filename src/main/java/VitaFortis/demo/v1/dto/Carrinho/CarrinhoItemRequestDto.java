@@ -14,8 +14,8 @@ public class CarrinhoItemRequestDto {
     private Long produtoId;
 
     @NotNull(groups = {OnCreate.class, OnUpdate.class})
-    @Min(value = 1, groups = OnCreate.class)
-    private int quantidade;
+    @Min(value = 1, groups = {OnCreate.class, OnUpdate.class})
+    private Integer quantidade;
 
     @NotNull(groups = OnUpdate.class)
     private Long itemId;

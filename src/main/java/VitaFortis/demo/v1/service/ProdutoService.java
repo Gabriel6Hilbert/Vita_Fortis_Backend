@@ -8,6 +8,9 @@ import VitaFortis.demo.v1.dto.ProdutoMetadadosComerciaisDto;
 import VitaFortis.demo.v1.entity.Produto;
 import VitaFortis.demo.v1.mapper.ProdutoMapper;
 import VitaFortis.demo.v1.repository.ProdutoRepository;
+import VitaFortis.demo.v1.repository.MovimentacaoEstoqueRepository;
+import VitaFortis.demo.v1.entity.MovimentacaoEstoque;
+import VitaFortis.demo.v1.dto.MovimentacaoEstoqueDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.PageImpl;
@@ -29,10 +32,12 @@ public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
     private final ProdutoMapper produtoMapper;
+    private final MovimentacaoEstoqueRepository movimentacoes;
 
-    public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper) {
+    public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper, MovimentacaoEstoqueRepository movimentacoes) {
         this.produtoRepository = produtoRepository;
         this.produtoMapper = produtoMapper;
+        this.movimentacoes = movimentacoes;
     }
 
     // CRIAR PRODUTO
@@ -85,6 +90,12 @@ public class ProdutoService {
     public void setAtivo (Long produtoId, Boolean ativo) {
         Produto p = produtoRepository.findById(produtoId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
+        if (Boolean.TRUE.equals(ativo) && p.getPreco() == null) {
+            throw new IllegalArgumentException("Informe o preço antes de ativar o produto.");
+        }
+        if (Boolean.TRUE.equals(ativo) && (p.getQuantidadeEstoque() == null || p.getQuantidadeEstoque() <= 0)) {
+            throw new IllegalArgumentException("Informe o estoque antes de ativar o produto.");
+        }
         p.setAtivo(ativo);
         produtoRepository.save(p);
     }
@@ -135,6 +146,28 @@ public class ProdutoService {
         Produto p = produtoRepository.findById(produtoId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
         return produtoMapper.toResponseDto(p);
+    }
+
+    @Transactional
+    public ProdutoResponseDto ajustarEstoque(Long produtoId, int quantidadeNova, String motivo, String responsavel) {
+        if (quantidadeNova < 0) throw new IllegalArgumentException("Estoque nao pode ser negativo");
+        if (motivo == null || motivo.trim().length() < 3) throw new IllegalArgumentException("Informe o motivo do ajuste");
+        Produto produto = produtoRepository.findById(produtoId).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
+        int anterior = produto.getQuantidadeEstoque();
+        if (anterior == quantidadeNova) throw new IllegalArgumentException("A quantidade informada e igual ao estoque atual");
+        produto.setQuantidadeEstoque(quantidadeNova);
+        if (quantidadeNova == 0) produto.setAtivo(false);
+        produtoRepository.save(produto);
+        MovimentacaoEstoque movimento = new MovimentacaoEstoque();
+        movimento.setProduto(produto); movimento.setQuantidadeAnterior(anterior); movimento.setQuantidadeNova(quantidadeNova);
+        movimento.setVariacao(quantidadeNova-anterior); movimento.setMotivo(motivo.trim()); movimento.setResponsavel(responsavel);
+        movimentacoes.save(movimento);
+        return produtoMapper.toResponseDto(produto);
+    }
+
+    @Transactional(readOnly=true)
+    public List<MovimentacaoEstoqueDto> historicoEstoque(Long produtoId){
+        return movimentacoes.findAllByProdutoIdOrderByCriadoEmDesc(produtoId).stream().map(m->new MovimentacaoEstoqueDto(m.getId(),m.getProduto().getId(),m.getProduto().getNome(),m.getQuantidadeAnterior(),m.getQuantidadeNova(),m.getVariacao(),m.getMotivo(),m.getResponsavel(),m.getCriadoEm())).toList();
     }
 
     @Transactional(readOnly = true)

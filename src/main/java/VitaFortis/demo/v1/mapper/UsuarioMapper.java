@@ -10,6 +10,7 @@ public interface UsuarioMapper {
 
     Usuario toEntity(UsuarioRequestDto dto);
 
+    @Mapping(source = "tipo", target = "tipoUsuario")
     UsuarioResponseDto toResponseDto(Usuario entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

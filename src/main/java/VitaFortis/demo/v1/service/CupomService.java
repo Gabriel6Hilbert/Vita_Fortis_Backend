@@ -7,6 +7,7 @@ import VitaFortis.demo.v1.enums.CupomTipo;
 import VitaFortis.demo.v1.mapper.CupomMapper;
 import VitaFortis.demo.v1.repository.CupomRepository;
 import VitaFortis.demo.v1.repository.UsuarioRepository;
+import VitaFortis.demo.v1.repository.PedidoRepository;
 import VitaFortis.demo.v1.enums.TipoUsuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,13 @@ public class CupomService {
     private final CupomRepository repository;
     private final CupomMapper mapper;
     private final UsuarioRepository usuarios;
+    private final PedidoRepository pedidos;
 
-    public CupomService(CupomRepository repository, CupomMapper mapper, UsuarioRepository usuarios) {
+    public CupomService(CupomRepository repository, CupomMapper mapper, UsuarioRepository usuarios, PedidoRepository pedidos) {
         this.repository = repository;
         this.mapper = mapper;
         this.usuarios = usuarios;
+        this.pedidos = pedidos;
     }
 
     @Transactional
@@ -53,7 +56,13 @@ public class CupomService {
 
     @Transactional(readOnly = true)
     public List<CupomResponseDto> listar() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return repository.findAll().stream().map(cupom -> {
+            CupomResponseDto dto = mapper.toDto(cupom);
+            var usos = pedidos.findAllByCupomUtilizadoIdOrderByDataPedidoDesc(cupom.getId());
+            dto.setQuantidadeUsos(usos.size());
+            dto.setPedidoIds(usos.stream().map(pedido -> pedido.getId()).toList());
+            return dto;
+        }).toList();
     }
 
     @Transactional

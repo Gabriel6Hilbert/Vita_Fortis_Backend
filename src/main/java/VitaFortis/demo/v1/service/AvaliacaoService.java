@@ -11,6 +11,7 @@ import java.util.List;
     private final AvaliacaoProdutoRepository avaliacoes; private final ProdutoRepository produtos; private final UsuarioRepository usuarios;
     public AvaliacaoService(AvaliacaoProdutoRepository a, ProdutoRepository p, UsuarioRepository u){avaliacoes=a;produtos=p;usuarios=u;}
     @Transactional(readOnly=true) public List<AvaliacaoResponseDto> listar(Long produtoId){return avaliacoes.findByProdutoIdAndAprovadoTrueOrderByCriadoEmDesc(produtoId).stream().map(this::dto).toList();}
+    @Transactional(readOnly=true) public List<AvaliacaoResponseDto> listarAdmin(){return avaliacoes.findAllByOrderByCriadoEmDesc().stream().map(this::dto).toList();}
     @Transactional public AvaliacaoResponseDto criar(Long produtoId, AvaliacaoRequestDto req, String email){
         Usuario u=usuarios.findById(req.getUsuarioId()).orElseThrow(()->new IllegalArgumentException("Usuario nao encontrado"));
         if(!u.getEmail().equalsIgnoreCase(email)) throw new org.springframework.security.access.AccessDeniedException("Somente o proprio usuario pode avaliar");

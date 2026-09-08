@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/produtos")
@@ -22,6 +24,8 @@ public class ProdutoAdminController {
     @GetMapping("/{id}") public ProdutoResponseDto buscar(@PathVariable Long id) { return produtos.getByIdAdmin(id); }
     @PatchMapping("/{id}/ativo") public void ativo(@PathVariable Long id, @RequestParam boolean valor) { produtos.setAtivo(id, valor); }
     @PatchMapping("/{id}/estoque") public ProdutoResponseDto estoque(@PathVariable Long id, @RequestParam int quantidade) { return quantidade >= 0 ? produtos.reporEstoque(id, quantidade) : produtos.baixarEstoque(id, -quantidade); }
+    @PutMapping("/{id}/estoque") public ProdutoResponseDto ajustarEstoque(@PathVariable Long id,@RequestParam int quantidade,@RequestParam String motivo,Authentication auth){return produtos.ajustarEstoque(id,quantidade,motivo,auth.getName());}
+    @GetMapping("/{id}/estoque/movimentacoes") public List<MovimentacaoEstoqueDto> historicoEstoque(@PathVariable Long id){return produtos.historicoEstoque(id);}
     @PatchMapping("/{id}/desconto-percentual") public ProdutoResponseDto percentual(@PathVariable Long id, @RequestParam BigDecimal valor) { return produtos.aplicarDescontoPercentual(id, valor); }
     @PatchMapping("/{id}/desconto-valor") public ProdutoResponseDto valor(@PathVariable Long id, @RequestParam BigDecimal valor) { return produtos.aplicarDescontoValor(id, valor); }
     @PatchMapping("/{id}/metadados-comerciais") public ProdutoResponseDto metadados(@PathVariable Long id, @Valid @RequestBody ProdutoMetadadosComerciaisDto dto) { return produtos.atualizarMetadados(id, dto); }

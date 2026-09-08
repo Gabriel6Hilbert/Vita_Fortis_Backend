@@ -52,16 +52,21 @@ public class HomologacaoDataInitializer implements CommandLineRunner {
     }
 
     private Usuario usuario(String email, String nome, String cpf, TipoUsuario tipo) {
-        return usuarios.findByEmail(email).orElseGet(() -> {
+        Usuario usuario = usuarios.findByEmail(email).orElseGet(() -> {
             Usuario u = new Usuario(); u.setEmail(email); u.setNome(nome); u.setCpf(cpf); u.setTelefone("11999999999");
-            u.setSenha(encoder.encode("Teste@123")); u.setTipo(tipo); u.setAtivo(true); u.setSaldoCashback(BigDecimal.ZERO);
-            return usuarios.save(u);
+            u.setSenha(encoder.encode("Teste@123")); u.setSaldoCashback(BigDecimal.ZERO);
+            return u;
         });
+        usuario.setNome(nome);
+        usuario.setCpf(cpf);
+        usuario.setTipo(tipo);
+        usuario.setAtivo(true);
+        return usuarios.save(usuario);
     }
 
     private void produto(String codigo, String nome, double preco, int estoque, boolean ativo, CategoriaProduto categoria) {
-        if (produtos.existsByCodigoIgnoreCase(codigo)) return;
-        Produto p = new Produto(); p.setCodigo(codigo); p.setNome(nome); p.setDescricao("Produto criado exclusivamente para homologacao do fluxo de vendas.");
+        Produto p = produtos.findByCodigoIgnoreCase(codigo).orElseGet(Produto::new);
+        p.setCodigo(codigo); p.setNome(nome); p.setDescricao("Produto criado exclusivamente para homologacao do fluxo de vendas.");
         p.setMarca("Vita Test"); p.setUnidade("UN"); p.setPreco(BigDecimal.valueOf(preco)); p.setQuantidadeEstoque(estoque);
         p.setCategoria(categoria); p.setAtivo(ativo); produtos.save(p);
     }

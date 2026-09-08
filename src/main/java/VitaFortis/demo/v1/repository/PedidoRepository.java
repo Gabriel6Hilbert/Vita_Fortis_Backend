@@ -13,6 +13,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findAllByUsuarioIdOrderByDataPedidoDesc(Long usuarioId);
     List<Pedido> findByDataPedidoBetween(LocalDateTime inicio, LocalDateTime fim);
     List<Pedido> findAllByCupomUtilizadoColaboradorIdOrderByDataPedidoDesc(Long colaboradorId);
+    List<Pedido> findAllByCupomUtilizadoIdOrderByDataPedidoDesc(Long cupomId);
 
     @Query("select distinct p from Pedido p " +
             "left join fetch p.cupomUtilizado c left join fetch c.colaborador " +

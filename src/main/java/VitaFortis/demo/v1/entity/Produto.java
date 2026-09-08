@@ -45,9 +45,8 @@ public class Produto {
     @Column(name = "UNIDADE", length = 20)
     private String unidade = "UN";
 
-    @NotNull
     @Digits(integer = 10, fraction = 2)
-    @Column(name = "PRECO", nullable = false, precision = 12, scale = 2)
+    @Column(name = "PRECO", precision = 12, scale = 2)
     private BigDecimal preco;
 
     @Digits(integer = 3, fraction = 2)

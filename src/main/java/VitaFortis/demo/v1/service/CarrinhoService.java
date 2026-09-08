@@ -115,22 +115,19 @@ public class CarrinhoService {
            throw new IllegalArgumentException("Produto indisponivel");
        }
 
-       CarrinhoItem item = carrinhoItemRepository
-               .findByCarrinhoIdAndProdutoId(carrinho.getId(), produto.getId())
-               .orElseGet(() -> {
-                   CarrinhoItem carrinhoItem = new CarrinhoItem();
-                   carrinhoItem.setCarrinho(carrinho);
-                   carrinhoItem.setProduto(produto);
-                   carrinhoItem.setPrecoUnitario(produto.getPreco());
-                   carrinhoItem.setQuantidade(0);
-                   return carrinhoItem;
-               });
-
-       int totalDesejado = item.getQuantidade() + dto.getQuantidade();
+       var itemExistente = carrinhoItemRepository.findByCarrinhoIdAndProdutoId(carrinho.getId(), produto.getId());
+       int totalDesejado = itemExistente.map(CarrinhoItem::getQuantidade).orElse(0) + dto.getQuantidade();
        if(produto.getQuantidadeEstoque() < totalDesejado) {
-           throw new IllegalArgumentException("Estoque insuficiente" + produto.getQuantidadeEstoque());
+           throw new IllegalArgumentException("Estoque insuficiente. Disponível: " + produto.getQuantidadeEstoque());
        }
 
+       CarrinhoItem item = itemExistente.orElseGet(() -> {
+           CarrinhoItem novoItem = new CarrinhoItem();
+           novoItem.setCarrinho(carrinho);
+           novoItem.setProduto(produto);
+           novoItem.setPrecoUnitario(produto.getPrecoFinal());
+           return novoItem;
+       });
        item.setQuantidade(totalDesejado);
        carrinhoItemRepository.save(item);
 
@@ -163,13 +160,13 @@ public class CarrinhoService {
         validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
 
-        carrinhoItemRepository.deleteAllByCarrinhoId(carrinho.getId());
+        carrinho.getItens().clear();
 
         carrinho.setSubtotal(BigDecimal.ZERO);
         carrinho.setDescontos(BigDecimal.ZERO);
         carrinho.setTotal(BigDecimal.ZERO);
 
-        carrinhoRepository.save(carrinho);
+        carrinhoRepository.saveAndFlush(carrinho);
         return resposta(carrinho);
     }
 
@@ -187,8 +184,8 @@ public class CarrinhoService {
         }
 
         Integer qtd = dto.getQuantidade();
-        if (qtd <= 0 || qtd <= 0) {
-            carrinhoItemRepository.delete(item);
+        if (qtd <= 0) {
+            carrinho.removeItem(item);
         } else {
             Produto produto = item.getProduto();
             Integer estoque  = produto.getQuantidadeEstoque();
@@ -204,6 +201,7 @@ public class CarrinhoService {
     }
 
     //REMOVE ITEM
+    @Transactional
     public CarrinhoResponseDto removeItem (Long usuarioId, Long itemId, int delta, String emailAutenticado) {
         validarProprietario(usuarioId, emailAutenticado);
         if (delta <= 0) {
@@ -221,7 +219,7 @@ public class CarrinhoService {
 
         int novaQtd = item.getQuantidade() - delta;
         if (novaQtd <= 0) {
-            carrinhoItemRepository.delete(item);
+            carrinho.removeItem(item);
         } else {
             item.setQuantidade(novaQtd);
             carrinhoItemRepository.save(item);
@@ -234,6 +232,7 @@ public class CarrinhoService {
     }
 
     //CUPOM
+    @Transactional
     public CarrinhoResponseDto aplicarCupom (Long usuarioId, String codigo, String emailAutenticado) {
         validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
@@ -244,8 +243,6 @@ public class CarrinhoService {
                 .orElseThrow(() -> new IllegalArgumentException("Cupom invalido"));
 
         validarCupom(cupom, subtotal);
-
-        BigDecimal desconto = calcularDesconto(cupom, subtotal);
 
         carrinho.setCupomCodigo(cupom.getCodigo());
 
@@ -259,8 +256,6 @@ public class CarrinhoService {
     public CarrinhoResponseDto removerCupom(Long usuarioId, String emailAutenticado) {
         validarProprietario(usuarioId, emailAutenticado);
         Carrinho carrinho = getOrCreateAtivoEntity(usuarioId);
-        BigDecimal subtotal = calcularSubtotal(carrinho);
-
         carrinho.setCupomCodigo(null);
         carrinho.setDescontos(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
 

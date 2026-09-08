@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface ProdutoRepository extends JpaRepository<Produto,Long>, JpaSpecificationExecutor<Produto> {
 
     boolean existsByCodigoIgnoreCase(String codigo);
+    Optional<Produto> findByCodigoIgnoreCase(String codigo);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""

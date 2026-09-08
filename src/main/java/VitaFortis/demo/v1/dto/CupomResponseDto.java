@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,4 +24,6 @@ public class CupomResponseDto {
     private Long colaboradorId;
     private String colaboradorNome;
     private BigDecimal percentualCashback;
+    private long quantidadeUsos;
+    private List<Long> pedidoIds;
 }

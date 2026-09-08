@@ -14,10 +14,14 @@ export function ProductCard({ product }: { product: Product }) {
   const { user } = useAuth(); const { add } = useCart(); const navigate = useNavigate(); const [busy, setBusy] = useState(false); const [favorite, setFavorite] = useState(() => favoriteIds().includes(product.id)); const [added, setAdded] = useState(false)
   useEffect(() => { if (user) api.favorites(user.id).then((items) => setFavorite(items.some((item) => item.id === product.id))).catch(() => undefined) },[user,product.id])
   const discounted = Number(product.precoFinal) < Number(product.preco)
+  const discountPercent = discounted
+    ? Math.max(1, Math.round(Number(product.descontoPercentual) || ((Number(product.preco) - Number(product.precoFinal)) / Number(product.preco)) * 100))
+    : 0
   const handleAdd = async () => { if (!user) { navigate('/entrar', { state: { from: `/produto/${product.id}` } }); return }; setBusy(true); try { await add(product.id); setAdded(true); setTimeout(() => setAdded(false), 1800) } catch (error) { alert(error instanceof Error ? error.message : 'Não foi possível adicionar.') } finally { setBusy(false) } }
   return <article className="product-card">
     <Link to={`/produto/${product.id}`} className="product-image-wrap">
-      {discounted && <span className="discount-badge">-{Math.round(Number(product.descontoPercentual || 0))}%</span>}
+      {discounted && <span className="discount-badge">-{discountPercent}%</span>}
+      {product.lancamento && <span className="new-badge">Novidade</span>}
       <button className={`favorite-button ${favorite ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); if (!user) { setFavorite(toggleFavorite(product.id)); return } const next=!favorite; setFavorite(next); void (next ? api.addFavorite(user.id,product.id) : api.removeFavorite(user.id,product.id)).catch(() => setFavorite(!next)) }} aria-label={favorite ? `Remover ${product.nome} dos favoritos` : `Favoritar ${product.nome}`}><Heart fill={favorite ? 'currentColor' : 'none'} /></button>
       <img src={product.imagemUrl || fallback} onError={(event) => { event.currentTarget.src = fallback }} alt={product.nome} className="product-image" />
     </Link>
