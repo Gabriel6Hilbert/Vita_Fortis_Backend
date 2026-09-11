@@ -14,16 +14,16 @@ class CatalogoFtwDataInitializerTest {
     private ProdutoRepository produtos;
 
     @Test
-    void importaOs179ProdutosComoRascunhosInativosComImagemLocal() {
+    void importaOs179ProdutosAtivosComPrecoEstoqueEImagemLocal() {
         var catalogo = produtos.findAll().stream()
                 .filter(produto -> produto.getCodigo() != null && produto.getCodigo().startsWith("PA"))
                 .toList();
 
         assertThat(catalogo).hasSize(179);
         assertThat(catalogo).allSatisfy(produto -> {
-            assertThat(produto.isAtivo()).isFalse();
-            assertThat(produto.getPreco()).isNull();
-            assertThat(produto.getQuantidadeEstoque()).isZero();
+            assertThat(produto.isAtivo()).isTrue();
+            assertThat(produto.getPreco()).isPositive();
+            assertThat(produto.getQuantidadeEstoque()).isPositive();
             assertThat(produto.getDescricao()).isNotBlank();
             assertThat(produto.getImagemUrl()).startsWith("/assets/");
         });

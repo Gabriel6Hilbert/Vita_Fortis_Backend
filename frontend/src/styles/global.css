@@ -3864,3 +3864,49 @@ body {
   .product-section { padding: 20px 16px; }
   .product-card { box-shadow: 6px 6px 0 rgba(11,11,10,.2); }
 }
+
+/* Refinamento mobile: ticker contínuo, hero legível e cartões mais leves. */
+.announcement { display:flex; align-items:center; padding:0; }
+.announcement-track { display:flex; width:max-content; min-width:max-content; gap:0; padding:0; animation:announcement-loop 28s linear infinite; will-change:transform; }
+.announcement-group { display:flex; flex:none; align-items:center; }
+.announcement-group span { display:inline-flex; flex:none; align-items:center; gap:24px; padding-left:24px; color:var(--brand-yellow-light); }
+.announcement-group b { color:rgba(255,255,255,.64); }
+@keyframes announcement-loop { to { transform:translateX(-50%); } }
+.hero-carousel { isolation:isolate; overflow:hidden; }
+.hero-carousel::after { content:""; position:absolute; inset:auto 0 0; height:32%; z-index:0; pointer-events:none; background:linear-gradient(transparent,rgba(0,0,0,.36)); }
+.hero-content { z-index:2; }
+.hero-content .button.primary { color:var(--brand-black); background:var(--brand-yellow); border-color:var(--brand-black); box-shadow:6px 6px 0 rgba(0,0,0,.72); }
+.benefits { position:relative; z-index:4; overflow:hidden; border:2px solid var(--brand-black); box-shadow:8px 8px 0 rgba(11,11,10,.18); }
+
+@media (max-width:760px) {
+  .app-shell { padding-top:28px; }
+  .announcement { height:28px; }
+  .header { top:28px; }
+  .announcement-track { min-height:28px; font-size:10px; animation-duration:22s; }
+  .announcement-group span { display:inline-flex; gap:16px; padding-left:16px; letter-spacing:.04em; text-transform:uppercase; }
+  .hero-carousel { min-height:min(560px,70svh); border-bottom-width:7px; touch-action:pan-y; }
+  .hero-carousel .hero-backdrop { background-position:58% center; }
+  .hero-content { justify-content:flex-end; padding-top:64px; padding-bottom:76px; }
+  .hero-content h1 { max-width:10ch; font-size:clamp(3rem,16vw,4.7rem); letter-spacing:-.055em; }
+  .hero-content p { max-width:32ch; margin-bottom:22px; font-size:1rem; line-height:1.5; }
+  .hero-content .button { width:fit-content; }
+  .hero-dots { bottom:28px; z-index:3; padding:7px 10px; border-radius:99px; background:rgba(0,0,0,.42); backdrop-filter:blur(8px); }
+  .hero-dots button { width:9px; height:9px; }
+  .hero-dots button.active { width:27px; }
+  .benefits { width:calc(100% - 28px); margin-top:-18px; border-radius:20px; grid-template-columns:1fr 1fr; box-shadow:6px 6px 0 rgba(11,11,10,.2); }
+  .benefits > div { min-width:0; padding:18px 14px; }
+  .benefits > div + div { border-left:0; }
+  .benefits > div:nth-child(even) { border-left:1px solid var(--border); }
+  .benefits > div:nth-child(n+3) { border-top:1px solid var(--border); }
+  .benefits svg { flex:0 0 22px; width:22px; }
+  .benefits strong { font-size:13px; }
+  .benefits span { font-size:11px; }
+  .section { padding-block:48px; }
+  .section-heading h2 { font-size:clamp(2rem,10vw,3rem); }
+  .intent-section { box-shadow:6px 6px 0 rgba(11,11,10,.18); }
+}
+@media (max-width:390px) {
+  .hero-carousel { min-height:510px; }
+  .hero-content h1 { font-size:clamp(2.75rem,15vw,3.75rem); }
+}
+@media (prefers-reduced-motion:reduce) { .announcement-track { animation-duration:60s; } }

@@ -11,9 +11,10 @@ export function Layout() {
   const { user, logout } = useAuth(); const { count } = useCart(); const navigate = useNavigate()
   useEffect(() => { api.store().then(setStore).catch(() => undefined) }, [])
   const submit = (event: React.FormEvent) => { event.preventDefault(); navigate(`/catalogo?busca=${encodeURIComponent(search)}`); setMenu(false) }
+  const announcementItems = ['Compra segura', 'Atendimento personalizado Vita Fortis', 'Retirada ou entrega', 'Acompanhe seus pedidos online']
   return <div className="app-shell">
     <a className="skip-link" href="#main">Pular para o conteúdo</a>
-    <div className="announcement" aria-label="Informações da loja"><div className="announcement-track"><span>Compra segura</span><b>•</b><span>Atendimento personalizado Vita Fortis</span><b>•</b><span>Retirada ou entrega</span><b>•</b><span>Acompanhe seus pedidos online</span><b>•</b><span aria-hidden="true">Compra segura</span><b aria-hidden="true">•</b><span aria-hidden="true">Atendimento personalizado Vita Fortis</span><b aria-hidden="true">•</b><span aria-hidden="true">Retirada ou entrega</span><b aria-hidden="true">•</b><span aria-hidden="true">Acompanhe seus pedidos online</span></div></div>
+    <div className="announcement" aria-label="Informações da loja"><div className="announcement-track">{[0, 1].map((copy) => <div className="announcement-group" aria-hidden={copy === 1} key={copy}>{announcementItems.map((item) => <span key={item}>{item}<b>•</b></span>)}</div>)}</div></div>
     <header className="header">
       <div className="header-main container">
         <button className="menu-toggle" onClick={() => setMenu(!menu)} aria-label="Abrir menu">{menu ? <X /> : <Menu />}</button>

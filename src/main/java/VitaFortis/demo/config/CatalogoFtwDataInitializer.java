@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -34,24 +35,31 @@ public class CatalogoFtwDataInitializer implements CommandLineRunner {
         try (InputStream arquivo = new ClassPathResource("catalogo-ftw.json").getInputStream()) {
             List<ProdutoCatalogo> catalogo = objectMapper.readValue(arquivo, new TypeReference<>() {});
             for (ProdutoCatalogo item : catalogo) {
-                if (produtos.existsByCodigoIgnoreCase(item.codigo())) continue;
-
-                Produto produto = new Produto();
-                produto.setCodigo(item.codigo());
-                produto.setNome(item.nome());
-                produto.setDescricao(item.descricao());
-                produto.setMarca(item.marca());
-                produto.setUnidade(item.unidade());
-                produto.setCategoria(item.categoria());
-                produto.setSubcategoria(item.subcategoria());
-                produto.setImagemUrl(item.imagemUrl());
-                produto.setLancamento(item.lancamento());
-                produto.setPreco(null);
-                produto.setQuantidadeEstoque(0);
-                produto.setAtivo(false);
+                Produto produto = produtos.findByCodigoIgnoreCase(item.codigo()).orElseGet(Produto::new);
+                if (produto.getId() == null) {
+                    produto.setCodigo(item.codigo());
+                    produto.setNome(item.nome());
+                    produto.setDescricao(item.descricao());
+                    produto.setMarca(item.marca());
+                    produto.setUnidade(item.unidade());
+                    produto.setCategoria(item.categoria());
+                    produto.setSubcategoria(item.subcategoria());
+                    produto.setImagemUrl(item.imagemUrl());
+                    produto.setLancamento(item.lancamento());
+                }
+                if (produto.getPreco() == null) produto.setPreco(precoCatalogo(item.codigo()));
+                if (produto.getQuantidadeEstoque() == null || produto.getQuantidadeEstoque() <= 0) {
+                    produto.setQuantidadeEstoque(12 + Math.floorMod(item.codigo().hashCode(), 37));
+                }
+                produto.setAtivo(true);
                 produtos.save(produto);
             }
         }
+    }
+
+    private BigDecimal precoCatalogo(String codigo) {
+        int centavos = 3990 + Math.floorMod(codigo.hashCode(), 26000);
+        return BigDecimal.valueOf(centavos, 2);
     }
 
     private record ProdutoCatalogo(
