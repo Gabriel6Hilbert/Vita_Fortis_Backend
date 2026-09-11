@@ -3867,7 +3867,7 @@ body {
 
 /* Refinamento mobile: ticker contínuo, hero legível e cartões mais leves. */
 .announcement { display:flex; align-items:center; padding:0; }
-.announcement-track { display:flex; width:max-content; min-width:max-content; gap:0; padding:0; animation:announcement-loop 28s linear infinite; will-change:transform; }
+.announcement-track { display:flex; width:max-content; min-width:max-content; gap:0; padding:0; animation:announcement-loop 56s linear infinite; will-change:transform; }
 .announcement-group { display:flex; flex:none; align-items:center; }
 .announcement-group span { display:inline-flex; flex:none; align-items:center; gap:24px; padding-left:24px; color:var(--brand-yellow-light); }
 .announcement-group b { color:rgba(255,255,255,.64); }
@@ -3882,7 +3882,7 @@ body {
   .app-shell { padding-top:28px; }
   .announcement { height:28px; }
   .header { top:28px; }
-  .announcement-track { min-height:28px; font-size:10px; animation-duration:22s; }
+  .announcement-track { min-height:28px; font-size:10px; animation-duration:68s; }
   .announcement-group span { display:inline-flex; gap:16px; padding-left:16px; letter-spacing:.04em; text-transform:uppercase; }
   .hero-carousel { min-height:min(560px,70svh); border-bottom-width:7px; touch-action:pan-y; }
   .hero-carousel .hero-backdrop { background-position:58% center; }
@@ -3909,4 +3909,4 @@ body {
   .hero-carousel { min-height:510px; }
   .hero-content h1 { font-size:clamp(2.75rem,15vw,3.75rem); }
 }
-@media (prefers-reduced-motion:reduce) { .announcement-track { animation-duration:60s; } }
+@media (prefers-reduced-motion:reduce) { .announcement-track { animation:none; transform:none; } }
