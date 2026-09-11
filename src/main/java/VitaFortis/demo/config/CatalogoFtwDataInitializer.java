@@ -6,7 +6,6 @@ import VitaFortis.demo.v1.repository.ProdutoRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,6 @@ import java.util.List;
 
 @Component
 @Order(10)
-@ConditionalOnProperty(name = "vita-fortis.catalogo-ftw.importar", havingValue = "true")
 public class CatalogoFtwDataInitializer implements CommandLineRunner {
 
     private final ProdutoRepository produtos;
