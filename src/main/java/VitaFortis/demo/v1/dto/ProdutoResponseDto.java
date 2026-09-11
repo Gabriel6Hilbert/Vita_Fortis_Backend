@@ -32,6 +32,9 @@ public class ProdutoResponseDto {
     private boolean vegetariano;
     private boolean linhaClinica;
     private boolean lancamento;
+    private boolean destaque;
+    private boolean oferta;
+    private boolean kit;
     private String subcategoria;
     private BigDecimal avaliacaoMedia;
     private long totalVendido;

@@ -17,7 +17,7 @@ public interface ProdutoMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "versao", ignore = true)
-    @Mapping(target = "ativo",ignore = true)
+    @Mapping(target = "ativo", expression = "java(produtoRequestDto.getAtivo() == null || produtoRequestDto.getAtivo())")
     @Mapping(target = "nome", qualifiedByName = "trimOrNull")
     @Mapping(target = "descricao", qualifiedByName = "trimOrNull")
     Produto toEntity(ProdutoRequestDto produtoRequestDto);
@@ -25,7 +25,7 @@ public interface ProdutoMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "versao", ignore = true)
-    @Mapping(target = "ativo", ignore = true)
+    @Mapping(target = "ativo", expression = "java(dto.getAtivo() == null ? entity.isAtivo() : dto.getAtivo())")
     @Mapping(target = "nome", qualifiedByName = "trimOrNull")
     @Mapping(target = "descricao", qualifiedByName = "trimOrNull")
     void updateFromDto(ProdutoRequestDto dto, @MappingTarget Produto entity);

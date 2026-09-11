@@ -26,6 +26,8 @@ public class ProdutoFiltroDto {
     private Boolean lancamento;
     private String subcategoria;
     private Boolean oferta;
+    private Boolean kit;
+    private Boolean destaque;
     private Boolean emEstoque;
     private BigDecimal descontoMin;
     private Boolean maisVendidos;

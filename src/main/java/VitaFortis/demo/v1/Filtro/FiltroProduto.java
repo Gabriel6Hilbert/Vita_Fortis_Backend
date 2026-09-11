@@ -25,6 +25,7 @@ public final class FiltroProduto {
                 booleano("vegano", f.getVegano()), booleano("vegetariano", f.getVegetariano()),
                 booleano("linhaClinica", f.getLinhaClinica()), booleano("lancamento", f.getLancamento()),
                 textoIgual("subcategoria", f.getSubcategoria()), oferta(f.getOferta()),
+                booleano("kit", f.getKit()), booleano("destaque", f.getDestaque()),
                 emEstoque(f.getEmEstoque()), descontoMin(f.getDescontoMin())
                 );
     }
@@ -103,8 +104,9 @@ public final class FiltroProduto {
         };
     }
     private static Specification<Produto> oferta(Boolean valor) {
-        return (root, q, cb) -> !Boolean.TRUE.equals(valor) ? cb.conjunction()
-                : cb.or(cb.greaterThan(root.get("descontoPercentual"), BigDecimal.ZERO), cb.greaterThan(root.get("descontoValor"), BigDecimal.ZERO));
+        return (root, q, cb) -> valor == null ? cb.conjunction()
+                : valor ? cb.and(cb.isTrue(root.get("oferta")), cb.or(cb.greaterThan(root.get("descontoPercentual"), BigDecimal.ZERO), cb.greaterThan(root.get("descontoValor"), BigDecimal.ZERO)))
+                : cb.isFalse(root.get("oferta"));
     }
     private static Specification<Produto> emEstoque(Boolean valor) {
         return (root, q, cb) -> valor == null ? cb.conjunction()

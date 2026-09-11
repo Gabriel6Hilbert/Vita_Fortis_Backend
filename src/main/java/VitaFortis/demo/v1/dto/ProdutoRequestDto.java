@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -39,5 +40,14 @@ public class ProdutoRequestDto {
 
     @Size(max = 500)
     private String imagemUrl;
+
+    private BigDecimal descontoPercentual;
+    private BigDecimal descontoValor;
+    private Boolean ativo;
+    private boolean destaque;
+    private boolean lancamento;
+    private boolean oferta;
+    private boolean kit;
+    private Set<@Size(max = 50) String> objetivos;
 
 }

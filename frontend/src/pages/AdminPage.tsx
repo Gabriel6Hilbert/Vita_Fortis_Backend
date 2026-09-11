@@ -51,6 +51,9 @@ const blankProduct: Partial<Product> = {
   imagemUrl: "",
   ativo: true,
   lancamento: false,
+  destaque: false,
+  oferta: false,
+  kit: false,
   valorDesconto: 0,
 };
 export function AdminPage() {
@@ -184,16 +187,6 @@ export function AdminPage() {
     void action(
       async () => {
         const saved = await api.saveProduct(form, form.id);
-        await api.setCommercialMetadata(saved.id, {
-          objetivos: form.objetivos,
-          esportes: form.esportes,
-          vegano: form.vegano,
-          vegetariano: form.vegetariano,
-          linhaClinica: form.linhaClinica,
-          lancamento: form.lancamento,
-          subcategoria: form.subcategoria,
-          avaliacaoMedia: form.avaliacaoMedia,
-        });
         if (Number(form.descontoPercentual) > 0)
           await api.setDiscountPercent(
             saved.id,
@@ -202,6 +195,19 @@ export function AdminPage() {
         else if (Number(form.descontoValor) > 0)
           await api.setDiscountValue(saved.id, Number(form.descontoValor));
         else if (form.id) await api.clearDiscount(saved.id);
+        await api.setCommercialMetadata(saved.id, {
+          objetivos: form.objetivos,
+          esportes: form.esportes,
+          vegano: form.vegano,
+          vegetariano: form.vegetariano,
+          linhaClinica: form.linhaClinica,
+          lancamento: form.lancamento,
+          destaque: form.destaque,
+          oferta: form.oferta,
+          kit: form.kit,
+          subcategoria: form.subcategoria,
+          avaliacaoMedia: form.avaliacaoMedia,
+        });
       },
       form.id ? "Produto atualizado." : "Produto criado.",
     );
@@ -444,7 +450,6 @@ export function AdminPage() {
                         <>
                           <th>Produto</th>
                           <th>Preço</th>
-                          <th>Estoque</th>
                           <th>Status</th>
                           <th>Ações</th>
                         </>
@@ -510,32 +515,6 @@ export function AdminPage() {
                                   : money(p.descontoValor)}
                               </small>
                             )}
-                          </td>
-                          <td>
-                            <input
-                              className="stock-input"
-                              type="number"
-                              min="0"
-                              defaultValue={p.quantidadeEstoque}
-                              onBlur={(e) => {
-                                const quantidade = Number(e.target.value);
-                                if (quantidade !== p.quantidadeEstoque) {
-                                  const motivo = prompt(
-                                    "Informe o motivo deste ajuste de estoque:",
-                                  );
-                                  if (motivo)
-                                    void action(
-                                      () =>
-                                        api.setStock(p.id, quantidade, motivo),
-                                      "Estoque atualizado e auditado.",
-                                    );
-                                  else
-                                    e.target.value = String(
-                                      p.quantidadeEstoque,
-                                    );
-                                }
-                              }}
-                            />
                           </td>
                           <td>
                             <span
@@ -980,7 +959,8 @@ export function AdminPage() {
                   ["marca", "Marca"],
                   ["unidade", "Unidade ou peso"],
                   ["preco", "Preço original"],
-                  ["quantidadeEstoque", "Estoque"],
+                  ["descontoPercentual", "Desconto (%)"],
+                  ["descontoValor", "Desconto (R$)"],
                   ["categoria", "Categoria"],
                   ["imagemUrl", "URL da imagem"],
                   ["subcategoria", "Subcategoria"],
@@ -994,11 +974,10 @@ export function AdminPage() {
                       "codigo",
                       "nome",
                       "preco",
-                      "quantidadeEstoque",
-                      "categoria",
+                      "categoria", "marca",
                     ].includes(key)}
                     type={
-                      ["preco", "quantidadeEstoque", "avaliacaoMedia"].includes(
+                      ["preco", "descontoPercentual", "descontoValor", "avaliacaoMedia"].includes(
                         key,
                       )
                         ? "number"
@@ -1015,7 +994,8 @@ export function AdminPage() {
                         ...productForm,
                         [key]: [
                           "preco",
-                          "quantidadeEstoque",
+                          "descontoPercentual",
+                          "descontoValor",
                           "avaliacaoMedia",
                         ].includes(key)
                           ? Number(e.target.value)
@@ -1038,21 +1018,7 @@ export function AdminPage() {
                   }
                 />
               </label>
-              <label>
-                Objetivos (separados por vírgula)
-                <input
-                  value={(productForm.objetivos || []).join(", ")}
-                  onChange={(e) =>
-                    setProductForm({
-                      ...productForm,
-                      objetivos: e.target.value
-                        .split(",")
-                        .map((v) => v.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                />
-              </label>
+              <fieldset className="full objective-picker"><legend>Objetivos</legend>{[["EMAGRECIMENTO","Emagrecimento"],["GANHO_DE_MASSA","Ganho de massa"],["PERFORMANCE","Performance"],["SAUDE_E_BEM_ESTAR","Saúde e bem-estar"]].map(([value,label])=><label className="check-row" key={value}><input type="checkbox" checked={(productForm.objetivos||[]).includes(value)} onChange={e=>setProductForm({...productForm,objetivos:e.target.checked?[...(productForm.objetivos||[]),value]:(productForm.objetivos||[]).filter(item=>item!==value)})}/>{label}</label>)}</fieldset>
               <label>
                 Esportes (separados por vírgula)
                 <input
@@ -1074,6 +1040,9 @@ export function AdminPage() {
                   ["vegetariano", "Vegetariano"],
                   ["linhaClinica", "Linha clínica"],
                   ["lancamento", "Marcar como novidade"],
+                  ["destaque", "Exibir em destaque"],
+                  ["oferta", "Produto em oferta"],
+                  ["kit", "Este item é um kit"],
                 ] as const
               ).map(([key, label]) => (
                 <label className="check-row" key={key}>

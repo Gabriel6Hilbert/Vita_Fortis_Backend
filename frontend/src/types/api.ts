@@ -46,6 +46,9 @@ export interface Product {
   vegetariano?: boolean;
   linhaClinica?: boolean;
   lancamento?: boolean;
+  destaque?: boolean;
+  oferta?: boolean;
+  kit?: boolean;
   subcategoria?: string;
   avaliacaoMedia?: number;
   maisVendido?: boolean;
@@ -63,6 +66,8 @@ export interface CategorySummary {
   categoria: string;
   quantidadeProdutos: number;
 }
+export interface BrandSummary { nome: string; quantidadeProdutos: number }
+export interface GoalSummary { codigo: string; nome: string; quantidadeProdutos: number }
 export interface CartItem {
   itemId: number;
   produtoId: number;

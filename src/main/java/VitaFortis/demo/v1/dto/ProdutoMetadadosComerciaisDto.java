@@ -16,6 +16,9 @@ public class ProdutoMetadadosComerciaisDto {
     private boolean vegetariano;
     private boolean linhaClinica;
     private boolean lancamento;
+    private boolean destaque;
+    private boolean oferta;
+    private boolean kit;
     @Size(max = 60) private String subcategoria;
     @DecimalMin("0.0") @DecimalMax("5.0") private BigDecimal avaliacaoMedia;
 }

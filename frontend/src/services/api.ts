@@ -1,4 +1,4 @@
-import type { Address, AddressInput, AdminMetrics, Cart, CategorySummary, CollaboratorSummary, Coupon, Order, OrderDetail, Page, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
+import type { Address, AddressInput, AdminMetrics, BrandSummary, Cart, CategorySummary, CollaboratorSummary, Coupon, GoalSummary, Order, OrderDetail, Page, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const SESSION_KEY = 'vita-fortis-session'
@@ -70,6 +70,8 @@ export const api = {
   reviews: (id: string | number) => request<Review[]>(`/produtos/${id}/avaliacoes`),
   createReview: (id: string | number, body: { usuarioId:number; nota: number; comentario?: string }) => request<Review>(`/produtos/${id}/avaliacoes`, { method: 'POST', body: JSON.stringify(body) }, true),
   categories: () => request<CategorySummary[]>('/produtos/categorias'),
+  brands: () => request<BrandSummary[]>('/produtos/marcas'),
+  goals: () => request<GoalSummary[]>('/produtos/objetivos'),
   login: (email: string, senha: string) => request<UserPayload>('/auth/login', { method: 'POST', body: JSON.stringify({ email, senha }) }).then(normalizeUser),
   register: (body: { nome: string; email: string; senha: string; cpf: string; telefone?: string }) => request<UserPayload>('/auth/cadastro', { method: 'POST', body: JSON.stringify(body) }).then(normalizeUser),
   requestPasswordReset: (email: string) => request<{message:string}>('/auth/recuperacao-senha', { method: 'POST', body: JSON.stringify({ email }) }),
@@ -94,7 +96,7 @@ export const api = {
   adminProducts: (filters: Record<string, string | number | boolean | undefined>) => request<Page<Product>>(`/admin/produtos${query(filters)}`,{},true),
   saveProduct: (body: Partial<Product>, id?: number) => request<Product>(`/admin/produtos${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }, true),
   setProductActive: (id: number, valor: boolean) => request<void>(`/admin/produtos/${id}/ativo?valor=${valor}`, { method: 'PATCH' }, true),
-  setCommercialMetadata: (id: number, body: Pick<Product, 'objetivos'|'esportes'|'vegano'|'vegetariano'|'linhaClinica'|'lancamento'|'subcategoria'|'avaliacaoMedia'>) => request<Product>(`/admin/produtos/${id}/metadados-comerciais`, { method: 'PATCH', body: JSON.stringify(body) }, true),
+  setCommercialMetadata: (id: number, body: Pick<Product, 'objetivos'|'esportes'|'vegano'|'vegetariano'|'linhaClinica'|'lancamento'|'destaque'|'oferta'|'kit'|'subcategoria'|'avaliacaoMedia'>) => request<Product>(`/admin/produtos/${id}/metadados-comerciais`, { method: 'PATCH', body: JSON.stringify(body) }, true),
   setStock: (id: number, quantidade: number, motivo:string) => request<Product>(`/admin/produtos/${id}/estoque${query({quantidade,motivo})}`, { method: 'PUT' }, true),
   stockHistory: (id:number) => request<StockMovement[]>(`/admin/produtos/${id}/estoque/movimentacoes`,{},true),
   setDiscountPercent: (id:number,valor:number) => request<Product>(`/admin/produtos/${id}/desconto-percentual?valor=${valor}`,{method:'PATCH'},true),

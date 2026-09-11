@@ -1,13 +1,14 @@
 // Curadoria editorial configuravel. Metricas, ofertas e ranking vêm exclusivamente da API.
 
 export const campaigns = [
-  { eyebrow: 'Semana Vita', title: 'Energia para ir além.', text: 'Seleção promocional para acompanhar sua rotina.', to: '/catalogo?oferta=true', image: '/assets/imagens/banner-foto-1.jpg' },
-  { eyebrow: 'Ganho de massa', title: 'Evolução com estratégia.', text: 'Uma curadoria para força, recuperação e consistência.', to: '/catalogo?objetivos=GANHO_DE_MASSA', image: '/assets/imagens/imagem-com-fundo-chat.categorias.png' },
+  { eyebrow: 'Seu objetivo. Seu ritmo.', title: 'EMAGRECER', text: 'Escolhas inteligentes para transformar constância em resultado.', to: '/catalogo?objetivos=EMAGRECIMENTO', image: '/assets/imagens/banner-foto-1.jpg' },
+  { eyebrow: 'Força para evoluir', title: 'GANHAR MASSA', text: 'Nutrição e performance para construir sua melhor versão.', to: '/catalogo?objetivos=GANHO_DE_MASSA', image: '/assets/imagens/imagem-com-fundo-chat.categorias.png' },
+  { eyebrow: 'Vá mais longe', title: 'AUMENTAR A PERFORMANCE', text: 'Energia, foco e recuperação para superar seus limites.', to: '/catalogo?objetivos=PERFORMANCE', image: '/assets/imagens/wheyBanner' },
 ]
 
 export const goals = [
-  ['maisVendidos', 'Mais vendidos'], ['GANHO_DE_MASSA', 'Ganho de massa'], ['EMAGRECIMENTO', 'Emagrecimento'],
-  ['DEFINICAO_MUSCULAR', 'Definição muscular'], ['ENERGIA', 'Energia'], ['RECUPERACAO', 'Recuperação'], ['BEM_ESTAR', 'Saúde e bem-estar'],
+  ['EMAGRECIMENTO', 'Emagrecer'], ['GANHO_DE_MASSA', 'Ganhar massa'],
+  ['PERFORMANCE', 'Melhorar performance'], ['SAUDE_E_BEM_ESTAR', 'Saúde e bem-estar'],
 ]
 
 export const sports = [

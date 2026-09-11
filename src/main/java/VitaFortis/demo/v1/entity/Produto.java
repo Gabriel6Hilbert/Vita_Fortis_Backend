@@ -97,6 +97,9 @@ public class Produto {
     @Column(name = "VEGETARIANO", nullable = false) private boolean vegetariano;
     @Column(name = "LINHA_CLINICA", nullable = false) private boolean linhaClinica;
     @Column(name = "LANCAMENTO", nullable = false) private boolean lancamento;
+    @Column(name = "DESTAQUE", nullable = false) private boolean destaque;
+    @Column(name = "KIT", nullable = false) private boolean kit;
+    @Column(name = "OFERTA", nullable = false) private boolean oferta;
     @Size(max = 60) @Column(name = "SUBCATEGORIA", length = 60) private String subcategoria;
     @Digits(integer = 1, fraction = 2) @DecimalMin("0.0") @DecimalMax("5.0")
     @Column(name = "AVALIACAO_MEDIA", precision = 3, scale = 2) private BigDecimal avaliacaoMedia;

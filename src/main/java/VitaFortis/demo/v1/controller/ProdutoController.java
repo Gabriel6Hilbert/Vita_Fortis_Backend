@@ -20,4 +20,10 @@ public class ProdutoController {
 
     @GetMapping("/categorias")
     public List<CategoriaResumoDto> categorias() { return produtos.listarCategorias(); }
+
+    @GetMapping("/marcas")
+    public List<MarcaResumoDto> marcas() { return produtos.listarMarcas(); }
+
+    @GetMapping("/objetivos")
+    public List<ObjetivoResumoDto> objetivos() { return produtos.listarObjetivos(); }
 }

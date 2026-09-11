@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import VitaFortis.demo.v1.dto.CategoriaResumoDto;
+import VitaFortis.demo.v1.dto.MarcaResumoDto;
+import VitaFortis.demo.v1.dto.ObjetivoResumoDto;
+import VitaFortis.demo.v1.enums.ObjetivoProduto;
 
 @Service
 public class ProdutoService {
@@ -77,9 +80,6 @@ public class ProdutoService {
         if (entity.getPreco() == null || entity.getPreco().signum() < 0) throw new IllegalArgumentException("Preço invalido");
         if (entity.getQuantidadeEstoque() == null || entity.getQuantidadeEstoque() < 0) throw new IllegalArgumentException("Estoque invalido");
         if (entity.getCategoria() == null) throw new IllegalArgumentException("Categoria obrigatorio");
-        if (entity.isAtivo() && entity.getQuantidadeEstoque() == 0) {
-            throw new IllegalArgumentException("Não é possível ativar um produto sem estoque.");
-        }
 
         Produto updated = produtoRepository.save(entity);
         return produtoMapper.toResponseDto(updated);
@@ -92,9 +92,6 @@ public class ProdutoService {
                 .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
         if (Boolean.TRUE.equals(ativo) && p.getPreco() == null) {
             throw new IllegalArgumentException("Informe o preço antes de ativar o produto.");
-        }
-        if (Boolean.TRUE.equals(ativo) && (p.getQuantidadeEstoque() == null || p.getQuantidadeEstoque() <= 0)) {
-            throw new IllegalArgumentException("Informe o estoque antes de ativar o produto.");
         }
         p.setAtivo(ativo);
         produtoRepository.save(p);
@@ -199,6 +196,23 @@ public class ProdutoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<MarcaResumoDto> listarMarcas() {
+        return produtoRepository.findAll().stream().filter(Produto::isAtivo)
+                .map(Produto::getMarca).filter(m -> m != null && !m.isBlank())
+                .collect(Collectors.groupingBy(String::trim, Collectors.counting())).entrySet().stream()
+                .map(e -> new MarcaResumoDto(e.getKey(), e.getValue()))
+                .sorted(java.util.Comparator.comparing(MarcaResumoDto::nome, String.CASE_INSENSITIVE_ORDER)).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ObjetivoResumoDto> listarObjetivos() {
+        Map<String, Long> totais = produtoRepository.findAll().stream().filter(Produto::isAtivo)
+                .flatMap(p -> p.getObjetivos().stream()).collect(Collectors.groupingBy(String::toUpperCase, Collectors.counting()));
+        return java.util.Arrays.stream(ObjetivoProduto.values())
+                .map(o -> new ObjetivoResumoDto(o.name(), o.getNome(), totais.getOrDefault(o.name(), 0L))).toList();
+    }
+
     //APLICAR DESCONTO EM UM PRODUTO VALOR OU PORCENTUAL
     @Transactional
     public ProdutoResponseDto aplicarDescontoPercentual (Long produtoId, BigDecimal percentual) {
@@ -244,12 +258,25 @@ public class ProdutoService {
     @Transactional
     public ProdutoResponseDto atualizarMetadados(Long id, ProdutoMetadadosComerciaisDto dto) {
         Produto p = produtoRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
-        p.setObjetivos(normalizar(dto.getObjetivos())); p.setEsportes(normalizar(dto.getEsportes()));
+        if (dto.isOferta() && (p.getValorDesconto() == null || p.getValorDesconto().signum() <= 0)) {
+            throw new IllegalArgumentException("Informe um desconto antes de marcar o produto como oferta");
+        }
+        p.setObjetivos(validarObjetivos(dto.getObjetivos())); p.setEsportes(normalizar(dto.getEsportes()));
         p.setVegano(dto.isVegano()); p.setVegetariano(dto.isVegetariano());
         p.setLinhaClinica(dto.isLinhaClinica()); p.setLancamento(dto.isLancamento());
+        p.setDestaque(dto.isDestaque()); p.setOferta(dto.isOferta()); p.setKit(dto.isKit());
         p.setSubcategoria(dto.getSubcategoria() == null ? null : dto.getSubcategoria().trim().toUpperCase());
         p.setAvaliacaoMedia(dto.getAvaliacaoMedia());
         return produtoMapper.toResponseDto(produtoRepository.save(p));
+    }
+
+    private java.util.Set<String> validarObjetivos(java.util.Set<String> valores) {
+        var normalizados = normalizar(valores);
+        for (String valor : normalizados) {
+            try { ObjetivoProduto.valueOf(valor); }
+            catch (IllegalArgumentException e) { throw new IllegalArgumentException("Objetivo inválido: " + valor); }
+        }
+        return normalizados;
     }
 
     private java.util.Set<String> normalizar(java.util.Set<String> valores) {
