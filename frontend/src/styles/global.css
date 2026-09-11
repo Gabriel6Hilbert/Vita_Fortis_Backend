@@ -570,7 +570,9 @@ p {
 }
 .footer-grid img {
   width: 140px;
-  filter: brightness(0) invert(1);
+  height: auto;
+  filter: none;
+  background: transparent;
 }
 .footer-grid h3 {
   font-size: 14px;
@@ -3880,7 +3882,9 @@ body {
 }
 
 /* Refinamento mobile: ticker contínuo, hero legível e cartões mais leves. */
-.announcement { display:flex; align-items:center; padding:0; }
+.announcement { display:flex; align-items:center; justify-content:center; padding:0 16px; }
+.announcement > p { width:100%; margin:0; overflow:hidden; color:var(--brand-yellow-light); font-size:12px; font-weight:750; letter-spacing:.04em; text-align:center; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; }
+.announcement > p b { margin:0 18px; color:rgba(255,255,255,.64); }
 .announcement-track { display:flex; width:max-content; min-width:max-content; gap:0; padding:0; animation:announcement-loop 56s linear infinite; will-change:transform; }
 .announcement-group { display:flex; flex:none; align-items:center; }
 .announcement-group span { display:inline-flex; flex:none; align-items:center; gap:24px; padding-left:24px; color:var(--brand-yellow-light); }
@@ -3895,6 +3899,8 @@ body {
 @media (max-width:760px) {
   .app-shell { padding-top:28px; }
   .announcement { height:28px; }
+  .announcement > p { font-size:9px; letter-spacing:.02em; }
+  .announcement > p b { margin:0 7px; }
   .header { top:28px; }
   .announcement-track { min-height:28px; font-size:10px; animation-duration:68s; }
   .announcement-group span { display:inline-flex; gap:16px; padding-left:16px; letter-spacing:.04em; text-transform:uppercase; }

@@ -13,10 +13,9 @@ export function Layout() {
   useEffect(() => { if (!location.pathname.startsWith('/catalogo')) setSearch('') }, [location.pathname])
   const goHome = () => { setSearch(''); setMenu(false) }
   const submit = (event: React.FormEvent) => { event.preventDefault(); const term=search.trim(); navigate(term ? `/catalogo?busca=${encodeURIComponent(term)}` : '/catalogo'); setMenu(false) }
-  const announcementItems = ['Compra segura', 'Atendimento personalizado Vita Fortis', 'Retirada ou entrega', 'Acompanhe seus pedidos online']
   return <div className="app-shell">
     <a className="skip-link" href="#main">Pular para o conteúdo</a>
-    <div className="announcement" aria-label="Informações da loja"><div className="announcement-track">{[0, 1].map((copy) => <div className="announcement-group" aria-hidden={copy === 1} key={copy}>{announcementItems.map((item) => <span key={item}>{item}<b>•</b></span>)}</div>)}</div></div>
+    <div className="announcement" aria-label="Informações da loja"><p>Compra segura <b>•</b> Atendimento personalizado</p></div>
     <header className="header">
       <div className="header-main container">
         <button className="menu-toggle" onClick={() => setMenu(!menu)} aria-label="Abrir menu">{menu ? <X /> : <Menu />}</button>
@@ -34,6 +33,6 @@ export function Layout() {
     </header>
     <main id="main"><Outlet /></main>
     {store?.telefone && <a className="whatsapp-float" href={`https://wa.me/55${store.telefone.replace(/\D/g,'').replace(/^55/,'')}`} target="_blank" rel="noreferrer" aria-label="Falar com a Vita Fortis pelo WhatsApp">WhatsApp</a>}
-    <footer className="footer"><div className="container footer-grid"><div><img src="/assets/imagens/logo-vita-fortis-brand.webp" alt="Vita Fortis Suplementos" /><p>{store?.descricao || 'Suplementos para sua evolução, com escolhas mais simples e conscientes.'}</p></div><div><h3>Vita Fortis</h3><Link to="/catalogo">Catálogo</Link><Link to="/sobre">Sobre nós</Link><Link to="/favoritos">Favoritos</Link></div><div><h3>Ajuda</h3><Link to="/contato">Fale conosco</Link><Link to="/faq">Perguntas frequentes</Link><Link to="/politicas">Políticas</Link><Link to="/trabalhe-conosco">Trabalhe conosco</Link></div><div><h3>Atendimento</h3><p>{store?.telefone || 'Telefone em atualização'}</p><p>{store?.email || 'E-mail em atualização'}</p><p>{store?.endereco || 'Endereço em atualização'}</p></div></div><div className="container copyright">© {new Date().getFullYear()} Vita Fortis.</div></footer>
+    <footer className="footer"><div className="container footer-grid"><div><img src="/assets/imagens/logo_vitafortisBarraPesquisaSemFundo.png" alt="Vita Fortis Suplementos" /><p>{store?.descricao || 'Suplementos para sua evolução, com escolhas mais simples e conscientes.'}</p></div><div><h3>Vita Fortis</h3><Link to="/catalogo">Catálogo</Link><Link to="/sobre">Sobre nós</Link><Link to="/favoritos">Favoritos</Link></div><div><h3>Ajuda</h3><Link to="/contato">Fale conosco</Link><Link to="/faq">Perguntas frequentes</Link><Link to="/politicas">Políticas</Link><Link to="/trabalhe-conosco">Trabalhe conosco</Link></div><div><h3>Atendimento</h3><p>{store?.telefone || 'Telefone em atualização'}</p><p>{store?.email || 'E-mail em atualização'}</p><p>{store?.endereco || 'Endereço em atualização'}</p></div></div><div className="container copyright">© {new Date().getFullYear()} Vita Fortis.</div></footer>
   </div>
 }
