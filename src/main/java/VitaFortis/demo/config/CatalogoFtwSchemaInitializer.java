@@ -25,7 +25,9 @@ public class CatalogoFtwSchemaInitializer implements CommandLineRunner {
         try (var connection = dataSource.getConnection()) {
             String banco = connection.getMetaData().getDatabaseProductName();
             if (banco != null && banco.toLowerCase().contains("mysql")) {
-                jdbc.execute("ALTER TABLE PRODUTO MODIFY COLUMN PRECO DECIMAL(12,2) NULL");
+                // O MySQL no Linux diferencia maiusculas de minusculas nos nomes
+                // das tabelas. O Hibernate cria estes identificadores em lowercase.
+                jdbc.execute("ALTER TABLE produto MODIFY COLUMN preco DECIMAL(12,2) NULL");
             }
         }
     }
