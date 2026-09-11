@@ -96,6 +96,8 @@ export const api = {
   adminProducts: (filters: Record<string, string | number | boolean | undefined>) => request<Page<Product>>(`/admin/produtos${query(filters)}`,{},true),
   saveProduct: (body: Partial<Product>, id?: number) => request<Product>(`/admin/produtos${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }, true),
   setProductActive: (id: number, valor: boolean) => request<void>(`/admin/produtos/${id}/ativo?valor=${valor}`, { method: 'PATCH' }, true),
+  archiveProduct: (id:number) => request<{resultado:string}>(`/admin/produtos/${id}`,{method:'DELETE'},true),
+  importProducts: async(file:File,preVisualizar=true) => { const body=new FormData();body.append('arquivo',file);const response=await fetch(`${API_URL}/admin/produtos/importacao?preVisualizar=${preVisualizar}`,{method:'POST',body,credentials:'include'});const payload=await response.json();if(!response.ok)throw new ApiError(apiErrorMessage(payload,response.status),response.status,payload);return payload as {preVisualizacao:boolean;inseridos:number;atualizados:number;ignorados:number;rejeitados:number;erros:string[]} },
   setCommercialMetadata: (id: number, body: Pick<Product, 'objetivos'|'esportes'|'vegano'|'vegetariano'|'linhaClinica'|'lancamento'|'destaque'|'oferta'|'kit'|'subcategoria'|'avaliacaoMedia'>) => request<Product>(`/admin/produtos/${id}/metadados-comerciais`, { method: 'PATCH', body: JSON.stringify(body) }, true),
   setStock: (id: number, quantidade: number, motivo:string) => request<Product>(`/admin/produtos/${id}/estoque${query({quantidade,motivo})}`, { method: 'PUT' }, true),
   stockHistory: (id:number) => request<StockMovement[]>(`/admin/produtos/${id}/estoque/movimentacoes`,{},true),
@@ -124,9 +126,9 @@ export const api = {
   withdrawCashback: (id:number,valor:number,justificativa:string) => request(`/admin/colaboradores/${id}/cashback/baixas`,{method:'POST',body:JSON.stringify({valor,justificativa})},true),
   adminReviews: () => request<Review[]>('/admin/avaliacoes',{},true),
   moderateReview: (id:number,valor:boolean) => request<Review>(`/admin/avaliacoes/${id}/aprovada?valor=${valor}`,{method:'PATCH'},true),
-  downloadReport: async (tipo:string,inicio:string,fim:string) => {
-    const response=await fetch(`${API_URL}/admin/relatorios/${tipo}.csv${query({inicio,fim})}`,{credentials:'include'})
+  downloadReport: async (tipo:string,inicio:string,fim:string,formato:'csv'|'pdf'|'xlsx'='csv') => {
+    const response=await fetch(`${API_URL}/admin/relatorios/${tipo}.${formato}${query({inicio,fim})}`,{credentials:'include'})
     if(!response.ok) throw new ApiError('Não foi possível gerar o relatório.',response.status)
-    const blob=await response.blob(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`vita-fortis-${tipo.toLowerCase()}.csv`; a.click(); URL.revokeObjectURL(url)
+    const blob=await response.blob(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`vita-fortis-${tipo.toLowerCase()}.${formato}`; a.click(); URL.revokeObjectURL(url)
   },
 }

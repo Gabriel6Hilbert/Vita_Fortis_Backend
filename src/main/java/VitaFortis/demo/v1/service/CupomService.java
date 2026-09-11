@@ -60,6 +60,7 @@ public class CupomService {
             CupomResponseDto dto = mapper.toDto(cupom);
             var usos = pedidos.findAllByCupomUtilizadoIdOrderByDataPedidoDesc(cupom.getId());
             dto.setQuantidadeUsos(usos.size());
+            dto.setValorTotalConcedido(usos.stream().map(pedido -> pedido.getDesconto() == null ? BigDecimal.ZERO : pedido.getDesconto()).reduce(BigDecimal.ZERO, BigDecimal::add));
             dto.setPedidoIds(usos.stream().map(pedido -> pedido.getId()).toList());
             return dto;
         }).toList();

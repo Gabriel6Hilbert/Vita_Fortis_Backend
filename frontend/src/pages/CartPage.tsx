@@ -19,6 +19,7 @@ const emptyAddress: AddressInput = {
   uf: "",
   principal: true,
 };
+const UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
 export function CartPage() {
   const { user } = useAuth();
@@ -44,6 +45,7 @@ export function CartPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressId, setAddressId] = useState<number | undefined>();
   const [newAddress, setNewAddress] = useState<AddressInput>(emptyAddress);
+  const [cepStatus,setCepStatus]=useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,20 +59,6 @@ export function CartPage() {
       .catch(() => undefined);
   }, [user]);
 
-  if (!user)
-    return (
-      <div className="page container">
-        <Empty
-          title="Sua sacola espera por você"
-          text="Entre na sua conta para carregar e manter seus produtos."
-        />
-        <div className="center">
-          <Link className="button primary" to="/entrar">
-            Entrar na conta
-          </Link>
-        </div>
-      </div>
-    );
   if (loading && !cart)
     return (
       <div className="page container">
@@ -100,6 +88,7 @@ export function CartPage() {
 
   const finish = async (event: FormEvent) => {
     event.preventDefault();
+    if (!user) { navigate('/entrar', { state: { from: '/sacola' } }); return; }
     if (!reviewing) {
       setReviewing(true);
       setMessage("Revise todos os dados antes de confirmar o pedido.");
@@ -138,6 +127,7 @@ export function CartPage() {
   };
 
   const applyCoupon = async () => {
+    if (!user) { setMessage('Entre na sua conta para aplicar um cupom.'); return; }
     try {
       await api.applyCoupon(user.id, coupon.trim());
       await refresh();
@@ -166,6 +156,7 @@ export function CartPage() {
 
   const field = (key: keyof AddressInput, value: string) =>
     setNewAddress((current) => ({ ...current, [key]: value }));
+  const lookupCep=async()=>{const cep=newAddress.cep.replace(/\D/g,'');if(cep.length!==8){setCepStatus('Informe os 8 dígitos do CEP.');return}setCepStatus('Consultando CEP…');try{const response=await fetch(`https://viacep.com.br/ws/${cep}/json/`);if(!response.ok)throw new Error();const data=await response.json();if(data.erro)throw new Error();setNewAddress(current=>({...current,cep,logradouro:data.logradouro||current.logradouro,bairro:data.bairro||current.bairro,cidade:data.localidade||current.cidade,uf:data.uf||current.uf}));setCepStatus('Endereço localizado. Confira o número e os dados.') }catch{setCepStatus('CEP não encontrado. Confira e tente novamente.')}};
 
   return (
     <div className="page container">
@@ -197,9 +188,7 @@ export function CartPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      item.quantidade === 1
-                        ? remove(item.itemId)
-                        : update(item.itemId, item.quantidade - 1)
+                      update(item.itemId, Math.max(1, item.quantidade - 1))
                     }
                     aria-label="Diminuir"
                   >
@@ -219,7 +208,7 @@ export function CartPage() {
                 <strong>{money(item.subtotal)}</strong>
                 <button
                   type="button"
-                  onClick={() => remove(item.itemId)}
+                  onClick={() => { if(window.confirm(`Remover ${item.produtoNome} da sacola?`)) void remove(item.itemId) }}
                   aria-label="Remover"
                 >
                   <Trash2 />
@@ -248,6 +237,7 @@ export function CartPage() {
             </div>
           )}
           <div className="checkout-section">
+            <div className="review-alert"><strong>Pagamento simulado — ambiente de homologação</strong><span>Nenhum dado de cartão, CVV, boleto ou Pix real é coletado. A confirmação é administrativa.</span></div>
             <label className="checkout-field">
               Como deseja receber?
               <select
@@ -294,7 +284,9 @@ export function CartPage() {
                       onChange={(event) =>
                         field("cep", event.target.value.replace(/\D/g, ""))
                       }
+                      onBlur={()=>void lookupCep()}
                     />
+                    {cepStatus&&<small>{cepStatus}</small>}
                   </label>
                   <label>
                     Logradouro
@@ -341,14 +333,7 @@ export function CartPage() {
                   </label>
                   <label>
                     UF
-                    <input
-                      required
-                      maxLength={2}
-                      value={newAddress.uf}
-                      onChange={(event) =>
-                        field("uf", event.target.value.toUpperCase())
-                      }
-                    />
+                    <select required value={newAddress.uf} onChange={(event)=>field("uf",event.target.value)}><option value="">Selecione</option>{UFS.map(uf=><option key={uf}>{uf}</option>)}</select>
                   </label>
                 </div>
               </div>
@@ -429,7 +414,7 @@ export function CartPage() {
               </>
             ) : (
               <>
-                Revisar pedido <ArrowRight size={18} />
+                {user ? 'Revisar pedido' : 'Entrar para finalizar'} <ArrowRight size={18} />
               </>
             )}
           </button>

@@ -48,10 +48,8 @@ public class SecurityConfig {
                                 "/trabalhe-conosco", "/contato", "/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/produtos/**", "/api/v1/loja").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/admin/metricas/**").hasAnyRole("ADMIN", "COLABORADOR")
-                        .requestMatchers("/api/v1/admin/relatorios/**").hasAnyRole("ADMIN", "COLABORADOR")
-                        .requestMatchers("/api/v1/colaborador/**").hasRole("COLABORADOR")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/colaborador/**").hasRole("COLABORADOR")
                         .anyRequest().authenticated())
                 // A autenticação da aplicação é feita pelo endpoint /auth/login e pela sessão.
                 // Desabilitar Basic evita o popup nativo do navegador em respostas 401.

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/v1/admin/produtos")
@@ -30,4 +31,8 @@ public class ProdutoAdminController {
     @PatchMapping("/{id}/desconto-valor") public ProdutoResponseDto valor(@PathVariable Long id, @RequestParam BigDecimal valor) { return produtos.aplicarDescontoValor(id, valor); }
     @PatchMapping("/{id}/metadados-comerciais") public ProdutoResponseDto metadados(@PathVariable Long id, @Valid @RequestBody ProdutoMetadadosComerciaisDto dto) { return produtos.atualizarMetadados(id, dto); }
     @DeleteMapping("/{id}/desconto") public ProdutoResponseDto removerDesconto(@PathVariable Long id) { return produtos.removerDesconto(id); }
+    @DeleteMapping("/{id}") public java.util.Map<String,String> excluir(@PathVariable Long id) { produtos.arquivar(id); return java.util.Map.of("resultado", "Produto arquivado para preservar pedidos, carrinhos, favoritos e estoque."); }
+    @PostMapping(value="/importacao",consumes=org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public java.util.Map<String,Object> importar(@RequestPart("arquivo") org.springframework.web.multipart.MultipartFile arquivo,@RequestParam(defaultValue="true") boolean preVisualizar) throws java.io.IOException { return produtos.importar(arquivo,preVisualizar); }
+    @GetMapping(value="/importacao/modelo",produces="text/csv") public ResponseEntity<byte[]> modelo(){byte[] body="codigo;nome;descricao;marca;unidade;preco;estoque;categoria;imagemUrl;ativo\r\nSKU-001;Produto exemplo;Descricao;Marca;300g;99.90;10;PROTEINAS;;true\r\n".getBytes(java.nio.charset.StandardCharsets.UTF_8);return ResponseEntity.ok().header("Content-Disposition","attachment; filename=vita-fortis-modelo-produtos.csv").body(body);}
 }

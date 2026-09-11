@@ -146,6 +146,13 @@ public class ProdutoService {
     }
 
     @Transactional
+    public void arquivar(Long produtoId) {
+        Produto produto = produtoRepository.findById(produtoId).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
+        produto.setAtivo(false);
+        produtoRepository.save(produto);
+    }
+
+    @Transactional
     public ProdutoResponseDto ajustarEstoque(Long produtoId, int quantidadeNova, String motivo, String responsavel) {
         if (quantidadeNova < 0) throw new IllegalArgumentException("Estoque nao pode ser negativo");
         if (motivo == null || motivo.trim().length() < 3) throw new IllegalArgumentException("Informe o motivo do ajuste");
@@ -283,6 +290,17 @@ public class ProdutoService {
         if (valores == null) return new java.util.HashSet<>();
         return valores.stream().filter(java.util.Objects::nonNull).map(String::trim).filter(v -> !v.isEmpty())
                 .map(String::toUpperCase).collect(java.util.stream.Collectors.toCollection(java.util.HashSet::new));
+    }
+
+    @Transactional
+    public Map<String,Object> importar(org.springframework.web.multipart.MultipartFile arquivo, boolean preVisualizar) throws java.io.IOException {
+        String nome=java.util.Optional.ofNullable(arquivo.getOriginalFilename()).orElse("").toLowerCase(); List<List<String>> linhas=new java.util.ArrayList<>();
+        if(nome.endsWith(".xlsx")){try(var workbook=new org.apache.poi.xssf.usermodel.XSSFWorkbook(arquivo.getInputStream())){var sheet=workbook.getSheetAt(0);var formatter=new org.apache.poi.ss.usermodel.DataFormatter();for(var row:sheet){List<String> cols=new java.util.ArrayList<>();for(int i=0;i<10;i++)cols.add(formatter.formatCellValue(row.getCell(i)));linhas.add(cols);}}}
+        else {try(var reader=new java.io.BufferedReader(new java.io.InputStreamReader(arquivo.getInputStream(),java.nio.charset.StandardCharsets.UTF_8))){String line;while((line=reader.readLine())!=null)linhas.add(java.util.Arrays.asList(line.split(line.contains(";")?";":",",-1)));}}
+        List<String> erros=new java.util.ArrayList<>();int inseridos=0,atualizados=0,ignorados=0;
+        for(int index=1;index<linhas.size();index++){var c=linhas.get(index);try{if(c.size()<8)throw new IllegalArgumentException("colunas insuficientes");String codigo=c.get(0).trim().toUpperCase(),produtoNome=c.get(1).trim();if(codigo.isBlank()||produtoNome.isBlank())throw new IllegalArgumentException("codigo e nome sao obrigatorios");BigDecimal preco=new BigDecimal(c.get(5).trim().replace(',','.'));int estoque=Integer.parseInt(c.get(6).trim());var categoria=VitaFortis.demo.v1.enums.CategoriaProduto.valueOf(c.get(7).trim().toUpperCase());var existing=produtoRepository.findByCodigoIgnoreCase(codigo);if(preVisualizar){if(existing.isPresent())atualizados++;else inseridos++;continue;}Produto p=existing.orElseGet(Produto::new);p.setCodigo(codigo);p.setNome(produtoNome);p.setDescricao(c.size()>2?c.get(2).trim():"");p.setMarca(c.size()>3?c.get(3).trim():null);p.setUnidade(c.size()>4?c.get(4).trim():null);p.setPreco(preco);p.setQuantidadeEstoque(estoque);p.setCategoria(categoria);p.setImagemUrl(c.size()>8&&!c.get(8).isBlank()?c.get(8).trim():null);p.setAtivo(c.size()<=9||c.get(9).isBlank()||Boolean.parseBoolean(c.get(9)));produtoRepository.save(p);if(existing.isPresent())atualizados++;else inseridos++;}catch(Exception e){erros.add("Linha "+(index+1)+": "+e.getMessage());}}
+        if(!preVisualizar&&!erros.isEmpty())throw new IllegalArgumentException("Importacao cancelada; corrija as linhas rejeitadas na pre-visualizacao.");
+        return Map.of("preVisualizacao",preVisualizar,"inseridos",inseridos,"atualizados",atualizados,"ignorados",ignorados,"rejeitados",erros.size(),"erros",erros);
     }
 
 

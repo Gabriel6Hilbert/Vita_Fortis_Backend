@@ -42,6 +42,27 @@ public class RelatorioService {
         return ("\uFEFF" + csv).getBytes(StandardCharsets.UTF_8);
     }
 
+    @Transactional(readOnly = true)
+    public byte[] gerarXlsx(TipoRelatorio tipo, LocalDate inicio, LocalDate fim) {
+        String csv = new String(gerar(tipo, inicio, fim), StandardCharsets.UTF_8).replace("\uFEFF", "");
+        try (var workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook(); var output = new java.io.ByteArrayOutputStream()) {
+            var sheet = workbook.createSheet(tipo.name()); int rowIndex = 0;
+            for (String line : csv.split("\\R")) { var row=sheet.createRow(rowIndex++); String[] values=line.split(";",-1); for(int i=0;i<values.length;i++) row.createCell(i).setCellValue(values[i].replaceAll("^\\\"|\\\"$", "").replace("\\\"\\\"", "\\\"")); }
+            if(rowIndex>0) for(int i=0;i<sheet.getRow(0).getLastCellNum();i++) sheet.autoSizeColumn(i);
+            workbook.write(output); return output.toByteArray();
+        } catch (java.io.IOException e) { throw new IllegalStateException("Nao foi possivel gerar XLSX", e); }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] gerarPdf(TipoRelatorio tipo, LocalDate inicio, LocalDate fim) {
+        String csv = new String(gerar(tipo, inicio, fim), StandardCharsets.UTF_8).replace("\uFEFF", "");
+        try (var document=new org.apache.pdfbox.pdmodel.PDDocument(); var output=new java.io.ByteArrayOutputStream()) {
+            var a4=org.apache.pdfbox.pdmodel.common.PDRectangle.A4;var page=new org.apache.pdfbox.pdmodel.PDPage(new org.apache.pdfbox.pdmodel.common.PDRectangle(a4.getHeight(),a4.getWidth()));document.addPage(page);
+            try(var content=new org.apache.pdfbox.pdmodel.PDPageContentStream(document,page)){content.beginText();content.setFont(new org.apache.pdfbox.pdmodel.font.PDType1Font(org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA),8);content.newLineAtOffset(28,page.getMediaBox().getHeight()-30);content.showText("Vita Fortis - "+tipo+" - "+inicio+" a "+fim);content.newLineAtOffset(0,-14);for(String line:csv.split("\\R")){String printable=line.replace(';',' ').replace('"',' ');content.showText(printable.substring(0,Math.min(150,printable.length())));content.newLineAtOffset(0,-11);}content.endText();}
+            document.save(output);return output.toByteArray();
+        } catch(java.io.IOException e){throw new IllegalStateException("Nao foi possivel gerar PDF",e);}
+    }
+
     private String pedidos(LocalDate inicio, LocalDate fim) {
         LocalDateTime de = inicio.atStartOfDay();
         LocalDateTime ate = fim.atTime(LocalTime.MAX);

@@ -1,5 +1,5 @@
 import { ArrowRight, Check, Heart, ShoppingBag } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import type { Product } from '../types/api'
 import { money, titleCase } from '../utils/format'
@@ -11,13 +11,13 @@ import { favoriteIds, toggleFavorite } from '../utils/commerce'
 const fallback = '/assets/imagens/proteina_exemplo.png'
 
 export function ProductCard({ product }: { product: Product }) {
-  const { user } = useAuth(); const { add } = useCart(); const navigate = useNavigate(); const [busy, setBusy] = useState(false); const [favorite, setFavorite] = useState(() => favoriteIds().includes(product.id)); const [added, setAdded] = useState(false)
+  const { user } = useAuth(); const { add } = useCart(); const [busy, setBusy] = useState(false); const [favorite, setFavorite] = useState(() => favoriteIds().includes(product.id)); const [added, setAdded] = useState(false)
   useEffect(() => { if (user) api.favorites(user.id).then((items) => setFavorite(items.some((item) => item.id === product.id))).catch(() => undefined) },[user,product.id])
   const discounted = Number(product.precoFinal) < Number(product.preco)
   const discountPercent = discounted
     ? Math.max(1, Math.round(Number(product.descontoPercentual) || ((Number(product.preco) - Number(product.precoFinal)) / Number(product.preco)) * 100))
     : 0
-  const handleAdd = async () => { if (!user) { navigate('/entrar', { state: { from: `/produto/${product.id}` } }); return }; setBusy(true); try { await add(product.id); setAdded(true); setTimeout(() => setAdded(false), 1800) } catch (error) { alert(error instanceof Error ? error.message : 'Não foi possível adicionar.') } finally { setBusy(false) } }
+  const handleAdd = async () => { setBusy(true); try { await add(product.id); setAdded(true); setTimeout(() => setAdded(false), 1800) } catch (error) { alert(error instanceof Error ? error.message : 'Não foi possível adicionar.') } finally { setBusy(false) } }
   return <article className="product-card">
     <Link to={`/produto/${product.id}`} className="product-image-wrap">
       {product.oferta && discounted && <span className="discount-badge">Oferta -{discountPercent}%</span>}

@@ -5,6 +5,8 @@ import { useAuth } from '../app/AuthContext'
 import { api } from '../services/api'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'
+const maskCpf=(value:string)=>value.replace(/\D/g,'').slice(0,11).replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')
+const validCpf=(value:string)=>{const cpf=value.replace(/\D/g,'');if(cpf.length!==11||/^(\d)\1+$/.test(cpf))return false;const digit=(size:number)=>{let sum=0;for(let i=0;i<size;i++)sum+=Number(cpf[i])*(size+1-i);const rest=(sum*10)%11;return rest===10?0:rest};return digit(9)===Number(cpf[9])&&digit(10)===Number(cpf[10])}
 
 export function AuthPage() {
   const [params] = useSearchParams()
@@ -14,6 +16,7 @@ export function AuthPage() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [cpfError, setCpfError] = useState('')
   const { login, register } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -45,10 +48,11 @@ export function AuthPage() {
         setTimeout(() => navigate('/entrar', { replace: true }), 1600)
         return
       }
-      if (mode === 'login') await login(String(data.get('email')), String(data.get('senha')))
-      else await register({ nome: String(data.get('nome')), email: String(data.get('email')), senha: String(data.get('senha')), cpf: String(data.get('cpf')), telefone: String(data.get('telefone') || '') })
+      let logged
+      if (mode === 'login') logged=await login(String(data.get('email')), String(data.get('senha')))
+      else { const cpf=String(data.get('cpf')); if(!validCpf(cpf)){setCpfError('Informe um CPF válido.');return} logged=await register({ nome: String(data.get('nome')), email: String(data.get('email')), senha: String(data.get('senha')), cpf, telefone: String(data.get('telefone') || '') }) }
       const state = location.state as { from?: string } | null
-      navigate(state?.from || '/conta', { replace: true })
+      navigate(logged.tipoUsuario==='ADMIN'?'/admin':logged.tipoUsuario==='COLABORADOR'?'/colaborador':state?.from||'/', { replace: true })
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Não foi possível concluir a operação.')
     } finally {
@@ -66,7 +70,7 @@ export function AuthPage() {
       <h2>{title}</h2><p>{description}</p>
       {(mode === 'login' || mode === 'register') && <div className="auth-switch"><button className={mode === 'login' ? 'active' : ''} onClick={() => changeMode('login')}>Entrar</button><button className={mode === 'register' ? 'active' : ''} onClick={() => changeMode('register')}>Cadastrar</button></div>}
       <form onSubmit={submit} className="form">
-        {mode === 'register' && <><label>Nome completo<input name="nome" required maxLength={120} autoComplete="name" /></label><div className="form-row"><label>CPF<input name="cpf" required placeholder="000.000.000-00" inputMode="numeric" /></label><label>Telefone<input name="telefone" maxLength={20} autoComplete="tel" /></label></div></>}
+        {mode === 'register' && <><label>Nome completo<input name="nome" required maxLength={120} autoComplete="name" /></label><div className="form-row"><label>CPF<input name="cpf" required placeholder="000.000.000-00" inputMode="numeric" maxLength={14} onChange={e=>{e.currentTarget.value=maskCpf(e.currentTarget.value);setCpfError('')}} onBlur={e=>setCpfError(validCpf(e.currentTarget.value)?'':'Informe um CPF válido.')} aria-invalid={Boolean(cpfError)}/>{cpfError&&<small className="field-error">{cpfError}</small>}</label><label>Telefone<input name="telefone" maxLength={20} autoComplete="tel" /></label></div></>}
         {mode !== 'reset' && <label>E-mail<input name="email" required type="email" autoComplete="email" /></label>}
         {(mode === 'login' || mode === 'register' || mode === 'reset') && <label>Senha<div className="password-field"><input name="senha" required type={show ? 'text' : 'password'} minLength={mode === 'login' ? undefined : 8} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} /><button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}>{show ? <EyeOff /> : <Eye />}</button></div>{mode !== 'login' && <small>Mínimo de 8 caracteres.</small>}</label>}
         {mode === 'reset' && <label>Confirmar nova senha<input name="confirmacao" required type={show ? 'text' : 'password'} minLength={8} autoComplete="new-password" /></label>}

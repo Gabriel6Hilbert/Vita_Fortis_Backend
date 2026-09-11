@@ -1,6 +1,6 @@
 import { Menu, Search, ShoppingBag, UserRound, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 import { isAdmin, isCollaborator, type StoreInfo } from '../types/api'
 import { useAuth } from '../app/AuthContext'
@@ -8,9 +8,11 @@ import { useCart } from '../app/CartContext'
 
 export function Layout() {
   const [menu, setMenu] = useState(false); const [search, setSearch] = useState(''); const [store, setStore] = useState<StoreInfo | null>(null)
-  const { user, logout } = useAuth(); const { count } = useCart(); const navigate = useNavigate()
+  const { user, logout } = useAuth(); const { count } = useCart(); const navigate = useNavigate(); const location = useLocation()
   useEffect(() => { api.store().then(setStore).catch(() => undefined) }, [])
-  const submit = (event: React.FormEvent) => { event.preventDefault(); navigate(`/catalogo?busca=${encodeURIComponent(search)}`); setMenu(false) }
+  useEffect(() => { if (!location.pathname.startsWith('/catalogo')) setSearch('') }, [location.pathname])
+  const goHome = () => { setSearch(''); setMenu(false) }
+  const submit = (event: React.FormEvent) => { event.preventDefault(); const term=search.trim(); navigate(term ? `/catalogo?busca=${encodeURIComponent(term)}` : '/catalogo'); setMenu(false) }
   const announcementItems = ['Compra segura', 'Atendimento personalizado Vita Fortis', 'Retirada ou entrega', 'Acompanhe seus pedidos online']
   return <div className="app-shell">
     <a className="skip-link" href="#main">Pular para o conteúdo</a>
@@ -18,15 +20,15 @@ export function Layout() {
     <header className="header">
       <div className="header-main container">
         <button className="menu-toggle" onClick={() => setMenu(!menu)} aria-label="Abrir menu">{menu ? <X /> : <Menu />}</button>
-        <Link to="/" className="brand"><img src="/assets/imagens/logo-vita-fortis-brand.webp" alt="Vita Fortis Suplementos" /></Link>
-        <form className="search" onSubmit={submit}><Search size={18} /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Busque suplemento, marca ou objetivo" aria-label="Buscar produtos" /></form>
+        <Link to="/" className="brand" onClick={goHome}><img src="/assets/imagens/logo_vitafortisBarraPesquisaSemFundo.png" alt="Vita Fortis Suplementos" /></Link>
+        <form className="search" onSubmit={submit}><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Busque suplemento, marca ou objetivo" aria-label="Buscar produtos" /><button type="submit" aria-label="Pesquisar"><Search size={18} /></button></form>
         <div className="header-actions">
           <Link to={user ? '/conta' : '/entrar'} className="header-action"><UserRound /><span>{user ? user.nome.split(' ')[0] : 'Entrar'}</span></Link>
           {(!user || user.tipoUsuario === 'CLIENTE') && <Link to="/sacola" className="header-action bag"><ShoppingBag /><span>Sacola</span>{count > 0 && <b>{count}</b>}</Link>}
         </div>
       </div>
       <nav className={`nav ${menu ? 'open' : ''}`} aria-label="Navegação principal"><div className="container">
-        <NavLink to="/" end onClick={() => setMenu(false)}>Home</NavLink><NavLink to="/ofertas" onClick={() => setMenu(false)}>Ofertas</NavLink><NavLink to="/marcas" onClick={() => setMenu(false)}>Marcas</NavLink><NavLink to="/kits" onClick={() => setMenu(false)}>Kits</NavLink><NavLink to="/objetivos" onClick={() => setMenu(false)}>Objetivos</NavLink>{user&&<NavLink to="/pedidos" onClick={() => setMenu(false)}>Meus pedidos</NavLink>}{isAdmin(user) && <NavLink to="/admin" onClick={() => setMenu(false)}>Painel admin</NavLink>}{isCollaborator(user)&&<NavLink to="/colaborador" onClick={()=>setMenu(false)}>Meu desempenho</NavLink>}
+        <NavLink to="/" end onClick={goHome}>Home</NavLink><NavLink to="/catalogo" onClick={() => {setSearch('');setMenu(false)}}>Todos os produtos</NavLink><NavLink to="/ofertas" onClick={() => setMenu(false)}>Ofertas</NavLink><NavLink to="/marcas" onClick={() => setMenu(false)}>Marcas</NavLink><NavLink to="/kits" onClick={() => setMenu(false)}>Kits</NavLink><NavLink to="/objetivos" onClick={() => setMenu(false)}>Objetivos</NavLink>{user?.tipoUsuario==='CLIENTE'&&<NavLink to="/favoritos" onClick={() => setMenu(false)}>Meus favoritos</NavLink>}{user?.tipoUsuario==='CLIENTE'&&<NavLink to="/pedidos" onClick={() => setMenu(false)}>Meus pedidos</NavLink>}{isAdmin(user) && <NavLink to="/admin" onClick={() => setMenu(false)}>Painel admin</NavLink>}{isCollaborator(user)&&<NavLink to="/colaborador" onClick={()=>setMenu(false)}>Meu cashback</NavLink>}
         {user && <button className="nav-logout" onClick={() => { logout(); navigate('/') }}>Sair</button>}
       </div></nav>
     </header>

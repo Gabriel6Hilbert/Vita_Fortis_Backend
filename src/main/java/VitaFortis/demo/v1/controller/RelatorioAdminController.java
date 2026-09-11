@@ -45,4 +45,11 @@ public class RelatorioAdminController {
                 .filename("vita-fortis-" + tipo.name().toLowerCase() + ".csv", StandardCharsets.UTF_8).build());
         return ResponseEntity.ok().headers(headers).body(relatorios.gerar(tipo, inicio, fim));
     }
+
+    @GetMapping(value="/{tipo}.xlsx",produces="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    public ResponseEntity<byte[]> xlsx(@PathVariable TipoRelatorio tipo,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate inicio,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate fim,Authentication auth){autorizar(auth,inicio,fim);return arquivo(relatorios.gerarXlsx(tipo,inicio,fim),"vita-fortis-"+tipo.name().toLowerCase()+".xlsx",MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));}
+    @GetMapping(value="/{tipo}.pdf",produces=MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> pdf(@PathVariable TipoRelatorio tipo,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate inicio,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate fim,Authentication auth){autorizar(auth,inicio,fim);return arquivo(relatorios.gerarPdf(tipo,inicio,fim),"vita-fortis-"+tipo.name().toLowerCase()+".pdf",MediaType.APPLICATION_PDF);}
+    private void autorizar(Authentication authentication,LocalDate inicio,LocalDate fim){var atual=usuarios.findByEmail(authentication.getName().trim().toLowerCase()).orElseThrow(()->new AccessDeniedException("Usuario nao autenticado"));if(atual.getTipo()==TipoUsuario.COLABORADOR&&!atual.isPermissaoRelatorios())throw new AccessDeniedException("Sem permissao de relatorio");if(fim.isBefore(inicio))throw new IllegalArgumentException("Periodo do relatorio invalido");}
+    private ResponseEntity<byte[]> arquivo(byte[] bytes,String nome,MediaType tipo){HttpHeaders headers=new HttpHeaders();headers.setContentType(tipo);headers.setContentDisposition(ContentDisposition.attachment().filename(nome,StandardCharsets.UTF_8).build());return ResponseEntity.ok().headers(headers).body(bytes);}
 }

@@ -188,6 +188,7 @@ export interface Coupon {
   colaboradorNome?: string;
   percentualCashback?: number;
   quantidadeUsos?: number;
+  valorTotalConcedido?: number;
   pedidoIds?: number[];
 }
 export interface CashbackMovement {

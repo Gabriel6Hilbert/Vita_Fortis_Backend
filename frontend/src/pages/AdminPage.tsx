@@ -70,6 +70,8 @@ export function AdminPage() {
   const [success, setSuccess] = useState("");
   const [search, setSearch] = useState("");
   const [productForm, setProductForm] = useState<Partial<Product> | null>(null);
+  const [importFile,setImportFile]=useState<File|null>(null);
+  const [importPreview,setImportPreview]=useState<{inseridos:number;atualizados:number;rejeitados:number;erros:string[]}|null>(null);
   const [orderOpen, setOrderOpen] = useState<Order | null>(null);
   const [couponForm, setCouponForm] = useState<Partial<Coupon> | null>(null);
   const [cashbackForm, setCashbackForm] = useState<{
@@ -88,6 +90,7 @@ export function AdminPage() {
       fim: now.toISOString().slice(0, 10),
     };
   });
+  const [reportFormat,setReportFormat]=useState<'csv'|'pdf'|'xlsx'>('csv');
   const [collaboratorForm, setCollaboratorForm] = useState({
     nome: "",
     email: "",
@@ -146,6 +149,7 @@ export function AdminPage() {
   useEffect(() => {
     void load();
   }, [tab]);
+  useEffect(() => { setSearch('') }, [tab]);
   const visibleProducts = useMemo(
     () =>
       products.filter((p) =>
@@ -394,15 +398,16 @@ export function AdminPage() {
                     />
                   </label>
                   {tab === "products" && (
-                    <button
+                    <><a className="button secondary" href="/api/v1/admin/produtos/importacao/modelo">Baixar modelo CSV</a><label className="button secondary">Importar CSV/XLSX<input hidden type="file" accept=".csv,.xlsx" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;setImportFile(file);try{setImportPreview(await api.importProducts(file,true))}catch(error){setError(error instanceof Error?error.message:'Falha na pré-visualização.')}}}/></label><button
                       className="button primary"
                       onClick={() => setProductForm({ ...blankProduct })}
                     >
                       <Plus /> Novo produto
-                    </button>
+                    </button></>
                   )}
                 </div>
               )}
+              {tab==='products'&&importPreview&&<div className="review-alert"><strong>Pré-visualização: {importPreview.inseridos} novos, {importPreview.atualizados} atualizações, {importPreview.rejeitados} rejeitados.</strong>{importPreview.erros.map(error=><span key={error}>{error}</span>)}<button className="button primary" disabled={!importFile||importPreview.rejeitados>0} onClick={()=>importFile&&void action(async()=>{await api.importProducts(importFile,false);setImportFile(null);setImportPreview(null)},'Importação concluída.')}>Confirmar importação transacional</button></div>}
               {tab === "users" && (
                 <div className="admin-toolbar">
                   <span />
@@ -626,6 +631,7 @@ export function AdminPage() {
                             >
                               {p.ativo ? "Desativar" : "Ativar"}
                             </button>
+                            <button className="text-action danger" onClick={()=>confirm(`Arquivar ${p.nome}? O produto sairá do catálogo, mas o histórico será preservado.`)&&void action(()=>api.archiveProduct(p.id),'Produto arquivado com segurança.')}>Excluir/arquivar</button>
                           </td>
                         </tr>
                       ))}
@@ -805,7 +811,7 @@ export function AdminPage() {
                               : money(c.desconto)}
                           </td>
                           <td>
-                            <strong>{c.quantidadeUsos || 0} uso(s)</strong>
+                            <strong>{c.quantidadeUsos || 0} uso(s) — {money(c.valorTotalConcedido || 0)} concedidos</strong>
                             <small>
                               {c.pedidoIds?.length
                                 ? `Pedidos: ${c.pedidoIds.map((id) => `#${id}`).join(", ")}`
@@ -914,6 +920,7 @@ export function AdminPage() {
               </label>
             </div>
             <div className="report-actions">
+              <label>Formato<select value={reportFormat} onChange={e=>setReportFormat(e.target.value as 'csv'|'pdf'|'xlsx')}><option value="csv">CSV</option><option value="pdf">PDF</option><option value="xlsx">XLSX</option></select></label>
               {["PEDIDOS", "PRODUTOS", "CLIENTES", "CUPONS", "CASHBACK"].map(
                 (tipo) => (
                   <button
@@ -926,6 +933,7 @@ export function AdminPage() {
                             tipo,
                             reportPeriod.inicio,
                             reportPeriod.fim,
+                            reportFormat,
                           ),
                         `Relatório ${titleCase(tipo)} gerado.`,
                       )
@@ -1119,10 +1127,12 @@ export function AdminPage() {
                 </select>
               </label>
               <label>
-                Desconto
+                {couponForm.tipo === "PERCENTUAL" ? "Desconto (%)" : "Desconto (R$)"}
                 <input
                   required
                   type="number"
+                  min="0.01"
+                  max={couponForm.tipo === "PERCENTUAL" ? 100 : undefined}
                   step=".01"
                   value={couponForm.desconto || 0}
                   onChange={(e) =>
@@ -1168,7 +1178,7 @@ export function AdminPage() {
                     .filter((u) => u.tipoUsuario === "COLABORADOR" && u.ativo)
                     .map((u) => (
                       <option key={u.id} value={u.id}>
-                        {u.nome}
+                        {u.nome} — {u.email}
                       </option>
                     ))}
                 </select>

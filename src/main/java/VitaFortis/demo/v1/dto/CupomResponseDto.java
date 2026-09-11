@@ -25,5 +25,6 @@ public class CupomResponseDto {
     private String colaboradorNome;
     private BigDecimal percentualCashback;
     private long quantidadeUsos;
+    private BigDecimal valorTotalConcedido;
     private List<Long> pedidoIds;
 }

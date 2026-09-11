@@ -111,7 +111,7 @@ p {
   width: 116px;
   height: 62px;
   object-fit: contain;
-  border-radius: 10px;
+  border-radius: 0;
 }
 .search {
   height: 46px;
@@ -135,6 +135,20 @@ p {
   width: 100%;
   color: var(--ink);
 }
+.search button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 0;
+  border-radius: 50%;
+  color: #111;
+  background: var(--brand-yellow);
+  cursor: pointer;
+}
+.search input::selection { color: #111; background: var(--brand-yellow); }
+.field-error { display:block; margin-top:6px; color:#b42318; font-weight:700; }
 .header-actions {
   display: flex;
   align-items: center;
