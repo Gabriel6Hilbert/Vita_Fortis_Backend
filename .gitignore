@@ -41,3 +41,4 @@ frontend/vite.config.d.ts
 
 ### Temporary working files ###
 tmp/
+uploads/

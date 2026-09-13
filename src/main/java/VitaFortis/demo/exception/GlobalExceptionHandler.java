@@ -7,6 +7,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -14,6 +16,14 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<Map<String, Object>> arquivoGrande(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        String mensagem = request.getRequestURI().endsWith("/produtos/imagens")
+                ? "A imagem deve ter no máximo 5 MB"
+                : "O arquivo deve ter no máximo 10 MB";
+        return resposta(HttpStatus.PAYLOAD_TOO_LARGE, mensagem, null);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     ResponseEntity<Map<String, Object>> regra(IllegalArgumentException ex) {
         return resposta(HttpStatus.BAD_REQUEST, ex.getMessage(), null);

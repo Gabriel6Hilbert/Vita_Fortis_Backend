@@ -123,9 +123,9 @@ public class CarrinhoService {
 
        CarrinhoItem item = itemExistente.orElseGet(() -> {
            CarrinhoItem novoItem = new CarrinhoItem();
-           novoItem.setCarrinho(carrinho);
            novoItem.setProduto(produto);
            novoItem.setPrecoUnitario(produto.getPrecoFinal());
+           carrinho.addItem(novoItem);
            return novoItem;
        });
        item.setQuantidade(totalDesejado);

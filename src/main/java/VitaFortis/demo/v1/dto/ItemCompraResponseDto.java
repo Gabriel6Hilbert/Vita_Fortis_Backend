@@ -11,6 +11,7 @@ public class ItemCompraResponseDto {
     private Long id;
     private Long produtoId;
     private String produtoNome;
+    private String produtoImagemUrl;
     private int quantidade;
     private BigDecimal precoUnitario;
     private BigDecimal subtotal;

@@ -41,7 +41,7 @@ export const setSession = (session: Session | null) => session ? sessionStorage.
 const request = async <T>(path: string, init: RequestInit = {}, authenticated = false): Promise<T> => {
   const headers = new Headers(init.headers)
   headers.set('Accept', 'application/json')
-  if (init.body) headers.set('Content-Type', 'application/json')
+  if (init.body && !(init.body instanceof FormData)) headers.set('Content-Type', 'application/json')
   if (authenticated) {
     if (!getSession()) throw new ApiError('Faça login para continuar.', 401)
   }
@@ -95,6 +95,11 @@ export const api = {
   removeFavorite: (userId: number, productId: number) => request<void>(`/usuarios/${userId}/favoritos/${productId}`, { method: 'DELETE' }, true),
   adminProducts: (filters: Record<string, string | number | boolean | undefined>) => request<Page<Product>>(`/admin/produtos${query(filters)}`,{},true),
   saveProduct: (body: Partial<Product>, id?: number) => request<Product>(`/admin/produtos${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }, true),
+  uploadProductImage: (file: File) => {
+    const body = new FormData()
+    body.append('imagem', file)
+    return request<{ url: string }>('/admin/produtos/imagens', { method: 'POST', body }, true)
+  },
   setProductActive: (id: number, valor: boolean) => request<void>(`/admin/produtos/${id}/ativo?valor=${valor}`, { method: 'PATCH' }, true),
   archiveProduct: (id:number) => request<{resultado:string}>(`/admin/produtos/${id}`,{method:'DELETE'},true),
   importProducts: async(file:File,preVisualizar=true) => { const body=new FormData();body.append('arquivo',file);const response=await fetch(`${API_URL}/admin/produtos/importacao?preVisualizar=${preVisualizar}`,{method:'POST',body,credentials:'include'});const payload=await response.json();if(!response.ok)throw new ApiError(apiErrorMessage(payload,response.status),response.status,payload);return payload as {preVisualizacao:boolean;inseridos:number;atualizados:number;ignorados:number;rejeitados:number;erros:string[]} },

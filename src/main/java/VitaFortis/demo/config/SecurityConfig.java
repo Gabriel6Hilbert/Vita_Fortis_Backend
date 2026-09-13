@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/assets/**", "/*.html", "/catalogo", "/produto/**",
+                        .requestMatchers("/", "/index.html", "/assets/**", "/uploads/**", "/*.html", "/catalogo", "/marcas", "/objetivos", "/produto/**",
                                 "/entrar", "/sacola", "/conta", "/pedidos", "/admin", "/colaborador", "/favoritos",
                                 "/ofertas", "/novidades", "/kits", "/sobre", "/politicas", "/faq",
                                 "/trabalhe-conosco", "/contato", "/error").permitAll()

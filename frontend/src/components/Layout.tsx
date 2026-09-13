@@ -15,19 +15,19 @@ export function Layout() {
   const submit = (event: React.FormEvent) => { event.preventDefault(); const term=search.trim(); navigate(term ? `/catalogo?busca=${encodeURIComponent(term)}` : '/catalogo'); setMenu(false) }
   return <div className="app-shell">
     <a className="skip-link" href="#main">Pular para o conteúdo</a>
-    <div className="announcement" aria-label="Informações da loja"><p>Compra segura <b>•</b> Atendimento personalizado</p></div>
+    <div className="announcement" aria-label="Informações da loja"><div className="announcement-track">{[0,1].map(group=><div className="announcement-group" key={group} aria-hidden={group === 1 ? true : undefined}>{[0,1].map(item=><span key={item} aria-hidden={item === 1 ? true : undefined}>COMPRA SEGURA <b>•</b> ATENDIMENTO PERSONALIZADO <b>•</b> ENTREGA ACOMPANHADA <b>•</b></span>)}</div>)}</div></div>
     <header className="header">
       <div className="header-main container">
-        <button className="menu-toggle" onClick={() => setMenu(!menu)} aria-label="Abrir menu">{menu ? <X /> : <Menu />}</button>
+        <button className="menu-toggle" onClick={() => setMenu(!menu)} aria-label={menu ? 'Fechar menu' : 'Abrir menu'} aria-expanded={menu} aria-controls="main-navigation">{menu ? <X /> : <Menu />}</button>
         <Link to="/" className="brand" onClick={goHome}><img src="/assets/imagens/logo_vitafortisBarraPesquisaSemFundo.png" alt="Vita Fortis Suplementos" /></Link>
         <form className="search" onSubmit={submit}><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Busque suplemento, marca ou objetivo" aria-label="Buscar produtos" /><button type="submit" aria-label="Pesquisar"><Search size={18} /></button></form>
         <div className="header-actions">
           <Link to={user ? '/conta' : '/entrar'} className="header-action"><UserRound /><span>{user ? user.nome.split(' ')[0] : 'Entrar'}</span></Link>
-          {(!user || user.tipoUsuario === 'CLIENTE') && <Link to="/sacola" className="header-action bag"><ShoppingBag /><span>Sacola</span>{count > 0 && <b>{count}</b>}</Link>}
+          {(!user || user.tipoUsuario !== 'ADMIN') && <Link to="/sacola" className="header-action bag"><ShoppingBag /><span>Sacola</span>{count > 0 && <b>{count}</b>}</Link>}
         </div>
       </div>
-      <nav className={`nav ${menu ? 'open' : ''}`} aria-label="Navegação principal"><div className="container">
-        <NavLink to="/" end onClick={goHome}>Home</NavLink><NavLink to="/catalogo" onClick={() => {setSearch('');setMenu(false)}}>Todos os produtos</NavLink><NavLink to="/ofertas" onClick={() => setMenu(false)}>Ofertas</NavLink><NavLink to="/marcas" onClick={() => setMenu(false)}>Marcas</NavLink><NavLink to="/kits" onClick={() => setMenu(false)}>Kits</NavLink><NavLink to="/objetivos" onClick={() => setMenu(false)}>Objetivos</NavLink>{user?.tipoUsuario==='CLIENTE'&&<NavLink to="/favoritos" onClick={() => setMenu(false)}>Meus favoritos</NavLink>}{user?.tipoUsuario==='CLIENTE'&&<NavLink to="/pedidos" onClick={() => setMenu(false)}>Meus pedidos</NavLink>}{isAdmin(user) && <NavLink to="/admin" onClick={() => setMenu(false)}>Painel admin</NavLink>}{isCollaborator(user)&&<NavLink to="/colaborador" onClick={()=>setMenu(false)}>Meu cashback</NavLink>}
+      <nav id="main-navigation" className={`nav ${menu ? 'open' : ''}`} aria-label="Navegação principal"><div className="container">
+        <NavLink to="/" end onClick={goHome}>Home</NavLink><NavLink to="/catalogo" onClick={() => {setSearch('');setMenu(false)}}>Todos os produtos</NavLink><NavLink to="/ofertas" onClick={() => setMenu(false)}>Ofertas</NavLink><NavLink to="/marcas" onClick={() => setMenu(false)}>Marcas</NavLink><NavLink to="/kits" onClick={() => setMenu(false)}>Kits</NavLink><NavLink to="/objetivos" onClick={() => setMenu(false)}>Objetivos</NavLink>{user?.tipoUsuario==='CLIENTE'&&<NavLink to="/favoritos" onClick={() => setMenu(false)}>Meus favoritos</NavLink>}{user&&user.tipoUsuario!=='ADMIN'&&<NavLink to="/pedidos" onClick={() => setMenu(false)}>Meus pedidos</NavLink>}{isAdmin(user) && <NavLink to="/admin" onClick={() => setMenu(false)}>Painel admin</NavLink>}{isCollaborator(user)&&<NavLink to="/colaborador" onClick={()=>setMenu(false)}>Meu cashback</NavLink>}
         {user && <button className="nav-logout" onClick={() => { logout(); navigate('/') }}>Sair</button>}
       </div></nav>
     </header>

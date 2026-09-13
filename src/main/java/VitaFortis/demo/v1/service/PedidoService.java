@@ -282,6 +282,7 @@ public class PedidoService {
         dto.setId(item.getItemId());
         dto.setProdutoId(item.getProduto().getId());
         dto.setProdutoNome(item.getProduto().getNome());
+        dto.setProdutoImagemUrl(item.getProduto().getImagemUrl());
         dto.setQuantidade(item.getQuantidade());
         dto.setPrecoUnitario(item.getPrecoUnitario());
         dto.setSubtotal(item.getSubtotal());

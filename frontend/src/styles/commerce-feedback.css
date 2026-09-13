@@ -1,0 +1,96 @@
+.product-editor .product-editor-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.product-editor .image-upload-field > label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 750;
+}
+
+.product-editor .image-upload-box:focus-within {
+  outline: 3px solid var(--brand-yellow);
+  outline-offset: 3px;
+}
+
+.commerce-feedback {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 10px 0 0;
+}
+
+.commerce-feedback:empty {
+  display: none;
+}
+
+.commerce-feedback.error {
+  padding: 12px 14px;
+  border: 1px solid #d7ba72;
+  border-radius: 10px;
+  background: #fff7df;
+  color: #59430a;
+  overflow-wrap: anywhere;
+}
+
+.product-editor button:disabled,
+.order-card button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.cashback-statement-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cashback-statement-controls label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  max-width: 100%;
+}
+
+.cashback-statement-controls select {
+  width: 100%;
+  min-height: 44px;
+}
+
+.cashback-statement-controls > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cashback-statement .movement-list article > div:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cashback-statement .movement-value {
+  flex-shrink: 0;
+}
+
+@media (max-width: 540px) {
+  .cashback-statement-controls,
+  .cashback-statement-controls label {
+    width: 100%;
+  }
+
+  .cashback-statement .movement-list article {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .cashback-statement .movement-value {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

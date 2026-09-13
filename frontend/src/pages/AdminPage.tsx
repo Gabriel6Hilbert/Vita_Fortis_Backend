@@ -8,6 +8,7 @@ import {
   PackageCheck,
   Pencil,
   Plus,
+  ImagePlus,
   Search,
   ShieldAlert,
   TicketPercent,
@@ -31,6 +32,7 @@ import {
   type User,
 } from "../types/api";
 import { date, money, titleCase } from "../utils/format";
+import "../styles/commerce-feedback.css";
 type Tab =
   | "dashboard"
   | "products"
@@ -70,6 +72,11 @@ export function AdminPage() {
   const [success, setSuccess] = useState("");
   const [search, setSearch] = useState("");
   const [productForm, setProductForm] = useState<Partial<Product> | null>(null);
+  const [imageUploading,setImageUploading]=useState(false);
+  const [imageError, setImageError] = useState("");
+  const [imageStatus, setImageStatus] = useState("");
+  const [productSaving, setProductSaving] = useState(false);
+  const [productError, setProductError] = useState("");
   const [importFile,setImportFile]=useState<File|null>(null);
   const [importPreview,setImportPreview]=useState<{inseridos:number;atualizados:number;rejeitados:number;erros:string[]}|null>(null);
   const [orderOpen, setOrderOpen] = useState<Order | null>(null);
@@ -184,13 +191,22 @@ export function AdminPage() {
       setError(e instanceof Error ? e.message : "Ação não concluída.");
     }
   };
-  const submitProduct = (e: React.FormEvent) => {
+  const openProductForm = (form: Partial<Product> | null) => {
+    setImageError("");
+    setImageStatus("");
+    setProductError("");
+    setProductForm(form);
+  };
+  const submitProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!productForm) return;
+    if (!productForm || imageUploading || productSaving) return;
     const form = productForm;
-    void action(
-      async () => {
+    setProductSaving(true);
+    setProductError("");
+    try {
         const saved = await api.saveProduct(form, form.id);
+        // Keep the saved ID if a later metadata request fails, so retry updates it.
+        setProductForm(current => current ? { ...current, id: saved.id } : current);
         if (Number(form.descontoPercentual) > 0)
           await api.setDiscountPercent(
             saved.id,
@@ -212,10 +228,38 @@ export function AdminPage() {
           subcategoria: form.subcategoria,
           avaliacaoMedia: form.avaliacaoMedia,
         });
-      },
-      form.id ? "Produto atualizado." : "Produto criado.",
-    );
-    setProductForm(null);
+      setSuccess(form.id ? "Produto atualizado." : "Produto criado.");
+      setTimeout(() => setSuccess(""), 2500);
+      openProductForm(null);
+      await load();
+    } catch (e) {
+      setProductError(e instanceof Error ? e.message : "Não foi possível salvar o produto. Seus dados foram mantidos.");
+    } finally {
+      setProductSaving(false);
+    }
+  };
+  const uploadProductImage = async (file: File) => {
+    if (imageUploading || productSaving) return;
+    setImageError("");
+    setImageStatus("");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setImageError("Selecione uma imagem JPG, PNG ou WebP.");
+      return;
+    }
+    if (file.size === 0 || file.size > 5 * 1024 * 1024) {
+      setImageError(file.size === 0 ? "O arquivo está vazio. Selecione outra imagem." : "A imagem deve ter no máximo 5 MB.");
+      return;
+    }
+    setImageUploading(true);
+    try {
+      const uploaded = await api.uploadProductImage(file);
+      setProductForm(current => current ? { ...current, imagemUrl: uploaded.url } : current);
+      setImageStatus("Imagem enviada. Salve o produto para confirmar a alteração.");
+    } catch (e) {
+      setImageError(e instanceof Error ? e.message : "Não foi possível enviar a imagem. Tente novamente.");
+    } finally {
+      setImageUploading(false);
+    }
   };
   const submitCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -400,7 +444,7 @@ export function AdminPage() {
                   {tab === "products" && (
                     <><a className="button secondary" href="/api/v1/admin/produtos/importacao/modelo">Baixar modelo CSV</a><label className="button secondary">Importar CSV/XLSX<input hidden type="file" accept=".csv,.xlsx" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;setImportFile(file);try{setImportPreview(await api.importProducts(file,true))}catch(error){setError(error instanceof Error?error.message:'Falha na pré-visualização.')}}}/></label><button
                       className="button primary"
-                      onClick={() => setProductForm({ ...blankProduct })}
+                      onClick={() => openProductForm({ ...blankProduct })}
                     >
                       <Plus /> Novo produto
                     </button></>
@@ -531,14 +575,14 @@ export function AdminPage() {
                           <td className="action-cell">
                             <button
                               title="Editar"
-                              onClick={() => setProductForm({ ...p })}
+                              onClick={() => openProductForm({ ...p })}
                             >
                               <Pencil />
                             </button>
                             <button
                               title="Duplicar"
                               onClick={() =>
-                                setProductForm({
+                                openProductForm({
                                   ...p,
                                   id: undefined,
                                   codigo: `${p.codigo}-COPIA`,
@@ -896,8 +940,8 @@ export function AdminPage() {
         )}
         {tab === "reports" && (
           <section className="chart-card report-panel">
-            <h2>Exportar relatórios CSV</h2>
-            <div className="form-row">
+            <span className="eyebrow">Central de exportação</span><h2>Relatórios administrativos</h2><p>Escolha o período, o formato e o conteúdo que deseja baixar.</p>
+            <div className="form-row report-period">
               <label>
                 Início
                 <input
@@ -949,32 +993,18 @@ export function AdminPage() {
       </section>
       {productForm && (
         <div className="modal-backdrop">
-          <form className="admin-modal" onSubmit={submitProduct}>
+          <form className="admin-modal product-editor" onSubmit={submitProduct} aria-busy={productSaving || imageUploading}>
             <header>
               <div>
                 <span className="eyebrow">Cadastro</span>
                 <h2>{productForm.id ? "Editar produto" : "Novo produto"}</h2>
               </div>
-              <button type="button" onClick={() => setProductForm(null)}>
+              <button type="button" disabled={imageUploading || productSaving} aria-label="Fechar cadastro de produto" onClick={() => openProductForm(null)}>
                 <X />
               </button>
             </header>
-            <div className="form-grid">
-              {(
-                [
-                  ["codigo", "Código"],
-                  ["nome", "Nome"],
-                  ["marca", "Marca"],
-                  ["unidade", "Unidade ou peso"],
-                  ["preco", "Preço original"],
-                  ["descontoPercentual", "Desconto (%)"],
-                  ["descontoValor", "Desconto (R$)"],
-                  ["categoria", "Categoria"],
-                  ["imagemUrl", "URL da imagem"],
-                  ["subcategoria", "Subcategoria"],
-                  ["avaliacaoMedia", "Avaliação média"],
-                ] as const
-              ).map(([key, label]) => (
+            <fieldset className="form-grid product-editor-fields" disabled={productSaving}>
+              {([ ["codigo", "Código"], ["nome", "Nome"], ["preco", "Preço original"], ["descontoPercentual", "Desconto (%)"], ["descontoValor", "Desconto (R$)"], ["avaliacaoMedia", "Avaliação média"] ] as const).map(([key, label]) => (
                 <label key={key}>
                   {label}
                   <input
@@ -1013,6 +1043,20 @@ export function AdminPage() {
                   />
                 </label>
               ))}
+              <label>Marca<input required list="product-brands" value={productForm.marca || ""} placeholder="Selecione ou digite a marca" onChange={e => setProductForm({ ...productForm, marca: e.target.value })} /><datalist id="product-brands">{Array.from(new Set(products.map(p => p.marca).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
+              <label>Categoria<select required value={productForm.categoria||""} onChange={e=>setProductForm({...productForm,categoria:e.target.value})}><option value="">Selecione</option>{["ACESSORIOS","AMINOACIDOS","CARBOIDRATROS","PRETREINOS","PROTEINAS","TERMOGENICOS","VITAMINAS"].map(value=><option key={value} value={value}>{titleCase(value)}</option>)}</select></label>
+              <label>Subcategoria<input list="product-subcategories" value={productForm.subcategoria || ""} placeholder="Selecione ou digite a subcategoria" onChange={e => setProductForm({ ...productForm, subcategoria: e.target.value })} /><datalist id="product-subcategories">{Array.from(new Set(products.map(p => p.subcategoria).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
+              <label>Unidade ou peso<input list="product-units" value={productForm.unidade || ""} placeholder="Ex.: 300g ou 60 cápsulas" onChange={e => setProductForm({ ...productForm, unidade: e.target.value })} /><datalist id="product-units">{Array.from(new Set(products.map(p => p.unidade).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
+              <div className="full image-upload-field">
+                <label htmlFor="product-image">Imagem do produto</label>
+                <div className="image-upload-box">
+                  {productForm.imagemUrl ? <img src={productForm.imagemUrl} alt="Pré-visualização do produto" /> : <ImagePlus aria-hidden="true" />}
+                  <div><strong>{imageUploading ? 'Enviando imagem…' : 'Clique para selecionar a imagem'}</strong><small id="product-image-help">JPG, PNG ou WebP · até 5 MB · recomendado 1200 × 1200 px</small></div>
+                  <input id="product-image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby={`product-image-help${imageError ? ' product-image-error' : ''}`} aria-invalid={Boolean(imageError)} disabled={imageUploading || productSaving} onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; if (file) void uploadProductImage(file) }} />
+                </div>
+                {imageError && <p id="product-image-error" className="commerce-feedback error" role="alert">{imageError}</p>}
+                <p className="commerce-feedback" role="status">{imageUploading ? "Enviando imagem. Aguarde para salvar o produto." : imageStatus}</p>
+              </div>
               <label className="full">
                 Descrição
                 <textarea
@@ -1027,21 +1071,7 @@ export function AdminPage() {
                 />
               </label>
               <fieldset className="full objective-picker"><legend>Objetivos</legend>{[["EMAGRECIMENTO","Emagrecimento"],["GANHO_DE_MASSA","Ganho de massa"],["PERFORMANCE","Performance"],["SAUDE_E_BEM_ESTAR","Saúde e bem-estar"]].map(([value,label])=><label className="check-row" key={value}><input type="checkbox" checked={(productForm.objetivos||[]).includes(value)} onChange={e=>setProductForm({...productForm,objetivos:e.target.checked?[...(productForm.objetivos||[]),value]:(productForm.objetivos||[]).filter(item=>item!==value)})}/>{label}</label>)}</fieldset>
-              <label>
-                Esportes (separados por vírgula)
-                <input
-                  value={(productForm.esportes || []).join(", ")}
-                  onChange={(e) =>
-                    setProductForm({
-                      ...productForm,
-                      esportes: e.target.value
-                        .split(",")
-                        .map((v) => v.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                />
-              </label>
+              <fieldset className="full objective-picker"><legend>Esportes</legend>{Array.from(new Set([...(productForm.esportes || []), "ACADEMIA", "ARTES_MARCIAIS", "ATLETISMO", "BASQUETE", "CICLISMO", "CORRIDA", "CROSS_TRAINING", "FUTEBOL", "NATACAO", "OUTROS"])).map(value => <label className="check-row" key={value}><input type="checkbox" checked={(productForm.esportes || []).includes(value)} onChange={e => setProductForm({ ...productForm, esportes: e.target.checked ? [...(productForm.esportes || []), value] : (productForm.esportes || []).filter(item => item !== value) })} />{titleCase(value)}</label>)}</fieldset>
               {(
                 [
                   ["vegano", "Vegano"],
@@ -1067,23 +1097,18 @@ export function AdminPage() {
                   {label}
                 </label>
               ))}
-              {productForm.imagemUrl && (
-                <img
-                  className="image-preview"
-                  src={productForm.imagemUrl}
-                  alt="Pré-visualização"
-                />
-              )}
-            </div>
+            </fieldset>
+            {productError && <p className="commerce-feedback error" role="alert">{productError}</p>}
             <footer>
               <button
                 type="button"
                 className="button secondary"
-                onClick={() => setProductForm(null)}
+                disabled={imageUploading || productSaving}
+                onClick={() => openProductForm(null)}
               >
                 Cancelar
               </button>
-              <button className="button primary">Salvar produto</button>
+              <button className="button primary" disabled={imageUploading || productSaving}>{productSaving ? "Salvando produto…" : imageUploading ? "Aguarde o envio da imagem…" : "Salvar produto"}</button>
             </footer>
           </form>
         </div>
@@ -1414,8 +1439,9 @@ export function AdminPage() {
             </header>
             {orderOpen.itens.map((item) => (
               <div className="order-detail-row" key={item.id}>
+                <img src={item.produtoImagemUrl||"/assets/imagens/logo-vita-fortis-brand.webp"} alt="" onError={e => { const img = e.currentTarget; const fallback = "/assets/imagens/logo-vita-fortis-brand.webp"; if (!img.src.endsWith(fallback)) img.src = fallback; }} />
                 <span>
-                  {item.quantidade}× {item.produtoNome}
+                  <b>{item.produtoNome}</b><small>{item.quantidade} unidade(s) · {money(item.precoUnitario)} cada</small>
                 </span>
                 <b>{money(item.subtotal)}</b>
               </div>
