@@ -294,21 +294,74 @@ public class ProdutoService {
 
     @Transactional
     public Map<String,Object> importar(org.springframework.web.multipart.MultipartFile arquivo, boolean preVisualizar) throws java.io.IOException {
-        String nome=java.util.Optional.ofNullable(arquivo.getOriginalFilename()).orElse("").toLowerCase(); List<List<String>> linhas=new java.util.ArrayList<>();
-        if(nome.endsWith(".xlsx")){try(var workbook=new org.apache.poi.xssf.usermodel.XSSFWorkbook(arquivo.getInputStream())){var sheet=workbook.getSheetAt(0);var formatter=new org.apache.poi.ss.usermodel.DataFormatter();for(var row:sheet){List<String> cols=new java.util.ArrayList<>();for(int i=0;i<10;i++)cols.add(formatter.formatCellValue(row.getCell(i)));linhas.add(cols);}}}
-        else {try(var reader=new java.io.BufferedReader(new java.io.InputStreamReader(arquivo.getInputStream(),java.nio.charset.StandardCharsets.UTF_8))){String line;while((line=reader.readLine())!=null)linhas.add(java.util.Arrays.asList(line.split(line.contains(";")?";":",",-1)));}}
-        List<String> erros=new java.util.ArrayList<>();int inseridos=0,atualizados=0,ignorados=0;
-        for(int index=1;index<linhas.size();index++){var c=linhas.get(index);try{if(c.size()<8)throw new IllegalArgumentException("colunas insuficientes");String codigo=c.get(0).trim().toUpperCase(),produtoNome=c.get(1).trim();if(codigo.isBlank()||produtoNome.isBlank())throw new IllegalArgumentException("codigo e nome sao obrigatorios");BigDecimal preco=new BigDecimal(c.get(5).trim().replace(',','.'));int estoque=Integer.parseInt(c.get(6).trim());var categoria=VitaFortis.demo.v1.enums.CategoriaProduto.valueOf(c.get(7).trim().toUpperCase());var existing=produtoRepository.findByCodigoIgnoreCase(codigo);if(preVisualizar){if(existing.isPresent())atualizados++;else inseridos++;continue;}Produto p=existing.orElseGet(Produto::new);p.setCodigo(codigo);p.setNome(produtoNome);p.setDescricao(c.size()>2?c.get(2).trim():"");p.setMarca(c.size()>3?c.get(3).trim():null);p.setUnidade(c.size()>4?c.get(4).trim():null);p.setPreco(preco);p.setQuantidadeEstoque(estoque);p.setCategoria(categoria);p.setImagemUrl(c.size()>8&&!c.get(8).isBlank()?c.get(8).trim():null);p.setAtivo(c.size()<=9||c.get(9).isBlank()||Boolean.parseBoolean(c.get(9)));produtoRepository.save(p);if(existing.isPresent())atualizados++;else inseridos++;}catch(Exception e){erros.add("Linha "+(index+1)+": "+e.getMessage());}}
-        if(!preVisualizar&&!erros.isEmpty())throw new IllegalArgumentException("Importacao cancelada; corrija as linhas rejeitadas na pre-visualizacao.");
-        return Map.of("preVisualizacao",preVisualizar,"inseridos",inseridos,"atualizados",atualizados,"ignorados",ignorados,"rejeitados",erros.size(),"erros",erros);
+        String nome = java.util.Optional.ofNullable(arquivo.getOriginalFilename()).orElse("").toLowerCase();
+        if (arquivo.isEmpty()) throw new IllegalArgumentException("Selecione uma planilha com produtos");
+        List<List<String>> linhas;
+        if (nome.endsWith(".xlsx")) {
+            linhas = new java.util.ArrayList<>();
+            try (var workbook = new org.apache.poi.xssf.usermodel.XSSFWorkbook(arquivo.getInputStream())) {
+                if (workbook.getNumberOfSheets() == 0) throw new IllegalArgumentException("Planilha sem abas");
+                var formatter = new org.apache.poi.ss.usermodel.DataFormatter(java.util.Locale.US);
+                for (var row : workbook.getSheetAt(0)) {
+                    List<String> cols = new java.util.ArrayList<>();
+                    for (int i=0; i<10; i++) cols.add(formatter.formatCellValue(row.getCell(i)));
+                    linhas.add(cols);
+                }
+            }
+        } else if (nome.endsWith(".csv")) {
+            String texto = new String(arquivo.getBytes(), java.nio.charset.StandardCharsets.UTF_8).replace("\uFEFF", "");
+            String cabecalho = texto.lines().findFirst().orElse("");
+            linhas = CsvDados.ler(texto, cabecalho.contains(";") ? ';' : ',');
+        } else throw new IllegalArgumentException("Use um arquivo CSV ou XLSX");
+        List<String> colunas = List.of("codigo", "nome", "descricao", "marca", "unidade", "preco", "estoque", "categoria", "imagemUrl", "ativo");
+        if (linhas.isEmpty() || !linhas.get(0).stream().map(String::trim).toList().equals(colunas)) {
+            throw new IllegalArgumentException("Cabecalho invalido. Baixe o modelo CSV e mantenha a ordem das colunas.");
+        }
+        List<String> erros = new java.util.ArrayList<>();
+        List<Produto> validos = new java.util.ArrayList<>();
+        var codigos = new java.util.HashSet<String>();
+        int inseridos=0, atualizados=0;
+        try (var factory = jakarta.validation.Validation.buildDefaultValidatorFactory()) {
+            var validator = factory.getValidator();
+            for (int index=1; index<linhas.size(); index++) {
+                var c = linhas.get(index);
+                if (c.stream().allMatch(String::isBlank)) continue;
+                try {
+                    if (c.size()!=10) throw new IllegalArgumentException("esperadas 10 colunas");
+                    String codigo = c.get(0).trim().toUpperCase();
+                    if (codigo.isBlank()) throw new IllegalArgumentException("SKU obrigatorio");
+                    if (!codigos.add(codigo)) throw new IllegalArgumentException("SKU duplicado no arquivo: " + codigo);
+                    Produto p = new Produto();
+                    p.setCodigo(codigo); p.setNome(c.get(1).trim()); p.setDescricao(c.get(2).trim());
+                    p.setMarca(c.get(3).trim()); p.setUnidade(c.get(4).trim());
+                    p.setPreco(new BigDecimal(c.get(5).trim().replace(',', '.')));
+                    p.setQuantidadeEstoque(Integer.parseInt(c.get(6).trim()));
+                    p.setCategoria(VitaFortis.demo.v1.enums.CategoriaProduto.valueOf(c.get(7).trim().toUpperCase()));
+                    p.setImagemUrl(c.get(8).isBlank() ? null : c.get(8).trim());
+                    String ativo=c.get(9).trim();
+                    if (!ativo.isBlank() && !ativo.equalsIgnoreCase("true") && !ativo.equalsIgnoreCase("false")) throw new IllegalArgumentException("ativo deve ser true ou false");
+                    p.setAtivo(ativo.isBlank() || Boolean.parseBoolean(ativo));
+                    if (p.getPreco().signum()<0 || (p.isAtivo() && (p.getPreco().signum()==0 || p.getQuantidadeEstoque()<=0))) throw new IllegalArgumentException("produto ativo exige preco e estoque positivos; preco nao pode ser negativo");
+                    var falhas=validator.validate(p);
+                    if (!falhas.isEmpty()) throw new IllegalArgumentException(falhas.stream().map(v->v.getPropertyPath()+": "+v.getMessage()).sorted().collect(Collectors.joining("; ")));
+                    validos.add(p);
+                    if (produtoRepository.existsByCodigoIgnoreCase(codigo)) atualizados++; else inseridos++;
+                } catch (IllegalArgumentException erro) { erros.add("Linha "+(index+1)+": "+erro.getMessage()); }
+            }
+        }
+        if (validos.isEmpty() && erros.isEmpty()) erros.add("A planilha nao contem produtos");
+        if (!preVisualizar) {
+            if (!erros.isEmpty()) throw new IllegalArgumentException("Importacao cancelada: "+String.join(" | ", erros));
+            for (Produto dado : validos) {
+                Produto destino=produtoRepository.findByCodigoIgnoreCase(dado.getCodigo()).orElseGet(Produto::new);
+                destino.setCodigo(dado.getCodigo()); destino.setNome(dado.getNome()); destino.setDescricao(dado.getDescricao());
+                destino.setMarca(dado.getMarca()); destino.setUnidade(dado.getUnidade()); destino.setPreco(dado.getPreco());
+                destino.setQuantidadeEstoque(dado.getQuantidadeEstoque()); destino.setCategoria(dado.getCategoria());
+                destino.setImagemUrl(dado.getImagemUrl()); destino.setAtivo(dado.isAtivo());
+                produtoRepository.save(destino);
+            }
+            produtoRepository.flush();
+        }
+        return Map.of("preVisualizacao",preVisualizar,"inseridos",inseridos,"atualizados",atualizados,"ignorados",0,"rejeitados",erros.size(),"erros",erros);
     }
-
-
-
-
-
-
-
-
-
 }

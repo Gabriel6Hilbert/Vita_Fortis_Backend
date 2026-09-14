@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 public class PedidoController {
     private final PedidoService pedidos;
     public PedidoController(PedidoService pedidos) { this.pedidos = pedidos; }
+    @PostMapping("/revisao")
+    public PedidoResponseDto revisar(@Valid @RequestBody PedidoRequestDto dto, Authentication auth) { return pedidos.revisar(dto, auth.getName()); }
     @PostMapping @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
     public PedidoResponseDto criar(@Valid @RequestBody PedidoRequestDto dto, Authentication auth) { return pedidos.criar(dto, auth.getName()); }
     @GetMapping("/usuario/{usuarioId}") public List<PedidoResponseDto> usuario(@PathVariable Long usuarioId, Authentication auth) { return pedidos.listarUsuario(usuarioId, auth.getName()); }

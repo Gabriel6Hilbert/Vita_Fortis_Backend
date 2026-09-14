@@ -5,6 +5,7 @@ const SESSION_KEY = 'vita-fortis-session'
 
 type Session = { user: User }
 type UserPayload = User & { tipo?: UserRole; role?: UserRole }
+export type OrderInput = { usuarioId: number; itens: { produtoId: number; quantidade: number }[]; cupomId?:number; formaRecebimento: 'RETIRADA' | 'ENTREGA'; enderecoId?: number; formaPagamento: string; totalRevisado?: number }
 const normalizeUser = (user: UserPayload): User => ({ ...user, tipoUsuario: user.tipoUsuario || user.tipo || user.role })
 
 export class ApiError extends Error {
@@ -84,7 +85,8 @@ export const api = {
   clearCart: (userId: number) => request<Cart>(`/carrinhos/${userId}/itens`, { method: 'DELETE' }, true),
   applyCoupon: (userId: number, code: string) => request<Cart>(`/carrinhos/${userId}/cupom/${encodeURIComponent(code)}`, { method: 'POST' }, true),
   removeCoupon: (userId: number) => request<Cart>(`/carrinhos/${userId}/cupom`, { method: 'DELETE' }, true),
-  createOrder: (body: { usuarioId: number; itens: { produtoId: number; quantidade: number }[]; cupomId?:number; formaRecebimento: 'RETIRADA' | 'ENTREGA'; enderecoId?: number; formaPagamento: string }) => request<Order>('/pedidos', { method: 'POST', body: JSON.stringify(body) }, true),
+  reviewOrder: (body: OrderInput) => request<Order>('/pedidos/revisao', { method: 'POST', body: JSON.stringify(body) }, true),
+  createOrder: (body: OrderInput) => request<Order>('/pedidos', { method: 'POST', body: JSON.stringify(body) }, true),
   orders: (userId: number) => request<Order[]>(`/pedidos/usuario/${userId}`, {}, true),
   order: (id: number) => request<OrderDetail>(`/pedidos/${id}`, {}, true),
   me: () => request<User>('/me', {}, true),

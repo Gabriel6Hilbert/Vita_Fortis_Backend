@@ -111,7 +111,7 @@ public class CashbackService {
         var extrato = listaMovimentos.stream().map(m -> new ColaboradorResumoDto.MovimentoDto(m.getId(), m.getTipo().name(), m.getValor(),
                 m.getSaldoAnterior(), m.getSaldoNovo(), m.getJustificativa(), m.getPedido() == null ? null : m.getPedido().getId(), m.getCriadoEm())).toList();
         return new ColaboradorResumoDto(colaborador.getId(), saldo(colaborador), confirmado, estornado, vendas,
-                listaPedidos.size(), desempenho, extrato, listaPedidos.stream().map(pedidoServiceHolder::toDto).toList());
+                listaPedidos.size(), desempenho, extrato, java.util.List.of());
     }
 
     /** Quebra o ciclo de dependencias entre PedidoService e CashbackService. */

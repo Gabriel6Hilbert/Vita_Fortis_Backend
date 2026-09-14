@@ -57,6 +57,9 @@ public class PedidoService {
         pedido.setSubtotal(subtotal);
         pedido.setDesconto(desconto);
         pedido.setTotal(subtotal.subtract(desconto).add(pedido.getFrete()).setScale(2, RoundingMode.HALF_UP));
+        if (dto.getTotalRevisado() != null && dto.getTotalRevisado().compareTo(pedido.getTotal()) != 0) {
+            throw new IllegalArgumentException("O valor do pedido mudou. Revise novamente antes de confirmar.");
+        }
         adicionarHistorico(pedido, StatusCompra.PENDENTE, "Pedido criado e aguardando pagamento");
 
         Pedido salvo = pedidos.save(pedido);
@@ -64,6 +67,31 @@ public class PedidoService {
                 salvo.getId(), salvo.getTotal(), salvo.getFormaPagamento());
         salvo.setReferenciaPagamento(pagamento.referencia());
         return toDto(pedidos.save(salvo));
+    }
+
+    @Transactional(readOnly = true)
+    public PedidoResponseDto revisar(PedidoRequestDto dto, String emailAutenticado) {
+        Usuario usuario = usuarioAutenticado(emailAutenticado);
+        if (!usuario.getId().equals(dto.getUsuarioId())) throw new AccessDeniedException("Acesso negado ao pedido");
+        Pedido pedido = novoPedido(usuario, dto);
+        BigDecimal subtotal = BigDecimal.ZERO;
+        var quantidades = new java.util.LinkedHashMap<Long, Integer>();
+        for (var item : dto.getItens()) quantidades.merge(item.getProdutoId(), item.getQuantidade(), Math::addExact);
+        for (var item : quantidades.entrySet()) {
+            Produto produto = produtos.findByIdAndAtivoTrue(item.getKey())
+                    .orElseThrow(() -> new IllegalArgumentException("Produto indisponivel: " + item.getKey()));
+            if (produto.getQuantidadeEstoque() < item.getValue()) throw new IllegalArgumentException("Estoque insuficiente para " + produto.getNome());
+            ItemCompra compra = criarItem(pedido, produto, item.getValue());
+            pedido.getItems().add(compra);
+            subtotal = subtotal.add(compra.getSubtotal());
+        }
+        Cupom cupom = obterCupom(dto.getCupomId(), subtotal);
+        pedido.setCupomUtilizado(cupom);
+        pedido.setSubtotal(subtotal);
+        pedido.setDesconto(calcularDesconto(cupom, subtotal));
+        aplicarRecebimento(pedido, dto);
+        pedido.setTotal(subtotal.subtract(pedido.getDesconto()).add(pedido.getFrete()).setScale(2, RoundingMode.HALF_UP));
+        return toDto(pedido);
     }
 
     @Transactional
@@ -124,6 +152,9 @@ public class PedidoService {
     }
 
     private Pedido novoPedido(Usuario usuario, PedidoRequestDto dto) {
+        if (!java.util.Set.of("PIX", "CARTAO", "BOLETO").contains(dto.getFormaPagamento().trim().toUpperCase())) {
+            throw new IllegalArgumentException("Forma de pagamento invalida");
+        }
         Pedido pedido = new Pedido();
         pedido.setUsuario(usuario);
         pedido.setStatus(StatusCompra.PENDENTE);
@@ -152,6 +183,7 @@ public class PedidoService {
 
     private ItemCompra criarItem(Pedido pedido, Produto produto, int quantidade) {
         BigDecimal preco = produto.getPrecoFinal();
+        if (preco == null || preco.signum() <= 0) throw new IllegalArgumentException("Produto sem preco valido: " + produto.getNome());
         ItemCompra item = new ItemCompra();
         item.setPedido(pedido);
         item.setProduto(produto);
@@ -241,8 +273,12 @@ public class PedidoService {
     }
 
     private Pedido buscar(Long id) {
-        return pedidos.buscarComCupomEColaborador(id)
+        Pedido pedido = pedidos.buscarComCupomEColaborador(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido nao encontrado"));
+        // Carregar as duas coleções separadamente evita multiplicar os itens pelo histórico.
+        // O histórico precisa estar inicializado antes das operações de estoque limparem o contexto JPA.
+        pedido.getHistoricoStatus().size();
+        return pedido;
     }
 
     private void adicionarHistorico(Pedido pedido, StatusCompra status, String observacao) {

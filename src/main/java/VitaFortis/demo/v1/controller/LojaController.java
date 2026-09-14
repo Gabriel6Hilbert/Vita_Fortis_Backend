@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/loja")
 public class LojaController {
+    @Value("${RENDER_GIT_COMMIT:local}")
+    private String versao;
     private final LojaInfoDto loja;
 
     public LojaController(
@@ -23,4 +25,7 @@ public class LojaController {
 
     @GetMapping
     public LojaInfoDto obter() { return loja; }
+
+    @GetMapping("/versao")
+    public java.util.Map<String,String> versao() { return java.util.Map.of("commit",versao,"pagamento","SIMULADO"); }
 }

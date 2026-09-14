@@ -46,7 +46,7 @@ public class SecurityConfig {
                                 "/entrar", "/sacola", "/conta", "/pedidos", "/admin", "/colaborador", "/favoritos",
                                 "/ofertas", "/novidades", "/kits", "/sobre", "/politicas", "/faq",
                                 "/trabalhe-conosco", "/contato", "/error").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/produtos/**", "/api/v1/loja").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/produtos/**", "/api/v1/loja", "/api/v1/loja/versao").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/colaborador/**").hasRole("COLABORADOR")

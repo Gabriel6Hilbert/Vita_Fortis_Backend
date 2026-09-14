@@ -30,4 +30,7 @@ public class PedidoRequestDto {
 
     @NotBlank
     private String formaPagamento;
+
+    @jakarta.validation.constraints.DecimalMin("0.00")
+    private java.math.BigDecimal totalRevisado;
 }

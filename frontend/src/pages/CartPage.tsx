@@ -4,8 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/AuthContext";
 import { useCart } from "../app/CartContext";
 import { Empty, ErrorState, Loading } from "../components/States";
-import { api } from "../services/api";
-import type { Address, AddressInput } from "../types/api";
+import { api, type OrderInput } from "../services/api";
+import type { Address, AddressInput, Order } from "../types/api";
 import { money } from "../utils/format";
 
 const emptyAddress: AddressInput = {
@@ -38,6 +38,8 @@ export function CartPage() {
   const [ordering, setOrdering] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [reviewing, setReviewing] = useState(false);
+  const [quote, setQuote] = useState<Order | null>(null);
+  const [reviewedInput, setReviewedInput] = useState<OrderInput | null>(null);
   const [receiving, setReceiving] = useState<"RETIRADA" | "ENTREGA">(
     "RETIRADA",
   );
@@ -58,6 +60,12 @@ export function CartPage() {
       })
       .catch(() => undefined);
   }, [user]);
+
+  useEffect(() => {
+    setReviewing(false);
+    setQuote(null);
+    setReviewedInput(null);
+  }, [cart, user?.id]);
 
   if (loading && !cart)
     return (
@@ -89,11 +97,7 @@ export function CartPage() {
   const finish = async (event: FormEvent) => {
     event.preventDefault();
     if (!user) { navigate('/entrar', { state: { from: '/sacola' } }); return; }
-    if (!reviewing) {
-      setReviewing(true);
-      setMessage("Revise todos os dados antes de confirmar o pedido.");
-      return;
-    }
+    if (ordering) return;
     setOrdering(true);
     setMessage("");
     try {
@@ -101,8 +105,10 @@ export function CartPage() {
       if (receiving === "ENTREGA" && !selectedAddressId) {
         const address = await api.createAddress(user.id, newAddress);
         selectedAddressId = address.id;
+        setAddresses((current) => [...current, address]);
+        setAddressId(address.id);
       }
-      const order = await api.createOrder({
+      const input: OrderInput = {
         usuarioId: user.id,
         itens: cart.carrinhoItens.map((item) => ({
           produtoId: item.produtoId,
@@ -112,10 +118,24 @@ export function CartPage() {
         formaRecebimento: receiving,
         enderecoId: receiving === "ENTREGA" ? selectedAddressId : undefined,
         formaPagamento: payment,
-      });
-      await clear();
+      };
+      if (!reviewing || !quote || !reviewedInput) {
+        const result = await api.reviewOrder(input);
+        setReviewedInput(input);
+        setQuote(result);
+        if (selectedAddressId) setAddressId(selectedAddressId);
+        setReviewing(true);
+        setMessage("Confira o frete, o prazo e o total calculados antes de confirmar.");
+        return;
+      }
+      const order = await api.createOrder({ ...reviewedInput, totalRevisado: Number(quote.total) });
+      // A compra já foi criada. Uma falha ao limpar a sacola não deve permitir repeti-la.
+      try { await clear(); } catch { /* O pedido permanece acessível em Meus pedidos. */ }
       navigate(`/pedidos?novo=${order.id}`);
     } catch (error) {
+      setReviewing(false);
+      setQuote(null);
+      setReviewedInput(null);
       setMessage(
         error instanceof Error
           ? error.message
@@ -156,6 +176,10 @@ export function CartPage() {
 
   const field = (key: keyof AddressInput, value: string) =>
     setNewAddress((current) => ({ ...current, [key]: value }));
+  const changeCart = async (action: () => Promise<void>) => {
+    setReviewing(false); setQuote(null); setReviewedInput(null);
+    try { await action(); } catch (error) { setMessage(error instanceof Error ? error.message : 'Não foi possível atualizar a sacola.'); }
+  };
   const lookupCep=async()=>{const cep=newAddress.cep.replace(/\D/g,'');if(cep.length!==8){setCepStatus('Informe os 8 dígitos do CEP.');return}setCepStatus('Consultando CEP…');try{const response=await fetch(`https://viacep.com.br/ws/${cep}/json/`);if(!response.ok)throw new Error();const data=await response.json();if(data.erro)throw new Error();setNewAddress(current=>({...current,cep,logradouro:data.logradouro||current.logradouro,bairro:data.bairro||current.bairro,cidade:data.localidade||current.cidade,uf:data.uf||current.uf}));setCepStatus('Endereço localizado. Confira o número e os dados.') }catch{setCepStatus('CEP não encontrado. Confira e tente novamente.')}};
 
   return (
@@ -166,7 +190,7 @@ export function CartPage() {
       </header>
       <form className="cart-layout" onSubmit={finish}>
         <section className="cart-items">
-          {cart.carrinhoItens.map((item) => (
+          {cart.carrinhoItens.map((original) => { const priced = quote?.itens.find(item => item.produtoId === original.produtoId); const item = priced ? { ...original, precoUnitario: priced.precoUnitario, subtotal: priced.subtotal } : original; return (
             <article className="cart-item" key={item.itemId}>
               <div className="cart-thumb">
                 <img
@@ -188,7 +212,7 @@ export function CartPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      update(item.itemId, Math.max(1, item.quantidade - 1))
+                      void changeCart(() => update(item.itemId, Math.max(1, item.quantidade - 1)))
                     }
                     aria-label="Diminuir"
                   >
@@ -197,7 +221,7 @@ export function CartPage() {
                   <span>{item.quantidade}</span>
                   <button
                     type="button"
-                    onClick={() => update(item.itemId, item.quantidade + 1)}
+                    onClick={() => void changeCart(() => update(item.itemId, item.quantidade + 1))}
                     aria-label="Aumentar"
                   >
                     <Plus />
@@ -208,14 +232,14 @@ export function CartPage() {
                 <strong>{money(item.subtotal)}</strong>
                 <button
                   type="button"
-                  onClick={() => { if(window.confirm(`Remover ${item.produtoNome} da sacola?`)) void remove(item.itemId) }}
+                  onClick={() => { if(window.confirm(`Remover ${item.produtoNome} da sacola?`)) void changeCart(() => remove(item.itemId)) }}
                   aria-label="Remover"
                 >
                   <Trash2 />
                 </button>
               </div>
             </article>
-          ))}
+          )})}
           <button
             type="button"
             className="text-button danger clear-cart"
@@ -259,6 +283,7 @@ export function CartPage() {
                   Endereço
                   <select
                     value={addressId}
+                    disabled={reviewing || ordering}
                     onChange={(event) =>
                       setAddressId(Number(event.target.value))
                     }
@@ -354,30 +379,32 @@ export function CartPage() {
           </div>
           <div className="summary-line">
             <span>Subtotal</span>
-            <strong>{money(cart.subtotal ?? total)}</strong>
+            <strong>{money(quote?.subtotal ?? cart.subtotal ?? total)}</strong>
           </div>
           {(cart.descontos || 0) > 0 && (
             <div className="summary-line discount-line">
               <span>Desconto ({cart.cupomCodigo})</span>
-              <strong>-{money(cart.descontos)}</strong>
+              <strong>-{money(quote?.desconto ?? cart.descontos)}</strong>
             </div>
           )}
           <div className="summary-line">
             <span>Frete</span>
             <span>
-              {receiving === "RETIRADA" ? "Grátis" : "Calculado pelo servidor"}
+              {receiving === "RETIRADA" ? "Grátis" : quote ? money(quote.frete) : "Disponível na revisão"}
             </span>
           </div>
+          {quote && receiving === "ENTREGA" && <p className="summary-message">Prazo estimado: {quote.prazoEntregaDias} dias. Frete de homologação com tarifa fixa.</p>}
           <div className="coupon">
             <label>
               Cupom
               <input
                 value={coupon}
+                disabled={reviewing || ordering}
                 onChange={(event) => setCoupon(event.target.value)}
                 placeholder="Digite o código"
               />
             </label>
-            <button type="button" onClick={applyCoupon}>
+            <button type="button" disabled={reviewing || ordering} onClick={applyCoupon}>
               Aplicar
             </button>
           </div>
@@ -389,16 +416,18 @@ export function CartPage() {
             </p>
           )}
           <div className="summary-total">
-            <span>Total</span>
-            <strong>{money(cart.total ?? total)}</strong>
+            <span>{receiving === 'ENTREGA' && !quote ? 'Total sem frete' : 'Total'}</span>
+            <strong>{money(quote?.total ?? cart.total ?? total)}</strong>
           </div>
-          {message && <p className="summary-message">{message}</p>}
+          {(message || cartError) && <p className="summary-message" role="status">{message || cartError}</p>}
           {reviewing && (
             <button
               type="button"
               className="button secondary"
               onClick={() => {
                 setReviewing(false);
+                setQuote(null);
+                setReviewedInput(null);
                 setMessage("");
               }}
             >
