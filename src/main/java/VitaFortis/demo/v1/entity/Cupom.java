@@ -62,10 +62,14 @@ public class Cupom {
     private LocalDateTime dataCadastro;
 
     @Column(name = "DATA_VENCIMENTO")
-    private LocalDateTime dataVencimento; 
+    private LocalDateTime dataVencimento;
 
-    @AssertTrue(message = "DATA_VENCIMENTO deve ser posterior à DATA_CADASTRO")
+    private LocalDateTime dataInicio;
+    @jakarta.validation.constraints.Min(1)
+    private Integer limiteUso;
+
+    @AssertTrue(message = "DATA_VENCIMENTO deve ser posterior ao inicio da validade")
     private boolean isVencimentoValido() {
-        return dataVencimento == null || dataCadastro == null || dataVencimento.isAfter(dataCadastro);
+        return dataVencimento == null || dataInicio == null || dataVencimento.isAfter(dataInicio);
     }
 }

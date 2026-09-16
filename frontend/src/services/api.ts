@@ -1,9 +1,12 @@
-import type { Address, AddressInput, AdminMetrics, BrandSummary, Cart, CategorySummary, CollaboratorSummary, Coupon, GoalSummary, Order, OrderDetail, Page, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
+import type { CatalogRegistration, Address, AddressInput, AdminMetrics, BrandSummary, Cart, CategorySummary, CollaboratorSummary, Coupon, GoalSummary, Order, OrderDetail, Page, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const SESSION_KEY = 'vita-fortis-session'
+const PUBLIC_CACHE_MS = 30_000
+const publicCache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>()
 
 type Session = { user: User }
+export type OrderFilters = Partial<Record<'numero' | 'inicio' | 'fim' | 'cliente' | 'status' | 'recebimento' | 'pagamento' | 'statusPagamento', string>>
 type UserPayload = User & { tipo?: UserRole; role?: UserRole }
 export type OrderInput = { usuarioId: number; itens: { produtoId: number; quantidade: number }[]; cupomId?:number; formaRecebimento: 'RETIRADA' | 'ENTREGA'; enderecoId?: number; formaPagamento: string; totalRevisado?: number }
 const normalizeUser = (user: UserPayload): User => ({ ...user, tipoUsuario: user.tipoUsuario || user.tipo || user.role })
@@ -54,7 +57,16 @@ const request = async <T>(path: string, init: RequestInit = {}, authenticated = 
   if (!response.ok) {
     throw new ApiError(apiErrorMessage(payload, response.status), response.status, payload)
   }
+  if (init.method && init.method !== 'GET') publicCache.clear()
   return payload as T
+}
+
+const publicRequest = <T>(path: string): Promise<T> => {
+  const cached = publicCache.get(path)
+  if (cached && cached.expiresAt > Date.now()) return cached.promise as Promise<T>
+  const promise = request<T>(path).catch(error => { publicCache.delete(path); throw error })
+  publicCache.set(path, { expiresAt: Date.now() + PUBLIC_CACHE_MS, promise })
+  return promise
 }
 
 const query = (values: Record<string, string | number | boolean | undefined>) => {
@@ -65,14 +77,17 @@ const query = (values: Record<string, string | number | boolean | undefined>) =>
 }
 
 export const api = {
+  catalogRegistrations: () => request<CatalogRegistration[]>('/admin/catalogo/cadastros', {}, true),
+  saveCatalogRegistration: (body: Partial<CatalogRegistration>) => request<CatalogRegistration>('/admin/catalogo/cadastros' + (body.id ? '/' + body.id : ''), { method: body.id ? 'PUT' : 'POST', body: JSON.stringify(body) }, true),
+  disableCatalogRegistration: (id: number) => request<void>('/admin/catalogo/cadastros/' + id, { method: 'DELETE' }, true),
   store: () => request<StoreInfo>('/loja'),
-  products: (filters: Record<string, string | number | boolean | undefined>) => request<Page<Product>>(`/produtos${query(filters)}`),
-  product: (id: string | number) => request<Product>(`/produtos/${id}`),
+  products: (filters: Record<string, string | number | boolean | undefined>) => publicRequest<Page<Product>>(`/produtos${query(filters)}`),
+  product: (id: string | number) => publicRequest<Product>(`/produtos/${id}`),
   reviews: (id: string | number) => request<Review[]>(`/produtos/${id}/avaliacoes`),
   createReview: (id: string | number, body: { usuarioId:number; nota: number; comentario?: string }) => request<Review>(`/produtos/${id}/avaliacoes`, { method: 'POST', body: JSON.stringify(body) }, true),
-  categories: () => request<CategorySummary[]>('/produtos/categorias'),
-  brands: () => request<BrandSummary[]>('/produtos/marcas'),
-  goals: () => request<GoalSummary[]>('/produtos/objetivos'),
+  categories: () => publicRequest<CategorySummary[]>('/produtos/categorias'),
+  brands: () => publicRequest<BrandSummary[]>('/produtos/marcas'),
+  goals: () => publicRequest<GoalSummary[]>('/produtos/objetivos'),
   login: (email: string, senha: string) => request<UserPayload>('/auth/login', { method: 'POST', body: JSON.stringify({ email, senha }) }).then(normalizeUser),
   register: (body: { nome: string; email: string; senha: string; cpf: string; telefone?: string }) => request<UserPayload>('/auth/cadastro', { method: 'POST', body: JSON.stringify(body) }).then(normalizeUser),
   requestPasswordReset: (email: string) => request<{message:string}>('/auth/recuperacao-senha', { method: 'POST', body: JSON.stringify({ email }) }),
@@ -111,7 +126,7 @@ export const api = {
   setDiscountPercent: (id:number,valor:number) => request<Product>(`/admin/produtos/${id}/desconto-percentual?valor=${valor}`,{method:'PATCH'},true),
   setDiscountValue: (id:number,valor:number) => request<Product>(`/admin/produtos/${id}/desconto-valor?valor=${valor}`,{method:'PATCH'},true),
   clearDiscount: (id:number) => request<Product>(`/admin/produtos/${id}/desconto`,{method:'DELETE'},true),
-  adminOrders: () => request<Order[]>('/admin/pedidos', {}, true),
+  adminOrders: (filters: OrderFilters = {}) => request<Order[]>(`/admin/pedidos${query(filters)}`, {}, true),
   setOrderStatus: (id: number, valor: string) => request<Order>(`/admin/pedidos/${id}/status?valor=${valor}`, { method: 'PATCH' }, true),
   approvePayment: (id:number) => request<Order>(`/admin/pedidos/${id}/pagamento/aprovar`,{method:'PATCH'},true),
   rejectPayment: (id:number) => request<Order>(`/admin/pedidos/${id}/pagamento/recusar`,{method:'PATCH'},true),
@@ -133,9 +148,9 @@ export const api = {
   withdrawCashback: (id:number,valor:number,justificativa:string) => request(`/admin/colaboradores/${id}/cashback/baixas`,{method:'POST',body:JSON.stringify({valor,justificativa})},true),
   adminReviews: () => request<Review[]>('/admin/avaliacoes',{},true),
   moderateReview: (id:number,valor:boolean) => request<Review>(`/admin/avaliacoes/${id}/aprovada?valor=${valor}`,{method:'PATCH'},true),
-  downloadReport: async (tipo:string,inicio:string,fim:string,formato:'csv'|'pdf'|'xlsx'='csv') => {
-    const response=await fetch(`${API_URL}/admin/relatorios/${tipo}.${formato}${query({inicio,fim})}`,{credentials:'include'})
-    if(!response.ok) throw new ApiError('Não foi possível gerar o relatório.',response.status)
+  downloadReport: async (tipo:string,inicio:string,fim:string,formato:'csv'|'pdf'|'xlsx'='csv',filtros:Record<string,string>={}) => {
+    const response=await fetch(`${API_URL}/admin/relatorios/${tipo}.${formato}${query({...filtros,inicio,fim})}`,{credentials:'include'})
+    if(!response.ok) { const payload=await response.json().catch(()=>null); throw new ApiError(apiErrorMessage(payload,response.status),response.status) }
     const blob=await response.blob(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`vita-fortis-${tipo.toLowerCase()}.${formato}`; a.click(); URL.revokeObjectURL(url)
   },
 }

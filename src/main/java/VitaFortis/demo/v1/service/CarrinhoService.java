@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 
 @Service
 public class CarrinhoService {
+    private final CupomRegrasService regrasCupom;
 
     private final CarrinhoRepository carrinhoRepository;
     private final CarrinhoItemRepository  carrinhoItemRepository;
@@ -33,7 +34,8 @@ public class CarrinhoService {
                            CarrinhoItemRepository itemRepository,
                            ProdutoRepository produtoRepository,
                            CarrinhoMapper carrinhoMapper,
-                           CarrinhoItemMapper itemMapper, UsuarioRepository usuarioRepository, CupomRepository cupomRepository) {
+                           CarrinhoItemMapper itemMapper, UsuarioRepository usuarioRepository, CupomRepository cupomRepository, CupomRegrasService regrasCupom) {
+        this.regrasCupom = regrasCupom;
         this.carrinhoRepository = carrinhoRepository;
         this.carrinhoItemRepository = itemRepository;
         this.produtoRepository = produtoRepository;
@@ -147,7 +149,7 @@ public class CarrinhoService {
     }
 
     //CASO O CARRINHO EXISTA ELE PEGA O QUE JA TEM COM OS PRODUTOS
-    @Transactional(readOnly = true)
+    @Transactional
     public CarrinhoResponseDto obterCarrinhoSeExistir(Long usuarioId) {
         return carrinhoRepository.findByUsuarioIdAndAtivoTrue(usuarioId)
                 .map(this::resposta)
@@ -265,6 +267,9 @@ public class CarrinhoService {
     }
 
     private CarrinhoResponseDto resposta(Carrinho carrinho) {
+        carrinho.getItens().removeIf(item -> !item.getProduto().isAtivo());
+        carrinhoRepository.flush();
+        recalcularTotais(carrinho);
         CarrinhoResponseDto dto = carrinhoMapper.toResponseDto(carrinho);
         if (carrinho.getCupomCodigo() != null) {
             cupomRepository.findByCodigoIgnoreCase(carrinho.getCupomCodigo()).ifPresent(cupom -> {
@@ -308,19 +313,7 @@ public class CarrinhoService {
     }
 
     private void validarCupom(Cupom cupom, BigDecimal subtotalAtual) {
-        if (!cupom.isAtivo()) {
-            throw new IllegalArgumentException("Cupom inativo.");
-        }
-        LocalDateTime agora = LocalDateTime.now();
-        if (cupom.getDataCadastro() != null && agora.isBefore(cupom.getDataCadastro())) {
-            throw new IllegalArgumentException("Cupom ainda não está válido.");
-        }
-        if (cupom.getDataVencimento() != null && agora.isAfter(cupom.getDataVencimento())) {
-            throw new IllegalArgumentException("Cupom expirado.");
-        }
-        if (cupom.getMinSubtotal() != null && subtotalAtual.compareTo(cupom.getMinSubtotal()) < 0) {
-            throw new IllegalArgumentException("Subtotal mínimo não atingido.");
-        }
+        regrasCupom.validar(cupom, subtotalAtual);
     }
 
 }

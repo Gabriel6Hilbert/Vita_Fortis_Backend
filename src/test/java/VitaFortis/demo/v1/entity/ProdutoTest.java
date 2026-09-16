@@ -1,6 +1,5 @@
 package VitaFortis.demo.v1.entity;
 
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -37,7 +36,7 @@ class ProdutoTest {
         produto.setCodigo("TESTE-001");
         produto.setNome("Whey"); produto.setDescricao("Produto teste");
         produto.setPreco(new BigDecimal(preco)); produto.setQuantidadeEstoque(10);
-        produto.setCategoria(CategoriaProduto.PROTEINAS); produto.setAtivo(true);
+        produto.setCategoria("PROTEINAS"); produto.setAtivo(true);
         return produto;
     }
 }

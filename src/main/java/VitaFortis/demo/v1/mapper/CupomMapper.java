@@ -19,7 +19,7 @@ public interface CupomMapper {
     @Mapping(target = "colaborador", ignore = true)
     Cupom toEntity(CupomRequestDto dto);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.SET_TO_NULL)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "ativo", ignore = true)
     @Mapping(target = "dataCadastro", ignore = true)

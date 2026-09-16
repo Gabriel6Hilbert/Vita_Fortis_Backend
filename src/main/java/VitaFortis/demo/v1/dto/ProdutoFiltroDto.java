@@ -1,6 +1,5 @@
 package VitaFortis.demo.v1.dto;
 
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import VitaFortis.demo.v1.enums.ProdutoOrdenacao;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +16,7 @@ public class ProdutoFiltroDto {
     private String descricao;
     private BigDecimal precoMin;
     private BigDecimal precoMax;
-    private CategoriaProduto categoria;
+    private String categoria;
     private Set<String> objetivos;
     private Set<String> esportes;
     private Boolean vegano;

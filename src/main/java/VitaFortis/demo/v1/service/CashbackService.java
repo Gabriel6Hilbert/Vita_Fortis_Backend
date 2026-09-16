@@ -106,7 +106,7 @@ public class CashbackService {
             BigDecimal cashback = doCupom.stream().filter(p -> p.getStatusPagamento() == VitaFortis.demo.v1.enums.StatusPagamento.APROVADO)
                     .map(p -> p.getSubtotal().subtract(p.getDesconto()).multiply(c.getPercentualCashback()).divide(CEM, 2, RoundingMode.HALF_UP))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            return new ColaboradorResumoDto.CupomDesempenhoDto(c.getId(), c.getCodigo(), c.isAtivo(), c.getPercentualCashback(), doCupom.size(), total, cashback);
+            return new ColaboradorResumoDto.CupomDesempenhoDto(c.getId(), c.getCodigo(), c.isAtivo(), c.getPercentualCashback(), doCupom.size(), total, cashback, c.getDesconto(), c.getTipo().name(), c.getDataInicio(), c.getDataVencimento(), c.getLimiteUso());
         }).toList();
         var extrato = listaMovimentos.stream().map(m -> new ColaboradorResumoDto.MovimentoDto(m.getId(), m.getTipo().name(), m.getValor(),
                 m.getSaldoAnterior(), m.getSaldoNovo(), m.getJustificativa(), m.getPedido() == null ? null : m.getPedido().getId(), m.getCriadoEm())).toList();

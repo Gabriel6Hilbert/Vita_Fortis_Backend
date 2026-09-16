@@ -1,7 +1,6 @@
 package VitaFortis.demo.v1.controller;
 
 import VitaFortis.demo.v1.entity.Produto;
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import VitaFortis.demo.v1.repository.ProdutoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -28,6 +27,21 @@ class HomologacaoFluxosIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired ProdutoRepository produtos;
+
+    @Test
+    void relatoriosAplicamContratoDeFiltrosEPermissaoEmTodosOsFormatos() throws Exception {
+        var admin=login("admin@vitafortis.test");
+        var cliente=login("cliente@vitafortis.test");
+        for(String formato:List.of("csv","xlsx","pdf")) {
+            String url="/api/v1/admin/relatorios/CUPONS."+formato;
+            mvc.perform(get(url).param("inicio","2026-09-01").param("fim","2026-09-30").param("busca","COLAB").session(admin.session()))
+                    .andExpect(status().isOk()).andExpect(header().exists("Content-Disposition"));
+            mvc.perform(get(url).param("inicio","2026-09-01").param("fim","2026-09-30").session(cliente.session())).andExpect(status().isForbidden());
+            mvc.perform(get(url).param("inicio","2026-09-30").param("fim","2026-09-01").session(admin.session())).andExpect(status().isBadRequest());
+        }
+        mvc.perform(get("/api/v1/admin/relatorios/PEDIDOS.csv").param("inicio","2026-09-01").param("fim","2026-09-30").param("pagamento","INVALIDO").session(admin.session()))
+                .andExpect(status().isUnprocessableEntity());
+    }
 
     @Test
     void revisaoEntregaNaoDebitaEstoqueEConfirmacaoRevalidaTotal() throws Exception {
@@ -97,7 +111,7 @@ class HomologacaoFluxosIntegrationTest {
     private MockMultipartFile csv(String content) { return new MockMultipartFile("arquivo","produtos.csv","text/csv",content.getBytes(StandardCharsets.UTF_8)); }
     private Produto produto() {
         var p=new Produto(); p.setCodigo("CHECK-"+UUID.randomUUID()); p.setNome("Produto de teste");
-        p.setCategoria(CategoriaProduto.PROTEINAS); p.setPreco(new BigDecimal("24.90")); p.setQuantidadeEstoque(10);
+        p.setCategoria("PROTEINAS"); p.setPreco(new BigDecimal("24.90")); p.setQuantidadeEstoque(10);
         return produtos.saveAndFlush(p);
     }
     private Login login(String email) throws Exception {

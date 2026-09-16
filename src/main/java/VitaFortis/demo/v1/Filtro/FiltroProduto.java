@@ -2,7 +2,6 @@ package VitaFortis.demo.v1.Filtro;
 
 import VitaFortis.demo.v1.dto.ProdutoFiltroDto;
 import VitaFortis.demo.v1.entity.Produto;
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import VitaFortis.demo.v1.enums.ProdutoOrdenacao;
 import jakarta.persistence.criteria.Path;
 import org.springframework.data.domain.Sort;
@@ -72,7 +71,7 @@ public final class FiltroProduto {
                 : cb.equal(cb.lower(root.get("marca")), marca.trim().toLowerCase());
     }
 
-    private static Specification<Produto> categoriaIgual(CategoriaProduto cat) {
+    private static Specification<Produto> categoriaIgual(String cat) {
         return (root, q, cb) -> (cat == null)
                 ? cb.conjunction()
                 : cb.equal(root.get("categoria"), cat);

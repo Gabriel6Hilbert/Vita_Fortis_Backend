@@ -1,7 +1,6 @@
 package VitaFortis.demo.config;
 
 import VitaFortis.demo.v1.entity.Produto;
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import VitaFortis.demo.v1.repository.ProdutoRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +33,7 @@ public class CatalogoFtwDataInitializer implements CommandLineRunner {
             List<ProdutoCatalogo> catalogo = objectMapper.readValue(arquivo, new TypeReference<>() {});
             for (ProdutoCatalogo item : catalogo) {
                 Produto produto = produtos.findByCodigoIgnoreCase(item.codigo()).orElseGet(Produto::new);
+                if (produto.getId() != null) continue;
                 if (produto.getId() == null) {
                     produto.setCodigo(item.codigo());
                     produto.setNome(item.nome());
@@ -66,7 +66,7 @@ public class CatalogoFtwDataInitializer implements CommandLineRunner {
             String descricao,
             String marca,
             String unidade,
-            CategoriaProduto categoria,
+            String categoria,
             String subcategoria,
             String imagemUrl,
             boolean lancamento

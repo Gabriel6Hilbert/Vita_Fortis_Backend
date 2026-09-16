@@ -1,0 +1,8 @@
+.order-filters { margin-bottom: 1.5rem; }
+.order-filters fieldset { min-width: 0; border: 1px solid #ddd; border-radius: 12px; padding: 1rem; }
+.order-filters legend { padding: 0 .5rem; font-weight: 700; }
+.order-filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 1rem; }
+.order-filters label { display: flex; flex-direction: column; gap: .4rem; font-size: .875rem; }
+.order-filters input, .order-filters select { width: 100%; min-width: 0; padding: .7rem; border: 1px solid #bbb; border-radius: 6px; background: white; color: #222; }
+.order-filters [role=alert] { color: #b42318; margin-top: .8rem; }
+.order-filter-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }

@@ -18,6 +18,11 @@ Fonte analisada: `Levantamento_Requisitos_VittaFortis_Atualizado.docx`.
 - Painel administrativo separado da conta do cliente, com produtos ativos e inativos, estoque, pedidos, usuarios, colaboradores e cupons.
 - Cadastro administrativo de colaborador, ativacao/desativacao e permissao individual para relatorios.
 - Formulario de cupom com vinculo ao colaborador e percentual de cashback.
+- RF28: exclusao administrativa de produto por inativacao, preservando banco e historico; itens inativos nao aparecem em catalogo, detalhe publico, favoritos ou sacola e nao sao reativados pela carga inicial.
+- RF30: gestao persistente de categorias e atributos pelo painel, com criacao, edicao, inativacao e reativacao, sem categorias fixas no codigo.
+- RNF04: cupons com desconto percentual ou fixo, inicio e fim de validade, valor minimo e limite de uso; validacao na sacola, revisao e checkout, inclusive concorrencia no ultimo uso.
+- Area do colaborador com desconto, cashback, validade, consumo, limite e situacao de cada cupom vinculado.
+- Consultas do catalogo otimizadas com busca agregada de filtros, carregamento em lote das colecoes e cache curto de requisicoes publicas repetidas no navegador.
 - Catalogo, detalhes do produto, favoritos persistidos, avaliacoes, relacionados, sacola e checkout integrados.
 - Cupom aplicado na sacola transportado ao pedido, com desconto e cashback do colaborador apresentados separadamente.
 - API administrativa de produtos lista todo o inventario, inclusive itens inativos; a API publica continua ocultando inativos.

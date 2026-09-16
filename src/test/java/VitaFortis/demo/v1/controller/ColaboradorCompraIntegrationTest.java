@@ -1,7 +1,6 @@
 package VitaFortis.demo.v1.controller;
 
 import VitaFortis.demo.v1.entity.Produto;
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import VitaFortis.demo.v1.repository.ProdutoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -130,7 +129,7 @@ class ColaboradorCompraIntegrationTest {
         var produto = new Produto();
         produto.setCodigo("TEST-COMPRA-" + UUID.randomUUID());
         produto.setNome("Produto para compra do colaborador");
-        produto.setCategoria(CategoriaProduto.PROTEINAS);
+        produto.setCategoria("PROTEINAS");
         produto.setPreco(new BigDecimal("24.90"));
         produto.setQuantidadeEstoque(10);
         produto.setImagemUrl("/assets/imagens/produto-teste-colaborador.webp");

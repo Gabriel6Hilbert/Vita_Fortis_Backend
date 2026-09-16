@@ -15,7 +15,8 @@ public record ColaboradorResumoDto(
         List<MovimentoDto> movimentos,
         List<PedidoResponseDto> pedidos) {
     public record CupomDesempenhoDto(Long id, String codigo, boolean ativo, BigDecimal percentualCashback,
-                                      long pedidos, BigDecimal vendas, BigDecimal cashback) {}
+                                      long pedidos, BigDecimal vendas, BigDecimal cashback, BigDecimal desconto, String tipo,
+                                      LocalDateTime dataInicio, LocalDateTime dataVencimento, Integer limiteUso) {}
     public record MovimentoDto(Long id, String tipo, BigDecimal valor, BigDecimal saldoAnterior,
                                 BigDecimal saldoNovo, String justificativa, Long pedidoId,
                                 LocalDateTime criadoEm) {}

@@ -78,10 +78,13 @@ public class CupomService {
     }
 
     private void validar(CupomRequestDto dto) {
+        if (dto.getDataInicio() != null && dto.getDataVencimento() != null && !dto.getDataVencimento().isAfter(dto.getDataInicio()))
+            throw new IllegalArgumentException("Vencimento deve ser posterior ao inicio da validade");
+        if (dto.getLimiteUso() != null && dto.getLimiteUso() < 1) throw new IllegalArgumentException("Limite de uso deve ser positivo");
         if (dto.getTipo() == CupomTipo.PERCENTUAL && dto.getDesconto().compareTo(new BigDecimal("100")) > 0) {
             throw new IllegalArgumentException("Desconto percentual nao pode ultrapassar 100%");
         }
-        if (dto.getDataVencimento() != null && dto.getDataVencimento().isBefore(java.time.LocalDateTime.now())) {
+        if (dto.getDataVencimento() != null && dto.getDataVencimento().isBefore(java.time.LocalDateTime.now(java.time.ZoneId.of("America/Sao_Paulo")))) {
             throw new IllegalArgumentException("Data de vencimento deve estar no futuro");
         }
     }

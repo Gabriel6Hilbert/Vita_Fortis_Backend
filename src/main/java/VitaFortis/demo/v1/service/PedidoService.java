@@ -17,6 +17,7 @@ import java.util.List;
 
 @Service
 public class PedidoService {
+    private final CupomRegrasService regrasCupom;
     private static final BigDecimal CEM = new BigDecimal("100");
 
     private final PedidoRepository pedidos;
@@ -30,7 +31,8 @@ public class PedidoService {
 
     public PedidoService(PedidoRepository pedidos, UsuarioRepository usuarios, ProdutoRepository produtos,
                          CupomRepository cupons, EnderecoService enderecos, FreteService fretes,
-                         PagamentoGateway pagamentos, CashbackService cashback) {
+                         PagamentoGateway pagamentos, CashbackService cashback, CupomRegrasService regrasCupom) {
+        this.regrasCupom = regrasCupom;
         this.pedidos = pedidos;
         this.usuarios = usuarios;
         this.produtos = produtos;
@@ -41,7 +43,7 @@ public class PedidoService {
         this.cashback = cashback;
     }
 
-    @Transactional
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public PedidoResponseDto criar(PedidoRequestDto dto, String emailAutenticado) {
         Usuario usuario = usuarioAutenticado(emailAutenticado);
         if (!usuario.getId().equals(dto.getUsuarioId())) {
@@ -49,7 +51,7 @@ public class PedidoService {
         }
         Pedido pedido = novoPedido(usuario, dto);
         BigDecimal subtotal = adicionarItens(pedido, dto.getItens());
-        Cupom cupom = obterCupom(dto.getCupomId(), subtotal);
+        Cupom cupom = obterCupom(dto.getCupomId(), subtotal, true);
         BigDecimal desconto = calcularDesconto(cupom, subtotal);
         aplicarRecebimento(pedido, dto);
 
@@ -85,7 +87,7 @@ public class PedidoService {
             pedido.getItems().add(compra);
             subtotal = subtotal.add(compra.getSubtotal());
         }
-        Cupom cupom = obterCupom(dto.getCupomId(), subtotal);
+        Cupom cupom = obterCupom(dto.getCupomId(), subtotal, false);
         pedido.setCupomUtilizado(cupom);
         pedido.setSubtotal(subtotal);
         pedido.setDesconto(calcularDesconto(cupom, subtotal));
@@ -139,6 +141,41 @@ public class PedidoService {
     @Transactional(readOnly = true)
     public List<PedidoResponseDto> listarTodos() {
         return pedidos.findAll().stream().map(this::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDto> listarTodos(PedidoFiltroDto filtro) {
+        if (filtro.inicio() != null && filtro.fim() != null && filtro.fim().isBefore(filtro.inicio())) {
+            throw new IllegalArgumentException("A data final deve ser igual ou posterior a data inicial.");
+        }
+        String pagamento = filtro.pagamento() == null ? "" : filtro.pagamento().trim().toUpperCase(java.util.Locale.ROOT);
+        if (!pagamento.isEmpty() && !java.util.Set.of("PIX", "CARTAO", "BOLETO").contains(pagamento)) {
+            throw new IllegalArgumentException("Forma de pagamento invalida");
+        }
+        return pedidos.findAll((root, query, cb) -> {
+            var filtros = new ArrayList<jakarta.persistence.criteria.Predicate>();
+            if (filtro.numero() != null && !filtro.numero().isBlank())
+                filtros.add(cb.like(root.get("id").as(String.class), contemLiteral(filtro.numero()), '!'));
+            if (filtro.inicio() != null)
+                filtros.add(cb.greaterThanOrEqualTo(root.get("dataPedido"), filtro.inicio().atStartOfDay()));
+            // Limite exclusivo inclui todo o ultimo dia, independentemente da precisao do banco.
+            if (filtro.fim() != null)
+                filtros.add(cb.lessThan(root.get("dataPedido"), filtro.fim().plusDays(1).atStartOfDay()));
+            if (filtro.cliente() != null && !filtro.cliente().isBlank()) {
+                String cliente = contemLiteral(filtro.cliente().toLowerCase(java.util.Locale.ROOT));
+                filtros.add(cb.or(cb.like(cb.lower(root.get("usuario").get("nome")), cliente, '!'),
+                        cb.like(cb.lower(root.get("usuario").get("email")), cliente, '!')));
+            }
+            if (filtro.status() != null) filtros.add(cb.equal(root.get("status"), filtro.status()));
+            if (filtro.recebimento() != null) filtros.add(cb.equal(root.get("formaRecebimento"), filtro.recebimento()));
+            if (!pagamento.isEmpty()) filtros.add(cb.equal(root.get("formaPagamento"), pagamento));
+            if (filtro.statusPagamento() != null) filtros.add(cb.equal(root.get("statusPagamento"), filtro.statusPagamento()));
+            return cb.and(filtros.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        }).stream().map(this::toDto).toList();
+    }
+
+    private static String contemLiteral(String texto) {
+        return "%" + texto.trim().replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
     }
 
     @Transactional(readOnly = true)
@@ -209,9 +246,9 @@ public class PedidoService {
         pedido.setFrete(cotacao.valor());
     }
 
-    private Cupom obterCupom(Long cupomId, BigDecimal subtotal) {
+    private Cupom obterCupom(Long cupomId, BigDecimal subtotal, boolean reservar) {
         if (cupomId == null) return null;
-        Cupom cupom = cupons.findById(cupomId)
+        Cupom cupom = (reservar ? cupons.buscarParaUso(cupomId) : cupons.findById(cupomId))
                 .orElseThrow(() -> new IllegalArgumentException("Cupom nao encontrado"));
         validarCupom(cupom, subtotal);
         return cupom;
@@ -258,13 +295,7 @@ public class PedidoService {
     }
 
     private void validarCupom(Cupom cupom, BigDecimal subtotal) {
-        if (!cupom.isAtivo()) throw new IllegalArgumentException("Cupom inativo");
-        if (cupom.getDataVencimento() != null && cupom.getDataVencimento().isBefore(java.time.LocalDateTime.now())) {
-            throw new IllegalArgumentException("Cupom expirado");
-        }
-        if (cupom.getMinSubtotal() != null && subtotal.compareTo(cupom.getMinSubtotal()) < 0) {
-            throw new IllegalArgumentException("Subtotal minimo do cupom nao atingido");
-        }
+        regrasCupom.validar(cupom, subtotal);
     }
 
     private Usuario usuarioAutenticado(String email) {

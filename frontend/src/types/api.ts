@@ -24,7 +24,9 @@ export interface StoreInfo {
   instagram: string;
   endereco: string;
 }
+export interface CatalogRegistration { id: number; tipo: "CATEGORIA" | "ATRIBUTO"; codigo: string; nome: string; ativo: boolean }
 export interface Product {
+  atributos?: Record<string, string>;
   id: number;
   codigo: string;
   nome: string;
@@ -63,6 +65,7 @@ export interface Page<T> {
   last: boolean;
 }
 export interface CategorySummary {
+  nome?: string;
   categoria: string;
   quantidadeProdutos: number;
 }
@@ -136,6 +139,8 @@ export interface Review {
   criadoEm: string;
 }
 export interface AdminMetrics {
+  limiteEstoqueBaixo: number;
+  estoqueBaixo: {produtoId:number;codigo:string;nome:string;quantidade:number;ativo:boolean}[];
   faturamento: number;
   pedidos: number;
   ticketMedio: number;
@@ -184,7 +189,9 @@ export interface Coupon {
   minSubtotal?: number;
   ativo: boolean;
   dataCadastro: string;
-  dataVencimento?: string;
+  dataVencimento?: string | null;
+  dataInicio?: string | null;
+  limiteUso?: number | null;
   colaboradorId?: number;
   colaboradorNome?: string;
   percentualCashback?: number;
@@ -225,6 +232,11 @@ export interface CollaboratorSummary {
     codigo: string;
     ativo: boolean;
     percentualCashback: number;
+    desconto: number;
+    tipo: "PERCENTUAL" | "FIXO";
+    dataInicio?: string;
+    dataVencimento?: string;
+    limiteUso?: number;
     pedidos: number;
     vendas: number;
     cashback: number;

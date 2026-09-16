@@ -1,6 +1,5 @@
 package VitaFortis.demo.v1.dto;
 
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,8 +34,9 @@ public class ProdutoRequestDto {
     @NotNull @Min(0)
     private Integer quantidadeEstoque;
 
-    @NotNull
-    private CategoriaProduto categoria;
+    @NotBlank @Size(max = 40)
+    private String categoria;
+    private java.util.Map<@jakarta.validation.constraints.Size(max=40) String, @jakarta.validation.constraints.Size(max=255) String> atributos;
 
     @Size(max = 500)
     private String imagemUrl;

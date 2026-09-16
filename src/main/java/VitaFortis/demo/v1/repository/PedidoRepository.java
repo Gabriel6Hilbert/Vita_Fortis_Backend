@@ -9,7 +9,8 @@ import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-public interface PedidoRepository extends JpaRepository<Pedido, Long> {
+public interface PedidoRepository extends JpaRepository<Pedido, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Pedido> {
+    long countByCupomUtilizadoId(Long cupomId);
     List<Pedido> findAllByUsuarioIdOrderByDataPedidoDesc(Long usuarioId);
     List<Pedido> findByDataPedidoBetween(LocalDateTime inicio, LocalDateTime fim);
     List<Pedido> findAllByCupomUtilizadoColaboradorIdOrderByDataPedidoDesc(Long colaboradorId);

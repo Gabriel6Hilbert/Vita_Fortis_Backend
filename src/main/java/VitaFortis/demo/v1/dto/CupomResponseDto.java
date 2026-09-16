@@ -21,6 +21,10 @@ public class CupomResponseDto {
     private boolean ativo;
     private LocalDateTime dataCadastro;
     private LocalDateTime dataVencimento;
+
+    private LocalDateTime dataInicio;
+    @jakarta.validation.constraints.Min(1)
+    private Integer limiteUso;
     private Long colaboradorId;
     private String colaboradorNome;
     private BigDecimal percentualCashback;

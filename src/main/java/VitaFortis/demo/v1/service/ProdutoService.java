@@ -36,11 +36,13 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
     private final ProdutoMapper produtoMapper;
     private final MovimentacaoEstoqueRepository movimentacoes;
+    private final CatalogoCadastroService cadastros;
 
-    public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper, MovimentacaoEstoqueRepository movimentacoes) {
+    public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper, MovimentacaoEstoqueRepository movimentacoes, CatalogoCadastroService cadastros) {
         this.produtoRepository = produtoRepository;
         this.produtoMapper = produtoMapper;
         this.movimentacoes = movimentacoes;
+        this.cadastros = cadastros;
     }
 
     // CRIAR PRODUTO
@@ -50,6 +52,7 @@ public class ProdutoService {
         if (produtoRepository.existsByCodigoIgnoreCase(codigo)) {
             throw new IllegalArgumentException("Codigo de produto ja cadastrado");
         }
+        cadastros.validarProduto(dto, null);
         Produto entity = produtoMapper.toEntity(dto);
         entity.setCodigo(codigo);
 
@@ -64,6 +67,7 @@ public class ProdutoService {
     }
 
     // MODIFICAR PRODUTO
+    @Transactional
     public ProdutoResponseDto update (Long produtoId, ProdutoRequestDto dto) {
         Produto entity = produtoRepository.findById(produtoId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
@@ -75,6 +79,7 @@ public class ProdutoService {
                 .findFirst()
                 .ifPresent(outro -> { throw new IllegalArgumentException("Codigo de produto ja cadastrado"); });
 
+        cadastros.validarProduto(dto, entity);
         produtoMapper.updateFromDto(dto, entity);
 
         if (entity.getPreco() == null || entity.getPreco().signum() < 0) throw new IllegalArgumentException("Preço invalido");
@@ -194,28 +199,22 @@ public class ProdutoService {
 
     @Transactional(readOnly = true)
     public List<CategoriaResumoDto> listarCategorias() {
-        Map<VitaFortis.demo.v1.enums.CategoriaProduto, Long> totais = produtoRepository.findAll().stream()
-                .filter(Produto::isAtivo)
-                .collect(Collectors.groupingBy(Produto::getCategoria, Collectors.counting()));
-        return totais.entrySet().stream()
-                .map(item -> new CategoriaResumoDto(item.getKey(), item.getValue()))
-                .sorted(java.util.Comparator.comparing(item -> item.categoria().name()))
-                .toList();
+        Map<String, Long> totais = produtoRepository.contarAtivosPorCategoria().stream()
+                .collect(Collectors.toMap(row -> (String) row[0], row -> (Long) row[1]));
+        return cadastros.listar().stream().filter(c -> c.getTipo().equals("CATEGORIA") && c.isAtivo())
+                .map(c -> new CategoriaResumoDto(c.getCodigo(), c.getNome(), totais.getOrDefault(c.getCodigo(), 0L))).toList();
     }
 
     @Transactional(readOnly = true)
     public List<MarcaResumoDto> listarMarcas() {
-        return produtoRepository.findAll().stream().filter(Produto::isAtivo)
-                .map(Produto::getMarca).filter(m -> m != null && !m.isBlank())
-                .collect(Collectors.groupingBy(String::trim, Collectors.counting())).entrySet().stream()
-                .map(e -> new MarcaResumoDto(e.getKey(), e.getValue()))
-                .sorted(java.util.Comparator.comparing(MarcaResumoDto::nome, String.CASE_INSENSITIVE_ORDER)).toList();
+        return produtoRepository.contarAtivosPorMarca().stream()
+                .map(row -> new MarcaResumoDto((String) row[0], (Long) row[1])).toList();
     }
 
     @Transactional(readOnly = true)
     public List<ObjetivoResumoDto> listarObjetivos() {
-        Map<String, Long> totais = produtoRepository.findAll().stream().filter(Produto::isAtivo)
-                .flatMap(p -> p.getObjetivos().stream()).collect(Collectors.groupingBy(String::toUpperCase, Collectors.counting()));
+        Map<String, Long> totais = produtoRepository.contarAtivosPorObjetivo().stream()
+                .collect(Collectors.toMap(row -> ((String) row[0]).toUpperCase(), row -> (Long) row[1]));
         return java.util.Arrays.stream(ObjetivoProduto.values())
                 .map(o -> new ObjetivoResumoDto(o.name(), o.getNome(), totais.getOrDefault(o.name(), 0L))).toList();
     }
@@ -336,7 +335,7 @@ public class ProdutoService {
                     p.setMarca(c.get(3).trim()); p.setUnidade(c.get(4).trim());
                     p.setPreco(new BigDecimal(c.get(5).trim().replace(',', '.')));
                     p.setQuantidadeEstoque(Integer.parseInt(c.get(6).trim()));
-                    p.setCategoria(VitaFortis.demo.v1.enums.CategoriaProduto.valueOf(c.get(7).trim().toUpperCase()));
+                    p.setCategoria(cadastros.validarCategoria(c.get(7).trim().toUpperCase(), null));
                     p.setImagemUrl(c.get(8).isBlank() ? null : c.get(8).trim());
                     String ativo=c.get(9).trim();
                     if (!ativo.isBlank() && !ativo.equalsIgnoreCase("true") && !ativo.equalsIgnoreCase("false")) throw new IllegalArgumentException("ativo deve ser true ou false");

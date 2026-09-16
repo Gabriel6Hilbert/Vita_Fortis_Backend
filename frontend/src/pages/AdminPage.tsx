@@ -22,6 +22,10 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../app/AuthContext";
 import { ErrorState, Loading } from "../components/States";
 import { api } from "../services/api";
+import type { OrderFilters } from "../services/api";
+import { CatalogAdmin } from "../components/CatalogAdmin";
+import type { CatalogRegistration } from "../types/api";
+import { OrderFiltersForm } from "../components/OrderFiltersForm";
 import {
   isAdmin,
   type AdminMetrics,
@@ -36,6 +40,7 @@ import "../styles/commerce-feedback.css";
 type Tab =
   | "dashboard"
   | "products"
+  | "catalog"
   | "orders"
   | "users"
   | "coupons"
@@ -49,7 +54,7 @@ const blankProduct: Partial<Product> = {
   unidade: "",
   preco: 0,
   quantidadeEstoque: 0,
-  categoria: "PROTEINAS",
+  categoria: "",
   imagemUrl: "",
   ativo: true,
   lancamento: false,
@@ -61,8 +66,12 @@ const blankProduct: Partial<Product> = {
 export function AdminPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [registrations, setRegistrations] = useState<CatalogRegistration[]>([]);
+  const [couponError, setCouponError] = useState("");
+  const [couponSaving, setCouponSaving] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [orderFilters, setOrderFilters] = useState<OrderFilters>({});
   const [users, setUsers] = useState<User[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -97,6 +106,10 @@ export function AdminPage() {
       fim: now.toISOString().slice(0, 10),
     };
   });
+  const [reportType,setReportType]=useState('VENDAS');
+  const [reportFilters,setReportFilters]=useState<Record<string,string>>({});
+  const [reportDownloading,setReportDownloading]=useState(false);
+  const filterReport=(name:string,value:string)=>setReportFilters(current=>({...current,[name]:value}));
   const [reportFormat,setReportFormat]=useState<'csv'|'pdf'|'xlsx'>('csv');
   const [collaboratorForm, setCollaboratorForm] = useState({
     nome: "",
@@ -117,7 +130,7 @@ export function AdminPage() {
     };
     setReportPeriod({ inicio: localDate(start), fim: localDate(end) });
   };
-  const load = async () => {
+  const load = async (filters: OrderFilters = orderFilters) => {
     if (tab === "dashboard" && reportPeriod.fim < reportPeriod.inicio) {
       setError("A data final deve ser igual ou posterior à data inicial.");
       return;
@@ -125,6 +138,7 @@ export function AdminPage() {
     setLoading(true);
     setError("");
     try {
+      if (["products", "reports", "catalog"].includes(tab)) setRegistrations(await api.catalogRegistrations());
       if (tab === "dashboard")
         setMetrics(await api.metrics(reportPeriod.inicio, reportPeriod.fim));
       if (tab === "products")
@@ -136,8 +150,8 @@ export function AdminPage() {
             })
           ).content,
         );
-      if (tab === "orders") setOrders(await api.adminOrders());
-      if (tab === "users") setUsers(await api.adminUsers());
+      if (tab === "orders") setOrders(await api.adminOrders(filters));
+      if (tab === "users" || tab === "reports") setUsers(await api.adminUsers());
       if (tab === "coupons") {
         const [couponList, userList] = await Promise.all([
           api.coupons(),
@@ -261,14 +275,12 @@ export function AdminPage() {
       setImageUploading(false);
     }
   };
-  const submitCoupon = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!couponForm) return;
-    void action(
-      () => api.saveCoupon(couponForm, couponForm.id),
-      "Cupom salvo.",
-    );
-    setCouponForm(null);
+  const submitCoupon = async (e: React.FormEvent) => {
+    e.preventDefault(); if (!couponForm || couponSaving) return;
+    setCouponSaving(true); setCouponError('');
+    try { await api.saveCoupon({...couponForm, dataInicio: couponForm.dataInicio || null, dataVencimento: couponForm.dataVencimento || null, limiteUso: couponForm.limiteUso || null}, couponForm.id); setCouponForm(null); setSuccess('Cupom salvo.'); await load(); }
+    catch (e) { setCouponError(e instanceof Error ? e.message : 'Erro ao salvar cupom.'); }
+    finally { setCouponSaving(false); }
   };
   return (
     <div className="admin-shell">
@@ -281,6 +293,7 @@ export function AdminPage() {
           [
             ["dashboard", BarChart3, "Visão geral"],
             ["products", Boxes, "Produtos"],
+            ["catalog", Boxes, "Categorias e atributos"],
             ["orders", PackageCheck, "Pedidos"],
             ["users", Users, "Usuários"],
             ["coupons", TicketPercent, "Cupons"],
@@ -308,7 +321,8 @@ export function AdminPage() {
           </p>
         </header>
         {success && <div className="success-toast">{success}</div>}
-        {error && <ErrorState message={error} retry={load} />}
+        {tab === "orders" && <OrderFiltersForm applied={orderFilters} loading={loading} onApply={filters => { setOrderFilters(filters); void load(filters); }} />}
+        {error && <ErrorState message={error} retry={() => void load()} />}
         {tab === "dashboard" &&
           (loading ? (
             <Loading />
@@ -371,6 +385,8 @@ export function AdminPage() {
                     </article>
                   ))}
                 </div>
+                <section className="chart-card"><h2>Estoque baixo — {(metrics.estoqueBaixo||[]).length} produtos</h2><p>Estoque atual de até {metrics.limiteEstoqueBaixo ?? 5} unidades, incluindo inativos. Independente do período de vendas.</p>{!(metrics.estoqueBaixo||[]).length?<p>Nenhum produto com estoque baixo.</p>:<div className="table-wrap"><table><thead><tr><th>SKU</th><th>Produto</th><th>Quantidade</th><th>Situação</th></tr></thead><tbody>{metrics.estoqueBaixo?.map(p=><tr key={p.produtoId}><td>{p.codigo}</td><td>{p.nome}</td><td>{p.quantidade}</td><td>{p.ativo?'Ativo':'Inativo'}</td></tr>)}</tbody></table></div>}</section>
+                <section className="chart-card"><h2>Produtos mais vendidos no período</h2>{!(metrics.maisVendidos||[]).length?<p>Nenhuma venda aprovada no período.</p>:<div className="table-wrap"><table><thead><tr><th>Produto</th><th>Unidades</th><th>Valor dos itens</th></tr></thead><tbody>{metrics.maisVendidos?.map(p=><tr key={p.produtoId}><td>{p.nome}</td><td>{p.quantidade}</td><td>{money(p.faturamento||0)}</td></tr>)}</tbody></table></div>}</section>
                 <div className="dashboard-grid">
                   <article className="chart-card">
                     <h2>Faturamento por período</h2>
@@ -421,13 +437,14 @@ export function AdminPage() {
               </>
             )
           ))}
-        {tab !== "dashboard" &&
+        {tab === "catalog" && !loading && !error && <CatalogAdmin items={registrations} reload={load} />}
+        {tab !== "dashboard" && tab !== "catalog" &&
           !error &&
           (loading ? (
             <Loading />
           ) : (
             <>
-              {(tab === "products" || tab === "orders") && (
+              {tab === "products" && (
                 <div className="admin-toolbar">
                   <label>
                     <Search />
@@ -679,9 +696,9 @@ export function AdminPage() {
                           </td>
                         </tr>
                       ))}
+                    {tab === "orders" && orders.length === 0 && <tr><td colSpan={5}><p role="status">Nenhum pedido encontrado para os filtros aplicados.</p></td></tr>}
                     {tab === "orders" &&
                       orders
-                        .filter((o) => !search || String(o.id).includes(search))
                         .map((o) => (
                           <tr key={o.id}>
                             <td>
@@ -861,6 +878,11 @@ export function AdminPage() {
                                 ? `Pedidos: ${c.pedidoIds.map((id) => `#${id}`).join(", ")}`
                                 : "Nenhum pedido"}
                             </small>
+                            <small>
+                              {c.limiteUso ? `Limite: ${c.limiteUso} uso(s)` : "Sem limite de uso"}
+                              {` • ${c.dataInicio ? `início ${date(c.dataInicio)}` : "início imediato"}`}
+                              {` • ${c.dataVencimento ? `vence ${date(c.dataVencimento)}` : "sem vencimento"}`}
+                            </small>
                           </td>
                           <td>
                             <span
@@ -963,31 +985,26 @@ export function AdminPage() {
                 />
               </label>
             </div>
-            <div className="report-actions">
+            <div className="form-grid">
+              <label>Conteúdo<select value={reportType} onChange={e=>{setReportType(e.target.value);setReportFilters({})}}>{["VENDAS","PEDIDOS","PRODUTOS","CLIENTES","CUPONS","CASHBACK"].map(tipo=><option key={tipo} value={tipo}>{titleCase(tipo)}</option>)}</select></label>
+              <label>Buscar<input value={reportFilters.busca||''} maxLength={120} placeholder={['VENDAS','PEDIDOS'].includes(reportType)?'Pedido, nome ou e-mail do cliente':'Nome, código ou e-mail'} onChange={e=>filterReport('busca',e.target.value)}/></label>
+              {['VENDAS','PEDIDOS'].includes(reportType)&&<>
+                <label>Status do pedido<select value={reportFilters.status||''} onChange={e=>filterReport('status',e.target.value)}><option value="">Todos</option>{['PENDENTE','PAGAMENTO_APROVADO','EM_SEPARACAO','ENVIADO','ENTREGUE','CANCELADO'].map(v=><option key={v}>{v}</option>)}</select></label>
+                <label>Recebimento<select value={reportFilters.recebimento||''} onChange={e=>filterReport('recebimento',e.target.value)}><option value="">Todos</option><option value="RETIRADA">Retirada</option><option value="ENTREGA">Entrega</option></select></label>
+                <label>Pagamento<select value={reportFilters.pagamento||''} onChange={e=>filterReport('pagamento',e.target.value)}><option value="">Todos</option>{['PIX','CARTAO','BOLETO'].map(v=><option key={v}>{v}</option>)}</select></label>
+              </>}
+              {['PRODUTOS','CLIENTES','CUPONS'].includes(reportType)&&<label>Situação<select value={reportFilters.ativo||''} onChange={e=>filterReport('ativo',e.target.value)}><option value="">Todas</option><option value="true">Ativo</option><option value="false">Inativo</option></select></label>}
+              {reportType==='PRODUTOS'&&<>
+                <label>Categoria<select value={reportFilters.categoria||''} onChange={e=>filterReport('categoria',e.target.value)}><option value="">Todas</option>{registrations.filter(c=>c.tipo==='CATEGORIA').map(c=><option key={c.id} value={c.codigo}>{c.nome}</option>)}</select></label>
+                <label>Estoque até<input type="number" min="0" step="1" value={reportFilters.estoqueMax||''} onChange={e=>filterReport('estoqueMax',e.target.value)} placeholder="Ex.: 5"/></label>
+              </>}
+              {['CUPONS','CASHBACK'].includes(reportType)&&<label>Colaborador<select value={reportFilters.colaboradorId||''} onChange={e=>filterReport('colaboradorId',e.target.value)}><option value="">Todos</option>{users.filter(u=>u.tipoUsuario==='COLABORADOR').map(u=><option key={u.id} value={u.id}>{u.nome}</option>)}</select></label>}
               <label>Formato<select value={reportFormat} onChange={e=>setReportFormat(e.target.value as 'csv'|'pdf'|'xlsx')}><option value="csv">CSV</option><option value="pdf">PDF</option><option value="xlsx">XLSX</option></select></label>
-              {["PEDIDOS", "PRODUTOS", "CLIENTES", "CUPONS", "CASHBACK"].map(
-                (tipo) => (
-                  <button
-                    className="button secondary"
-                    key={tipo}
-                    onClick={() =>
-                      void action(
-                        () =>
-                          api.downloadReport(
-                            tipo,
-                            reportPeriod.inicio,
-                            reportPeriod.fim,
-                            reportFormat,
-                          ),
-                        `Relatório ${titleCase(tipo)} gerado.`,
-                      )
-                    }
-                  >
-                    <Download /> {titleCase(tipo)}
-                  </button>
-                ),
-              )}
             </div>
+            <p>{['PRODUTOS','CLIENTES'].includes(reportType)?'Cadastro atual: o período não se aplica a este relatório.':'O período inclui as datas inicial e final. Vendas e usos de cupons consideram somente pagamentos aprovados; cashback considera a data da movimentação.'}</p>
+            <div className="report-actions"><button className="button primary" disabled={reportDownloading||!reportPeriod.inicio||!reportPeriod.fim||reportPeriod.fim<reportPeriod.inicio} onClick={async()=>{setReportDownloading(true);setError('');setSuccess('');try{await api.downloadReport(reportType,reportPeriod.inicio,reportPeriod.fim,reportFormat,reportFilters);setSuccess('Relatório gerado.')}catch(e){setError(e instanceof Error?e.message:'Falha ao gerar relatório.')}finally{setReportDownloading(false)}}}><Download/>{reportDownloading?'Gerando…':'Baixar relatório'}</button></div>
+            {reportPeriod.fim<reportPeriod.inicio&&<p role="alert">A data final deve ser igual ou posterior à inicial.</p>}
+
           </section>
         )}
       </section>
@@ -1044,7 +1061,8 @@ export function AdminPage() {
                 </label>
               ))}
               <label>Marca<input required list="product-brands" value={productForm.marca || ""} placeholder="Selecione ou digite a marca" onChange={e => setProductForm({ ...productForm, marca: e.target.value })} /><datalist id="product-brands">{Array.from(new Set(products.map(p => p.marca).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
-              <label>Categoria<select required value={productForm.categoria||""} onChange={e=>setProductForm({...productForm,categoria:e.target.value})}><option value="">Selecione</option>{["ACESSORIOS","AMINOACIDOS","CARBOIDRATROS","PRETREINOS","PROTEINAS","TERMOGENICOS","VITAMINAS"].map(value=><option key={value} value={value}>{titleCase(value)}</option>)}</select></label>
+              <label>Categoria<select required value={productForm.categoria||""} onChange={e=>setProductForm({...productForm,categoria:e.target.value})}><option value="">Selecione</option>{registrations.filter(c=>c.tipo==='CATEGORIA'&&(c.ativo||c.codigo===productForm.categoria)).map(c=><option key={c.id} value={c.codigo}>{c.nome}{!c.ativo?' (inativa)':''}</option>)}</select></label>
+              {registrations.filter(c=>c.tipo==='ATRIBUTO'&&(c.ativo||productForm.atributos?.[c.codigo])).map(c=><label key={c.id}>{c.nome}<input maxLength={255} disabled={!c.ativo} value={productForm.atributos?.[c.codigo]||''} onChange={e=>{const atributos={...productForm.atributos};if(e.target.value.trim())atributos[c.codigo]=e.target.value;else delete atributos[c.codigo];setProductForm({...productForm,atributos})}} /></label>)}
               <label>Subcategoria<input list="product-subcategories" value={productForm.subcategoria || ""} placeholder="Selecione ou digite a subcategoria" onChange={e => setProductForm({ ...productForm, subcategoria: e.target.value })} /><datalist id="product-subcategories">{Array.from(new Set(products.map(p => p.subcategoria).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
               <label>Unidade ou peso<input list="product-units" value={productForm.unidade || ""} placeholder="Ex.: 300g ou 60 cápsulas" onChange={e => setProductForm({ ...productForm, unidade: e.target.value })} /><datalist id="product-units">{Array.from(new Set(products.map(p => p.unidade).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
               <div className="full image-upload-field">
@@ -1116,6 +1134,7 @@ export function AdminPage() {
       {couponForm && (
         <div className="modal-backdrop">
           <form className="admin-modal small" onSubmit={submitCoupon}>
+            {couponError && <p role="alert" className="form-error">{couponError}</p>}
             <header>
               <h2>{couponForm.id ? "Editar cupom" : "Novo cupom"}</h2>
               <button type="button" onClick={() => setCouponForm(null)}>
@@ -1171,6 +1190,7 @@ export function AdminPage() {
               <label>
                 Subtotal mínimo
                 <input
+                  min="0"
                   type="number"
                   step=".01"
                   value={couponForm.minSubtotal || 0}
@@ -1182,6 +1202,9 @@ export function AdminPage() {
                   }
                 />
               </label>
+              <label>Início da validade<input type="datetime-local" value={couponForm.dataInicio?.slice(0,16)||''} onChange={e=>setCouponForm({...couponForm,dataInicio:e.target.value||null})} /></label>
+              <label>Fim da validade<input type="datetime-local" min={couponForm.dataInicio?.slice(0,16)||undefined} value={couponForm.dataVencimento?.slice(0,16)||''} onChange={e=>setCouponForm({...couponForm,dataVencimento:e.target.value||null})} /></label>
+              <label>Limite de uso total<input type="number" min="1" step="1" placeholder="Sem limite" value={couponForm.limiteUso??''} onChange={e=>setCouponForm({...couponForm,limiteUso:e.target.value?Number(e.target.value):null})} /><small>Cada pedido criado consome um uso, inclusive se cancelado. Validade no horário de Brasília. Deixe vazio para não limitar.</small></label>
               <label>
                 Colaborador
                 <select
@@ -1243,7 +1266,7 @@ export function AdminPage() {
               >
                 Cancelar
               </button>
-              <button className="button primary">Salvar cupom</button>
+              <button className="button primary" disabled={couponSaving}>{couponSaving?"Salvando…":"Salvar cupom"}</button>
             </footer>
           </form>
         </div>

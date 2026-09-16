@@ -1,5 +1,4 @@
 package VitaFortis.demo.v1.entity;
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -64,9 +63,15 @@ public class Produto {
     @Column(name = "QTD_ESTOQUE", nullable = false)
     private Integer quantidadeEstoque = 0;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "CATEGORIA", nullable = false, length = 40)
-    private CategoriaProduto categoria;
+    private String categoria;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @org.hibernate.annotations.BatchSize(size = 100)
+    @CollectionTable(name = "produto_atributo", joinColumns = @JoinColumn(name = "produto_id"))
+    @MapKeyColumn(name = "atributo", length = 40)
+    @Column(name = "valor", length = 255)
+    private java.util.Map<String, String> atributos = new java.util.HashMap<>();
 
     @Column(name = "ATIVO", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private boolean ativo = true;
@@ -84,11 +89,13 @@ public class Produto {
     private String imagemContentType;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @org.hibernate.annotations.BatchSize(size = 100)
     @CollectionTable(name = "PRODUTO_OBJETIVO", joinColumns = @JoinColumn(name = "PRODUTO_ID"))
     @Column(name = "OBJETIVO", length = 50)
     private Set<String> objetivos = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @org.hibernate.annotations.BatchSize(size = 100)
     @CollectionTable(name = "PRODUTO_ESPORTE", joinColumns = @JoinColumn(name = "PRODUTO_ID"))
     @Column(name = "ESPORTE", length = 50)
     private Set<String> esportes = new HashSet<>();

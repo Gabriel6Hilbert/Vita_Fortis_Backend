@@ -3,7 +3,6 @@ package VitaFortis.demo.config;
 import VitaFortis.demo.v1.entity.Cupom;
 import VitaFortis.demo.v1.entity.Produto;
 import VitaFortis.demo.v1.entity.Usuario;
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import VitaFortis.demo.v1.enums.CupomTipo;
 import VitaFortis.demo.v1.enums.TipoUsuario;
 import VitaFortis.demo.v1.repository.CupomRepository;
@@ -39,10 +38,10 @@ public class HomologacaoDataInitializer implements CommandLineRunner {
         usuario("cliente@vitafortis.test", "Cliente Homologacao", "11144477735", TipoUsuario.CLIENTE);
         usuario("cliente2@vitafortis.test", "Segundo Cliente", "39053344705", TipoUsuario.CLIENTE);
 
-        produto("HML-WHEY", "Whey Homologacao", 149.90, 20, true, CategoriaProduto.PROTEINAS);
-        produto("HML-CREATINA", "Creatina Estoque Baixo", 89.90, 2, true, CategoriaProduto.AMINOACIDOS);
-        produto("HML-ZERO", "Produto Sem Estoque", 49.90, 0, true, CategoriaProduto.VITAMINAS);
-        produto("HML-INATIVO", "Produto Inativo", 39.90, 10, false, CategoriaProduto.VITAMINAS);
+        produto("HML-WHEY", "Whey Homologacao", 149.90, 20, true, "PROTEINAS");
+        produto("HML-CREATINA", "Creatina Estoque Baixo", 89.90, 2, true, "AMINOACIDOS");
+        produto("HML-ZERO", "Produto Sem Estoque", 49.90, 0, true, "VITAMINAS");
+        produto("HML-INATIVO", "Produto Inativo", 39.90, 10, false, "VITAMINAS");
 
         if (!cupons.existsByCodigoIgnoreCase("COLAB10")) {
             Cupom cupom = new Cupom(); cupom.setCodigo("COLAB10"); cupom.setDescricao("Cupom de homologacao vinculado");
@@ -64,7 +63,7 @@ public class HomologacaoDataInitializer implements CommandLineRunner {
         return usuarios.save(usuario);
     }
 
-    private void produto(String codigo, String nome, double preco, int estoque, boolean ativo, CategoriaProduto categoria) {
+    private void produto(String codigo, String nome, double preco, int estoque, boolean ativo, String categoria) {
         Produto p = produtos.findByCodigoIgnoreCase(codigo).orElseGet(Produto::new);
         p.setCodigo(codigo); p.setNome(nome); p.setDescricao("Produto criado exclusivamente para homologacao do fluxo de vendas.");
         p.setMarca("Vita Test"); p.setUnidade("UN"); p.setPreco(BigDecimal.valueOf(preco)); p.setQuantidadeEstoque(estoque);

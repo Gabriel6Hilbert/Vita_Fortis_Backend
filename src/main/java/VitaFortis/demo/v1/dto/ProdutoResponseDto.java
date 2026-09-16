@@ -1,6 +1,5 @@
 package VitaFortis.demo.v1.dto;
 
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +22,8 @@ public class ProdutoResponseDto {
     private BigDecimal descontoValor;
     private BigDecimal descontoPercentual;
     private int quantidadeEstoque;
-    private CategoriaProduto categoria;
+    private String categoria;
+    private java.util.Map<@jakarta.validation.constraints.Size(max=40) String, @jakarta.validation.constraints.Size(max=255) String> atributos;
     private boolean ativo;
     private String imagemUrl;
     private Set<String> objetivos;

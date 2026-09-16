@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
+import java.util.List;
 
 public interface ProdutoRepository extends JpaRepository<Produto,Long>, JpaSpecificationExecutor<Produto> {
 
@@ -58,4 +59,13 @@ public interface ProdutoRepository extends JpaRepository<Produto,Long>, JpaSpeci
 //    int reativar(Long produtoId);
 
     Optional<Produto> findByIdAndAtivoTrue(Long id);
+
+    @Query("select p.categoria, count(p) from Produto p where p.ativo = true group by p.categoria")
+    List<Object[]> contarAtivosPorCategoria();
+
+    @Query("select trim(p.marca), count(p) from Produto p where p.ativo = true and p.marca is not null and trim(p.marca) <> '' group by trim(p.marca) order by trim(p.marca)")
+    List<Object[]> contarAtivosPorMarca();
+
+    @Query("select objetivo, count(p) from Produto p join p.objetivos objetivo where p.ativo = true group by objetivo")
+    List<Object[]> contarAtivosPorObjetivo();
 }

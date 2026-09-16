@@ -27,8 +27,8 @@ class OwnershipAuthorizationTest {
     CarrinhoService carrinhoService; PedidoService pedidoService;
 
     @BeforeEach void setup() {
-        carrinhoService = new CarrinhoService(carrinhos, itens, produtos, carrinhoMapper, itemMapper, usuarios, cupons);
-        pedidoService = new PedidoService(pedidos, usuarios, produtos, cupons, enderecos, fretes, pagamentos, cashback);
+        carrinhoService = new CarrinhoService(carrinhos, itens, produtos, carrinhoMapper, itemMapper, usuarios, cupons, new CupomRegrasService(pedidos));
+        pedidoService = new PedidoService(pedidos, usuarios, produtos, cupons, enderecos, fretes, pagamentos, cashback, new CupomRegrasService(pedidos));
     }
 
     @Test void clienteNaoAcessaCarrinhoDeOutroUsuario() {

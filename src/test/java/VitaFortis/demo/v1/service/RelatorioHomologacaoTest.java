@@ -1,7 +1,6 @@
 package VitaFortis.demo.v1.service;
 
 import VitaFortis.demo.v1.entity.Produto;
-import VitaFortis.demo.v1.enums.CategoriaProduto;
 import VitaFortis.demo.v1.enums.TipoRelatorio;
 import VitaFortis.demo.v1.repository.*;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ class RelatorioHomologacaoTest {
         var lista=new ArrayList<Produto>();
         for(int i=0;i<120;i++) {
             var p=new Produto(); p.setCodigo("SKU-"+i); p.setNome(i==0 ? "Nome; com \"aspas\"\ne quebra" : "Produto "+i);
-            p.setCategoria(CategoriaProduto.PROTEINAS); p.setPreco(null); lista.add(p);
+            p.setCategoria("PROTEINAS"); p.setPreco(null); lista.add(p);
         }
         when(produtos.findAll()).thenReturn(lista);
         var service=new RelatorioService(mock(PedidoRepository.class),produtos,mock(UsuarioRepository.class),mock(CupomRepository.class),mock(MovimentoCashbackRepository.class));
