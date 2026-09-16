@@ -220,6 +220,18 @@ export interface StockMovement {
   responsavel: string;
   criadoEm: string;
 }
+export interface ImportHistory {
+  id: number;
+  nomeArquivo: string;
+  hashArquivo: string;
+  responsavel: string;
+  criadoEm: string;
+  resultado: string;
+  inseridos: number;
+  atualizados: number;
+  rejeitados: number;
+  detalhes: string;
+}
 export interface CollaboratorSummary {
   colaboradorId: number;
   saldo: number;

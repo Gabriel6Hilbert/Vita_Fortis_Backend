@@ -286,8 +286,11 @@ public class PedidoService {
         if (atual == StatusCompra.PAGAMENTO_APROVADO && novoStatus != StatusCompra.EM_SEPARACAO && novoStatus != StatusCompra.CANCELADO) {
             throw new IllegalArgumentException("Pedido aprovado deve seguir para separacao");
         }
-        if (atual == StatusCompra.EM_SEPARACAO && novoStatus != StatusCompra.ENVIADO && novoStatus != StatusCompra.CANCELADO) {
-            throw new IllegalArgumentException("Pedido em separacao deve seguir para envio");
+        if (atual == StatusCompra.EM_SEPARACAO && novoStatus != StatusCompra.ENVIADO && novoStatus != StatusCompra.DISPONIVEL_RETIRADA && novoStatus != StatusCompra.CANCELADO) {
+            throw new IllegalArgumentException("Pedido em separacao deve seguir para envio ou ficar disponivel para retirada");
+        }
+        if (atual == StatusCompra.DISPONIVEL_RETIRADA && novoStatus != StatusCompra.ENTREGUE && novoStatus != StatusCompra.CANCELADO) {
+            throw new IllegalArgumentException("Pedido disponivel para retirada deve ser entregue ou cancelado");
         }
         if (atual == StatusCompra.ENVIADO && novoStatus != StatusCompra.ENTREGUE && novoStatus != StatusCompra.CANCELADO) {
             throw new IllegalArgumentException("Pedido enviado deve seguir para entrega");

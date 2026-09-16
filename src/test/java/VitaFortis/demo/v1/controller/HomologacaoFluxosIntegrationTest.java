@@ -88,16 +88,42 @@ class HomologacaoFluxosIntegrationTest {
         String valido=sku+";Produto;\"Descricao; com separador\";FTW;300g;20.00;2;PROTEINAS;;true\n";
         String invalido=sku+";Duplicado;Descricao;FTW;300g;-1;2;PROTEINAS;;true\n";
         mvc.perform(multipart("/api/v1/admin/produtos/importacao").file(csv(header+valido+invalido)).param("preVisualizar","true").session(admin.session()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.rejeitados").value(1));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.rejeitados").value(1))
+                .andExpect(jsonPath("$.registros[0].codigo").value(sku.toUpperCase()));
         mvc.perform(multipart("/api/v1/admin/produtos/importacao").file(csv(header+valido+invalido)).param("preVisualizar","false").session(admin.session()))
                 .andExpect(status().isBadRequest());
         assertFalse(produtos.existsByCodigoIgnoreCase(sku));
         mvc.perform(multipart("/api/v1/admin/produtos/importacao").file(csv(header+valido)).param("preVisualizar","false").session(admin.session()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.inseridos").value(1));
         assertEquals("Descricao; com separador",produtos.findByCodigoIgnoreCase(sku).orElseThrow().getDescricao());
+        var historico=mvc.perform(get("/api/v1/admin/produtos/importacao/historico").session(admin.session()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].nomeArquivo").value("produtos.csv"))
+                .andExpect(jsonPath("$[0].responsavel").value("admin@vitafortis.test"))
+                .andExpect(jsonPath("$[0].resultado").value("CONCLUIDA")).andReturn();
+        long historicoId=json.readTree(historico.getResponse().getContentAsString()).get(0).get("id").asLong();
+        mvc.perform(get("/api/v1/admin/produtos/importacao/historico/{id}/arquivo",historicoId).session(admin.session()))
+                .andExpect(status().isOk()).andExpect(content().bytes((header+valido).getBytes(StandardCharsets.UTF_8)));
         String negativo=valido.replace(sku,sku+"N").replace("20.00","-1");
         mvc.perform(multipart("/api/v1/admin/produtos/importacao").file(csv(header+negativo)).param("preVisualizar","true").session(admin.session()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.rejeitados").value(1));
+    }
+
+    @Test
+    void entregaValidaRegiaoERetiradaTemStatusProprio() throws Exception {
+        var cliente=login("cliente@vitafortis.test");
+        var admin=login("admin@vitafortis.test");
+        var produto=produto();
+        var body=new HashMap<String,Object>();
+        body.put("usuarioId",cliente.id()); body.put("formaRecebimento","RETIRADA"); body.put("formaPagamento","PIX");
+        body.put("itens",List.of(Map.of("produtoId",produto.getId(),"quantidade",1))); body.put("totalRevisado",new BigDecimal("24.90"));
+        var criado=mvc.perform(post("/api/v1/pedidos").session(cliente.session()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
+                .andExpect(status().isCreated()).andReturn();
+        long id=json.readTree(criado.getResponse().getContentAsString()).get("id").asLong();
+        mvc.perform(patch("/api/v1/admin/pedidos/{id}/pagamento/aprovar",id).session(admin.session())).andExpect(status().isOk());
+        mvc.perform(patch("/api/v1/admin/pedidos/{id}/status",id).param("valor","EM_SEPARACAO").session(admin.session())).andExpect(status().isOk());
+        mvc.perform(patch("/api/v1/admin/pedidos/{id}/status",id).param("valor","DISPONIVEL_RETIRADA").session(admin.session()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("DISPONIVEL_RETIRADA"));
+        mvc.perform(patch("/api/v1/admin/pedidos/{id}/status",id).param("valor","ENTREGUE").session(admin.session())).andExpect(status().isOk());
     }
 
     @Test

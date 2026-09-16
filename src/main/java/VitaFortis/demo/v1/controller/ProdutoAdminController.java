@@ -39,7 +39,14 @@ public class ProdutoAdminController {
     @DeleteMapping("/{id}/desconto") public ProdutoResponseDto removerDesconto(@PathVariable Long id) { return produtos.removerDesconto(id); }
     @DeleteMapping("/{id}") public java.util.Map<String,String> excluir(@PathVariable Long id) { produtos.arquivar(id); return java.util.Map.of("resultado", "Produto arquivado para preservar pedidos, carrinhos, favoritos e estoque."); }
     @PostMapping(value="/importacao",consumes=org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
-    public java.util.Map<String,Object> importar(@RequestPart("arquivo") org.springframework.web.multipart.MultipartFile arquivo,@RequestParam(defaultValue="true") boolean preVisualizar) throws java.io.IOException { return produtos.importar(arquivo,preVisualizar); }
+    public java.util.Map<String,Object> importar(@RequestPart("arquivo") org.springframework.web.multipart.MultipartFile arquivo,@RequestParam(defaultValue="true") boolean preVisualizar, Authentication auth) throws java.io.IOException { return produtos.importar(arquivo,preVisualizar,auth.getName()); }
+    @GetMapping("/importacao/historico") public List<HistoricoImportacaoProdutoDto> historicoImportacoes(){return produtos.historicoImportacoes();}
+    @GetMapping("/importacao/historico/{id}/arquivo") public ResponseEntity<byte[]> arquivoImportacao(@PathVariable Long id){
+        var h=produtos.arquivoImportacao(id);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header("Content-Disposition",org.springframework.http.ContentDisposition.attachment().filename(h.getNomeArquivo(),java.nio.charset.StandardCharsets.UTF_8).build().toString())
+                .body(h.getArquivo());
+    }
     @PostMapping(value="/imagens", consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
     public java.util.Map<String,String> enviarImagem(@RequestPart("imagem") org.springframework.web.multipart.MultipartFile imagem) throws java.io.IOException {
         return java.util.Map.of("url", imagens.salvar(imagem));

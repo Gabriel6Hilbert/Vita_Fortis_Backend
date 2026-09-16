@@ -32,6 +32,7 @@ import {
   type Coupon,
   type Order,
   type Product,
+  type ImportHistory,
   type Review,
   type User,
 } from "../types/api";
@@ -87,7 +88,8 @@ export function AdminPage() {
   const [productSaving, setProductSaving] = useState(false);
   const [productError, setProductError] = useState("");
   const [importFile,setImportFile]=useState<File|null>(null);
-  const [importPreview,setImportPreview]=useState<{inseridos:number;atualizados:number;rejeitados:number;erros:string[]}|null>(null);
+  const [importPreview,setImportPreview]=useState<{inseridos:number;atualizados:number;rejeitados:number;erros:string[];registros:{codigo:string;nome:string;preco:number;estoque:number;categoria:string;acao:string}[]}|null>(null);
+  const [importHistory,setImportHistory]=useState<ImportHistory[]>([]);
   const [orderOpen, setOrderOpen] = useState<Order | null>(null);
   const [couponForm, setCouponForm] = useState<Partial<Coupon> | null>(null);
   const [cashbackForm, setCashbackForm] = useState<{
@@ -141,15 +143,14 @@ export function AdminPage() {
       if (["products", "reports", "catalog"].includes(tab)) setRegistrations(await api.catalogRegistrations());
       if (tab === "dashboard")
         setMetrics(await api.metrics(reportPeriod.inicio, reportPeriod.fim));
-      if (tab === "products")
-        setProducts(
-          (
-            await api.adminProducts({
-              tamanho: 500,
-              busca: search || undefined,
-            })
-          ).content,
-        );
+      if (tab === "products") {
+        const [productPage, history] = await Promise.all([
+          api.adminProducts({ tamanho: 500, busca: search || undefined }),
+          api.importHistory(),
+        ]);
+        setProducts(productPage.content);
+        setImportHistory(history);
+      }
       if (tab === "orders") setOrders(await api.adminOrders(filters));
       if (tab === "users" || tab === "reports") setUsers(await api.adminUsers());
       if (tab === "coupons") {
@@ -468,7 +469,8 @@ export function AdminPage() {
                   )}
                 </div>
               )}
-              {tab==='products'&&importPreview&&<div className="review-alert"><strong>Pré-visualização: {importPreview.inseridos} novos, {importPreview.atualizados} atualizações, {importPreview.rejeitados} rejeitados.</strong>{importPreview.erros.map(error=><span key={error}>{error}</span>)}<button className="button primary" disabled={!importFile||importPreview.rejeitados>0} onClick={()=>importFile&&void action(async()=>{await api.importProducts(importFile,false);setImportFile(null);setImportPreview(null)},'Importação concluída.')}>Confirmar importação transacional</button></div>}
+              {tab==='products'&&importPreview&&<div className="review-alert"><strong>Pré-visualização: {importPreview.inseridos} novos, {importPreview.atualizados} atualizações, {importPreview.rejeitados} rejeitados.</strong>{importPreview.erros.map(error=><span key={error}>{error}</span>)}{importPreview.registros.length>0&&<div className="table-scroll"><table><thead><tr><th>Ação</th><th>SKU</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th></tr></thead><tbody>{importPreview.registros.map(r=><tr key={r.codigo}><td>{r.acao}</td><td>{r.codigo}</td><td>{r.nome}</td><td>{r.categoria}</td><td>{money(r.preco)}</td><td>{r.estoque}</td></tr>)}</tbody></table></div>}<button className="button primary" disabled={!importFile||importPreview.rejeitados>0} onClick={()=>importFile&&void action(async()=>{await api.importProducts(importFile,false);setImportFile(null);setImportPreview(null);setImportHistory(await api.importHistory())},'Importação concluída e registrada no histórico.')}>Confirmar importação transacional</button></div>}
+              {tab==='products'&&importHistory.length>0&&<section className="chart-card"><header><div><h2>Histórico de importações</h2><p>Arquivo, data, responsável e resultado das últimas importações confirmadas.</p></div></header><div className="table-scroll"><table><thead><tr><th>Data</th><th>Arquivo</th><th>Responsável</th><th>Resultado</th><th>Totais</th><th>Comprovante</th></tr></thead><tbody>{importHistory.map(h=><tr key={h.id}><td>{date(h.criadoEm)}</td><td><strong>{h.nomeArquivo}</strong><small>SHA-256: {h.hashArquivo.slice(0,12)}…</small></td><td>{h.responsavel}</td><td>{titleCase(h.resultado)}</td><td>{h.inseridos} inseridos · {h.atualizados} atualizados · {h.rejeitados} rejeitados</td><td><a className="text-link" href={api.importHistoryFileUrl(h.id)}>Baixar arquivo</a></td></tr>)}</tbody></table></div></section>}
               {tab === "users" && (
                 <div className="admin-toolbar">
                   <span />
@@ -754,6 +756,7 @@ export function AdminPage() {
                                   {[
                                     "PAGAMENTO_APROVADO",
                                     "EM_SEPARACAO",
+                                    "DISPONIVEL_RETIRADA",
                                     "ENVIADO",
                                     "ENTREGUE",
                                     "CANCELADO",
@@ -989,7 +992,7 @@ export function AdminPage() {
               <label>Conteúdo<select value={reportType} onChange={e=>{setReportType(e.target.value);setReportFilters({})}}>{["VENDAS","PEDIDOS","PRODUTOS","CLIENTES","CUPONS","CASHBACK"].map(tipo=><option key={tipo} value={tipo}>{titleCase(tipo)}</option>)}</select></label>
               <label>Buscar<input value={reportFilters.busca||''} maxLength={120} placeholder={['VENDAS','PEDIDOS'].includes(reportType)?'Pedido, nome ou e-mail do cliente':'Nome, código ou e-mail'} onChange={e=>filterReport('busca',e.target.value)}/></label>
               {['VENDAS','PEDIDOS'].includes(reportType)&&<>
-                <label>Status do pedido<select value={reportFilters.status||''} onChange={e=>filterReport('status',e.target.value)}><option value="">Todos</option>{['PENDENTE','PAGAMENTO_APROVADO','EM_SEPARACAO','ENVIADO','ENTREGUE','CANCELADO'].map(v=><option key={v}>{v}</option>)}</select></label>
+                <label>Status do pedido<select value={reportFilters.status||''} onChange={e=>filterReport('status',e.target.value)}><option value="">Todos</option>{['PENDENTE','PAGAMENTO_APROVADO','EM_SEPARACAO','DISPONIVEL_RETIRADA','ENVIADO','ENTREGUE','CANCELADO'].map(v=><option key={v}>{v}</option>)}</select></label>
                 <label>Recebimento<select value={reportFilters.recebimento||''} onChange={e=>filterReport('recebimento',e.target.value)}><option value="">Todos</option><option value="RETIRADA">Retirada</option><option value="ENTREGA">Entrega</option></select></label>
                 <label>Pagamento<select value={reportFilters.pagamento||''} onChange={e=>filterReport('pagamento',e.target.value)}><option value="">Todos</option>{['PIX','CARTAO','BOLETO'].map(v=><option key={v}>{v}</option>)}</select></label>
               </>}

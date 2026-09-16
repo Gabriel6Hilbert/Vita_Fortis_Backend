@@ -9,8 +9,11 @@ import VitaFortis.demo.v1.entity.Produto;
 import VitaFortis.demo.v1.mapper.ProdutoMapper;
 import VitaFortis.demo.v1.repository.ProdutoRepository;
 import VitaFortis.demo.v1.repository.MovimentacaoEstoqueRepository;
+import VitaFortis.demo.v1.repository.HistoricoImportacaoProdutoRepository;
 import VitaFortis.demo.v1.entity.MovimentacaoEstoque;
+import VitaFortis.demo.v1.entity.HistoricoImportacaoProduto;
 import VitaFortis.demo.v1.dto.MovimentacaoEstoqueDto;
+import VitaFortis.demo.v1.dto.HistoricoImportacaoProdutoDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.PageImpl;
@@ -37,12 +40,14 @@ public class ProdutoService {
     private final ProdutoMapper produtoMapper;
     private final MovimentacaoEstoqueRepository movimentacoes;
     private final CatalogoCadastroService cadastros;
+    private final HistoricoImportacaoProdutoRepository historicoImportacoes;
 
-    public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper, MovimentacaoEstoqueRepository movimentacoes, CatalogoCadastroService cadastros) {
+    public ProdutoService(ProdutoRepository produtoRepository, ProdutoMapper produtoMapper, MovimentacaoEstoqueRepository movimentacoes, CatalogoCadastroService cadastros, HistoricoImportacaoProdutoRepository historicoImportacoes) {
         this.produtoRepository = produtoRepository;
         this.produtoMapper = produtoMapper;
         this.movimentacoes = movimentacoes;
         this.cadastros = cadastros;
+        this.historicoImportacoes = historicoImportacoes;
     }
 
     // CRIAR PRODUTO
@@ -292,7 +297,7 @@ public class ProdutoService {
     }
 
     @Transactional
-    public Map<String,Object> importar(org.springframework.web.multipart.MultipartFile arquivo, boolean preVisualizar) throws java.io.IOException {
+    public Map<String,Object> importar(org.springframework.web.multipart.MultipartFile arquivo, boolean preVisualizar, String responsavel) throws java.io.IOException {
         String nome = java.util.Optional.ofNullable(arquivo.getOriginalFilename()).orElse("").toLowerCase();
         if (arquivo.isEmpty()) throw new IllegalArgumentException("Selecione uma planilha com produtos");
         List<List<String>> linhas;
@@ -360,7 +365,46 @@ public class ProdutoService {
                 produtoRepository.save(destino);
             }
             produtoRepository.flush();
+            registrarImportacao(arquivo, responsavel, inseridos, atualizados, erros);
         }
-        return Map.of("preVisualizacao",preVisualizar,"inseridos",inseridos,"atualizados",atualizados,"ignorados",0,"rejeitados",erros.size(),"erros",erros);
+        var registros = validos.stream().map(p -> Map.of("codigo", p.getCodigo(), "nome", p.getNome(),
+                "preco", p.getPreco(), "estoque", p.getQuantidadeEstoque(), "categoria", p.getCategoria(),
+                "acao", produtoRepository.existsByCodigoIgnoreCase(p.getCodigo()) ? "ATUALIZAR" : "INSERIR")).toList();
+        return Map.of("preVisualizacao",preVisualizar,"inseridos",inseridos,"atualizados",atualizados,"ignorados",0,"rejeitados",erros.size(),"erros",erros,"registros",registros);
+    }
+
+    @Transactional(readOnly = true)
+    public List<HistoricoImportacaoProdutoDto> historicoImportacoes() {
+        return historicoImportacoes.findTop50ByOrderByCriadoEmDesc().stream()
+                .map(HistoricoImportacaoProdutoDto::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public HistoricoImportacaoProduto arquivoImportacao(Long id) {
+        return historicoImportacoes.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Historico de importacao nao encontrado"));
+    }
+
+    private void registrarImportacao(org.springframework.web.multipart.MultipartFile arquivo, String responsavel,
+                                     int inseridos, int atualizados, List<String> erros) throws java.io.IOException {
+        byte[] bytes = arquivo.getBytes();
+        HistoricoImportacaoProduto h = new HistoricoImportacaoProduto();
+        h.setNomeArquivo(java.util.Optional.ofNullable(arquivo.getOriginalFilename()).orElse("importacao"));
+        h.setHashArquivo(sha256(bytes));
+        h.setResponsavel(responsavel == null || responsavel.isBlank() ? "administrador" : responsavel);
+        h.setCriadoEm(java.time.LocalDateTime.now());
+        h.setResultado(erros.isEmpty() ? "CONCLUIDA" : "REJEITADA");
+        h.setInseridos(inseridos); h.setAtualizados(atualizados); h.setRejeitados(erros.size());
+        h.setDetalhes(erros.isEmpty() ? "Importacao transacional concluida" : String.join(" | ", erros));
+        h.setArquivo(bytes);
+        historicoImportacoes.save(h);
+    }
+
+    private String sha256(byte[] bytes) {
+        try {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 indisponivel", e);
+        }
     }
 }
