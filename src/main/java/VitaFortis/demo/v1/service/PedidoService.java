@@ -105,8 +105,12 @@ public class PedidoService {
                 throw new IllegalArgumentException("Pagamento do pedido ja foi aprovado");
             }
             pedido.setStatusPagamento(StatusPagamento.APROVADO);
-            pedido.getItems().forEach(item ->
-                    produtos.alterarTotalVendido(item.getProduto().getId(), item.getQuantidade()));
+            pedido.getItems().forEach(item -> {
+                if (produtos.debitarEstoque(item.getProduto().getId(), item.getQuantidade()) == 0) {
+                    throw new IllegalArgumentException("Estoque insuficiente para " + item.getProduto().getNome());
+                }
+                produtos.alterarTotalVendido(item.getProduto().getId(), item.getQuantidade());
+            });
             cashback.creditarPedido(pedido);
         }
         if (novoStatus == StatusCompra.CANCELADO) {
@@ -208,7 +212,7 @@ public class PedidoService {
             Produto produto = produtos.findByIdAndAtivoTrue(solicitado.getProdutoId())
                     .orElseThrow(() -> new IllegalArgumentException(
                             "Produto indisponivel: " + solicitado.getProdutoId()));
-            if (produtos.debitarEstoque(produto.getId(), solicitado.getQuantidade()) == 0) {
+            if (produto.getQuantidadeEstoque() < solicitado.getQuantidade()) {
                 throw new IllegalArgumentException("Estoque insuficiente para " + produto.getNome());
             }
             ItemCompra item = criarItem(pedido, produto, solicitado.getQuantidade());
@@ -265,8 +269,8 @@ public class PedidoService {
     private void cancelar(Pedido pedido) {
         boolean pagamentoAprovado = pedido.getStatusPagamento() == StatusPagamento.APROVADO;
         pedido.getItems().forEach(item -> {
-            produtos.creditarEstoque(item.getProduto().getId(), item.getQuantidade());
             if (pagamentoAprovado) {
+                produtos.creditarEstoque(item.getProduto().getId(), item.getQuantidade());
                 produtos.alterarTotalVendido(item.getProduto().getId(), -item.getQuantidade());
             }
         });

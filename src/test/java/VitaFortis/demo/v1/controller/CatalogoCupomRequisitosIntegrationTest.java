@@ -108,6 +108,7 @@ class CatalogoCupomRequisitosIntegrationTest {
 
     @Test void rnf04LimiteRevalidadoNoCheckoutECashbackPreservado() throws Exception {
         var admin=login("admin@vitafortis.test"); var cliente=login("cliente2@vitafortis.test");var colab=login("colaborador@vitafortis.test");
+        BigDecimal saldoAnterior=request(get("/api/v1/colaborador/cashback/resumo"),colab,null,200).get("saldo").decimalValue();
         var p=produto();var dto=cupom();dto.put("colaboradorId",colab.id());dto.put("percentualCashback",5);
         var coupon=request(post("/api/v1/admin/cupons"),admin,dto,201);long id=coupon.get("id").asLong();
         var order=pedido(cliente,p,id);
@@ -119,9 +120,8 @@ class CatalogoCupomRequisitosIntegrationTest {
         request(post("/api/v1/carrinhos/"+cliente.id()+"/cupom/"+dto.get("codigo")),cliente,null,400);
         request(patch("/api/v1/admin/pedidos/"+orderId+"/pagamento/aprovar"),admin,null,200);
         var summary=request(get("/api/v1/colaborador/cashback/resumo"),colab,null,200);
-        var linked=new ArrayList<JsonNode>();summary.get("cupons").forEach(c->{if(c.get("id").asLong()==id)linked.add(c);});
-        assertEquals(10,linked.get(0).get("desconto").asInt());assertEquals(5,linked.get(0).get("percentualCashback").asInt());
-        assertEquals(0,new BigDecimal("4.50").compareTo(linked.get(0).get("cashback").decimalValue()));
+        assertEquals(0, saldoAnterior.add(new BigDecimal("5.00")).compareTo(summary.get("saldo").decimalValue()));
+        assertNull(summary.get("cupons"));
     }
 
     @Test void rnf04RejeitaDatasMinimoPercentualELimiteInvalidosPermiteRemoverRegras() throws Exception {

@@ -105,8 +105,8 @@ class ColaboradorCompraIntegrationTest {
                         .content(pedido(cliente.id(), produto.getId())))
                 .andExpect(status().isForbidden());
 
-        assertEquals(8, produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque(),
-                "Somente o pedido autorizado deve debitar o estoque");
+        assertEquals(10, produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque(),
+                "Pedido pendente nao deve debitar o estoque");
     }
 
     private Login login(String email, String tipoUsuario) throws Exception {

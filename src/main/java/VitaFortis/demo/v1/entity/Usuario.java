@@ -1,6 +1,7 @@
 package VitaFortis.demo.v1.entity;
 
 import VitaFortis.demo.v1.enums.TipoUsuario;
+import VitaFortis.demo.v1.enums.DestinoCashback;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -68,6 +69,10 @@ public class Usuario {
     @Column(name = "SALDO_CASHBACK", nullable = false, precision = 12, scale = 2)
     @Builder.Default
     private BigDecimal saldoCashback = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "DESTINO_CASHBACK", length = 20)
+    private DestinoCashback destinoCashback;
 
     @Column(name = "ACEITA_COMUNICACOES", nullable = false)
     private boolean aceitaComunicacoes;

@@ -235,24 +235,5 @@ export interface ImportHistory {
 export interface CollaboratorSummary {
   colaboradorId: number;
   saldo: number;
-  cashbackConfirmado: number;
-  cashbackEstornado: number;
-  vendasGeradas: number;
-  pedidosGerados: number;
-  cupons: {
-    id: number;
-    codigo: string;
-    ativo: boolean;
-    percentualCashback: number;
-    desconto: number;
-    tipo: "PERCENTUAL" | "FIXO";
-    dataInicio?: string;
-    dataVencimento?: string;
-    limiteUso?: number;
-    pedidos: number;
-    vendas: number;
-    cashback: number;
-  }[];
-  movimentos: CashbackMovement[];
-  pedidos: Order[];
+  destinoCashback?: 'PIX' | 'DESCONTO';
 }

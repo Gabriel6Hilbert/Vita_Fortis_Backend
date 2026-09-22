@@ -69,7 +69,7 @@ class HomologacaoFluxosIntegrationTest {
         var criado=mvc.perform(post("/api/v1/pedidos").session(cliente.session()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.total").value(64.80)).andReturn();
         long id=json.readTree(criado.getResponse().getContentAsString()).get("id").asLong();
-        assertEquals(8,produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque());
+        assertEquals(10,produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque());
         mvc.perform(patch("/api/v1/admin/pedidos/{id}/pagamento/aprovar",id).session(admin.session()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.statusPagamento").value("APROVADO"))
                 .andExpect(jsonPath("$.itens.length()").value(1));
@@ -130,8 +130,10 @@ class HomologacaoFluxosIntegrationTest {
     void colaboradorNaoRecebePedidosDeCompradoresNoResumo() throws Exception {
         var colaborador=login("colaborador@vitafortis.test");
         mvc.perform(get("/api/v1/colaborador/cashback/resumo").session(colaborador.session()))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.pedidos").isEmpty())
-                .andExpect(jsonPath("$.movimentos").isArray());
+                .andExpect(status().isOk()).andExpect(jsonPath("$.saldo").isNumber())
+                .andExpect(jsonPath("$.pedidos").doesNotExist())
+                .andExpect(jsonPath("$.movimentos").doesNotExist())
+                .andExpect(jsonPath("$.cupons").doesNotExist());
     }
 
     private MockMultipartFile csv(String content) { return new MockMultipartFile("arquivo","produtos.csv","text/csv",content.getBytes(StandardCharsets.UTF_8)); }

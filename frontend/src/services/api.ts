@@ -146,6 +146,7 @@ export const api = {
   removeAddress: (userId:number,id:number) => request<void>(`/usuarios/${userId}/enderecos/${id}`,{method:'DELETE'},true),
   metrics: (inicio: string, fim: string) => request<AdminMetrics>(`/admin/metricas${query({ inicio, fim })}`, {}, true),
   collaboratorSummary: () => request<CollaboratorSummary>('/colaborador/cashback/resumo',{},true),
+  chooseCashbackDestination: (destino:'PIX'|'DESCONTO') => request<CollaboratorSummary>('/colaborador/cashback/destino',{method:'PUT',body:JSON.stringify({destino})},true),
   adjustCashback: (id:number,valor:number,justificativa:string) => request(`/admin/colaboradores/${id}/cashback/ajustes`,{method:'POST',body:JSON.stringify({valor,justificativa})},true),
   withdrawCashback: (id:number,valor:number,justificativa:string) => request(`/admin/colaboradores/${id}/cashback/baixas`,{method:'POST',body:JSON.stringify({valor,justificativa})},true),
   adminReviews: () => request<Review[]>('/admin/avaliacoes',{},true),
