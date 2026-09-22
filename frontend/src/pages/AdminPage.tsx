@@ -26,6 +26,7 @@ import type { OrderFilters } from "../services/api";
 import { CatalogAdmin } from "../components/CatalogAdmin";
 import type { CatalogRegistration } from "../types/api";
 import { OrderFiltersForm } from "../components/OrderFiltersForm";
+import { PrivacyAdmin } from "../components/PrivacyAdmin";
 import {
   isAdmin,
   type AdminMetrics,
@@ -46,6 +47,7 @@ type Tab =
   | "users"
   | "coupons"
   | "reviews"
+  | "privacy"
   | "reports";
 const blankProduct: Partial<Product> = {
   codigo: "",
@@ -299,6 +301,7 @@ export function AdminPage() {
             ["users", Users, "Usuários"],
             ["coupons", TicketPercent, "Cupons"],
             ["reviews", MessageSquare, "Avaliações"],
+            ["privacy", ShieldAlert, "Privacidade"],
             ["reports", Download, "Relatórios"],
           ] as const
         ).map(([value, Icon, label]) => (
@@ -963,6 +966,7 @@ export function AdminPage() {
             )}
           </div>
         )}
+        {tab === "privacy" && <PrivacyAdmin />}
         {tab === "reports" && (
           <section className="chart-card report-panel">
             <span className="eyebrow">Central de exportação</span><h2>Relatórios administrativos</h2><p>Escolha o período, o formato e o conteúdo que deseja baixar.</p>

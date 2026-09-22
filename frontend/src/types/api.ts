@@ -237,3 +237,22 @@ export interface CollaboratorSummary {
   saldo: number;
   destinoCashback?: 'PIX' | 'DESCONTO';
 }
+export type PrivacyRequestType = 'ACESSO' | 'CORRECAO' | 'EXCLUSAO';
+export type PrivacyRequestStatus = 'PENDENTE' | 'EM_ANALISE' | 'ATENDIDA' | 'NEGADA';
+export interface PrivacyRequest {
+  id: number;
+  protocolo: string;
+  tipo: PrivacyRequestType;
+  descricao: string;
+  status: PrivacyRequestStatus;
+  criadaEm: string;
+  decisao?: string;
+  justificativaAdmin?: string;
+  processadaEm?: string;
+}
+export interface AdminPrivacyRequest extends PrivacyRequest {
+  clienteId: number;
+  clienteNome: string;
+  clienteEmail: string;
+  responsavel?: string;
+}

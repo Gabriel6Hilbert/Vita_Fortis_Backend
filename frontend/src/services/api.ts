@@ -1,4 +1,4 @@
-import type { CatalogRegistration, Address, AddressInput, AdminMetrics, BrandSummary, Cart, CategorySummary, CollaboratorSummary, Coupon, GoalSummary, Order, OrderDetail, Page, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
+import type { AdminPrivacyRequest, CatalogRegistration, Address, AddressInput, AdminMetrics, BrandSummary, Cart, CategorySummary, CollaboratorSummary, Coupon, GoalSummary, Order, OrderDetail, Page, PrivacyRequest, PrivacyRequestStatus, PrivacyRequestType, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const SESSION_KEY = 'vita-fortis-session'
@@ -107,6 +107,10 @@ export const api = {
   me: () => request<User>('/me', {}, true),
   updateMe: (body:{nome:string;telefone?:string;aceitaComunicacoes:boolean}) => request<User>('/me',{method:'PUT',body:JSON.stringify(body)},true),
   changePassword: (body:{senhaAtual:string;novaSenha:string}) => request<void>('/me/senha',{method:'PUT',body:JSON.stringify(body)},true),
+  communicationConsent: () => request<{aceitaComunicacoes:boolean}>('/privacidade/consentimento-comunicacoes',{},true),
+  updateCommunicationConsent: (aceitaComunicacoes:boolean) => request<{aceitaComunicacoes:boolean}>('/privacidade/consentimento-comunicacoes',{method:'PUT',body:JSON.stringify({aceitaComunicacoes})},true),
+  privacyRequests: () => request<PrivacyRequest[]>('/privacidade/solicitacoes',{},true),
+  createPrivacyRequest: (body:{tipo:PrivacyRequestType;descricao:string}) => request<PrivacyRequest>('/privacidade/solicitacoes',{method:'POST',body:JSON.stringify(body)},true),
   favorites: (userId: number) => request<Product[]>(`/usuarios/${userId}/favoritos`, {}, true),
   addFavorite: (userId: number, productId: number) => request<Product>(`/usuarios/${userId}/favoritos/${productId}`, { method: 'POST' }, true),
   removeFavorite: (userId: number, productId: number) => request<void>(`/usuarios/${userId}/favoritos/${productId}`, { method: 'DELETE' }, true),
@@ -133,6 +137,8 @@ export const api = {
   approvePayment: (id:number) => request<Order>(`/admin/pedidos/${id}/pagamento/aprovar`,{method:'PATCH'},true),
   rejectPayment: (id:number) => request<Order>(`/admin/pedidos/${id}/pagamento/recusar`,{method:'PATCH'},true),
   adminUsers: () => request<User[]>('/admin/usuarios', {}, true),
+  adminPrivacyRequests: () => request<AdminPrivacyRequest[]>('/admin/privacidade/solicitacoes',{},true),
+  processPrivacyRequest: (id:number,body:{status:PrivacyRequestStatus;decisao:string;justificativa:string}) => request<AdminPrivacyRequest>(`/admin/privacidade/solicitacoes/${id}`,{method:'PATCH',body:JSON.stringify(body)},true),
   setUserActive: (id: number, valor: boolean) => request<User>(`/admin/usuarios/${id}/ativo?valor=${valor}`, { method: 'PATCH' }, true),
   setUserRole: (id: number, valor: string) => request<User>(`/admin/usuarios/${id}/tipo?valor=${valor}`, { method: 'PATCH' }, true),
   createCollaborator: (body:{nome:string;email:string;senha:string;cpf:string;telefone?:string}) => request<User>('/admin/usuarios/colaboradores',{method:'POST',body:JSON.stringify(body)},true),

@@ -1,0 +1,18 @@
+import { FormEvent, useEffect, useState } from 'react'
+import { api } from '../services/api'
+import type { AdminPrivacyRequest, PrivacyRequestStatus } from '../types/api'
+import { date, titleCase } from '../utils/format'
+import { ErrorState, Loading } from './States'
+
+export function PrivacyAdmin(){
+  const [items,setItems]=useState<AdminPrivacyRequest[]>([])
+  const [selected,setSelected]=useState<AdminPrivacyRequest|null>(null)
+  const [loading,setLoading]=useState(true)
+  const [error,setError]=useState('')
+  const [success,setSuccess]=useState('')
+  const load=async()=>{setLoading(true);setError('');try{setItems(await api.adminPrivacyRequests())}catch(e){setError(e instanceof Error?e.message:'Falha ao carregar solicitações.')}finally{setLoading(false)}}
+  useEffect(()=>{void load()},[])
+  const process=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(!selected)return;const form=e.currentTarget;const data=new FormData(form);try{await api.processPrivacyRequest(selected.id,{status:String(data.get('status')) as PrivacyRequestStatus,decisao:String(data.get('decisao')),justificativa:String(data.get('justificativa'))});setSelected(null);setSuccess('Solicitação processada e registrada na auditoria.');await load()}catch(cause){setError(cause instanceof Error?cause.message:'Falha ao processar solicitação.')}}
+  if(loading)return <Loading/>;if(error&&!items.length)return <ErrorState message={error} retry={()=>void load()}/>
+  return <section className="chart-card"><header><div><h2>Solicitações de privacidade</h2><p>O processamento registra decisão, responsável, data e justificativa. Solicitações de exclusão não apagam automaticamente registros sujeitos à retenção.</p></div></header>{success&&<div className="success-banner">{success}</div>}{error&&<p className="form-error">{error}</p>}<div className="table-wrap"><table><thead><tr><th>Protocolo e cliente</th><th>Tipo</th><th>Data</th><th>Status</th><th>Ação</th></tr></thead><tbody>{!items.length&&<tr><td colSpan={5}>Nenhuma solicitação registrada.</td></tr>}{items.map(item=><tr key={item.id}><td><strong>{item.protocolo}</strong><small>{item.clienteNome} · {item.clienteEmail}</small></td><td>{titleCase(item.tipo)}</td><td>{date(item.criadaEm)}</td><td><span className={`status ${item.status.toLowerCase()}`}>{titleCase(item.status)}</span></td><td><button className="text-action" onClick={()=>setSelected(item)}>Processar</button></td></tr>)}</tbody></table></div>{selected&&<div className="modal-backdrop"><form className="admin-modal small" onSubmit={process}><header><div><h2>{selected.protocolo}</h2><p>{selected.clienteNome} · {titleCase(selected.tipo)}</p></div><button type="button" onClick={()=>setSelected(null)}>×</button></header><p><strong>Descrição do cliente:</strong> {selected.descricao}</p><label>Status<select name="status" defaultValue={selected.status==='PENDENTE'?'EM_ANALISE':selected.status} required>{(['EM_ANALISE','ATENDIDA','NEGADA'] as PrivacyRequestStatus[]).map(status=><option key={status} value={status}>{titleCase(status)}</option>)}</select></label><label>Decisão<input name="decisao" maxLength={500} defaultValue={selected.decisao||''} required/></label><label>Justificativa<textarea name="justificativa" maxLength={1000} defaultValue={selected.justificativaAdmin||''} required/></label><p className="empty-inline">Pedidos, pagamentos, movimentações e demais dados sujeitos à retenção legal não serão excluídos automaticamente.</p><footer><button type="button" className="button secondary" onClick={()=>setSelected(null)}>Cancelar</button><button className="button primary">Registrar processamento</button></footer></form></div>}</section>
+}
