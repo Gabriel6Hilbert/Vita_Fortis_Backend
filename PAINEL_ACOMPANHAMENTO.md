@@ -36,11 +36,16 @@ Estado: 🟢 Publicado e verificado
 
 ### Segurança de tráfego
 
-Estado: ⬜ A fazer
+Estado: 🟡 Em andamento
 
 - [ ] Confirmar domínio, DNS e proxy utilizados hoje.
 - [ ] Definir países permitidos e exceções necessárias.
-- [ ] Proteger login, recuperação de senha e APIs contra abuso.
+- [x] Implementar proteção local contra excesso de tentativas em login, cadastro e recuperação de senha.
+- [x] Reforçar validação, expiração, uso único e concorrência dos tokens de recuperação.
+- [x] Validar localmente a proteção com testes Java, lint e build do frontend.
+- [x] Publicar a proteção de autenticação no GitHub.
+- [ ] Homologar a proteção no ambiente público.
+- [ ] Adicionar proteção complementar na borda para login, recuperação de senha e APIs sensíveis.
 - [ ] Evitar acesso que contorne a proteção pelo endereço do Render.
 - [ ] Testar bloqueio, rate limit e tráfego brasileiro legítimo.
 
@@ -93,4 +98,4 @@ Fora do escopo desta tarefa:
 - configuração de produção;
 - publicação no GitHub ou Render.
 
-Última atualização deste painel: 29/09/2026.
+Última atualização deste painel: 29/09/2026, após validação local da segurança de autenticação.

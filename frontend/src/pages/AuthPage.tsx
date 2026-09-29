@@ -5,6 +5,7 @@ import { useAuth } from '../app/AuthContext'
 import { api } from '../services/api'
 
 type Mode = 'login' | 'register' | 'forgot' | 'reset'
+const RESET_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/
 const maskCpf=(value:string)=>value.replace(/\D/g,'').slice(0,11).replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')
 const validCpf=(value:string)=>{const cpf=value.replace(/\D/g,'');if(cpf.length!==11||/^(\d)\1+$/.test(cpf))return false;const digit=(size:number)=>{let sum=0;for(let i=0;i<size;i++)sum+=Number(cpf[i])*(size+1-i);const rest=(sum*10)%11;return rest===10?0:rest};return digit(9)===Number(cpf[9])&&digit(10)===Number(cpf[10])}
 
@@ -40,6 +41,7 @@ export function AuthPage() {
         return
       }
       if (mode === 'reset') {
+        if (!RESET_TOKEN_PATTERN.test(resetToken)) throw new Error('O link de recuperação é inválido. Solicite um novo link.')
         const senha = String(data.get('senha'))
         const confirmacao = String(data.get('confirmacao'))
         if (senha !== confirmacao) throw new Error('As senhas informadas não coincidem.')
@@ -72,8 +74,8 @@ export function AuthPage() {
       <form onSubmit={submit} className="form">
         {mode === 'register' && <><label>Nome completo<input name="nome" required maxLength={120} autoComplete="name" /></label><div className="form-row"><label>CPF<input name="cpf" required placeholder="000.000.000-00" inputMode="numeric" maxLength={14} onChange={e=>{e.currentTarget.value=maskCpf(e.currentTarget.value);setCpfError('')}} onBlur={e=>setCpfError(validCpf(e.currentTarget.value)?'':'Informe um CPF válido.')} aria-invalid={Boolean(cpfError)}/>{cpfError&&<small className="field-error">{cpfError}</small>}</label><label>Telefone<input name="telefone" maxLength={20} autoComplete="tel" /></label></div></>}
         {mode !== 'reset' && <label>E-mail<input name="email" required type="email" autoComplete="email" /></label>}
-        {(mode === 'login' || mode === 'register' || mode === 'reset') && <label>Senha<div className="password-field"><input name="senha" required type={show ? 'text' : 'password'} minLength={mode === 'login' ? undefined : 8} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} /><button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}>{show ? <EyeOff /> : <Eye />}</button></div>{mode !== 'login' && <small>Mínimo de 8 caracteres.</small>}</label>}
-        {mode === 'reset' && <label>Confirmar nova senha<input name="confirmacao" required type={show ? 'text' : 'password'} minLength={8} autoComplete="new-password" /></label>}
+        {(mode === 'login' || mode === 'register' || mode === 'reset') && <label>Senha<div className="password-field"><input name="senha" required type={show ? 'text' : 'password'} minLength={mode === 'login' ? undefined : 8} maxLength={mode === 'login' ? undefined : 72} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} /><button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}>{show ? <EyeOff /> : <Eye />}</button></div>{mode !== 'login' && <small>Use de 8 a 72 caracteres.</small>}</label>}
+        {mode === 'reset' && <label>Confirmar nova senha<input name="confirmacao" required type={show ? 'text' : 'password'} minLength={8} maxLength={72} autoComplete="new-password" /></label>}
         {error && <div className="form-error" role="alert">{error}</div>}
         {success && <div className="form-success" role="status">{success}</div>}
         <button className="button primary" disabled={busy}>{busy ? 'Aguarde…' : mode === 'login' ? 'Entrar' : mode === 'register' ? 'Criar conta' : mode === 'forgot' ? 'Enviar link' : 'Redefinir senha'}</button>

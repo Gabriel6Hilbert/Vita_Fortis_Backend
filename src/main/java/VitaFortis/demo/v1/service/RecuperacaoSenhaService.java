@@ -56,9 +56,9 @@ public class RecuperacaoSenhaService {
         });
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = IllegalArgumentException.class)
     public void redefinir(String token, String novaSenha) {
-        RecuperacaoSenha recuperacao = recuperacoes.findByTokenHashAndUtilizadoEmIsNull(hash(token))
+        RecuperacaoSenha recuperacao = recuperacoes.findDisponivelForUpdate(hash(token))
                 .orElseThrow(() -> new IllegalArgumentException("Link de recuperação inválido ou já utilizado."));
         if (recuperacao.getExpiraEm().isBefore(LocalDateTime.now())) {
             recuperacao.setUtilizadoEm(LocalDateTime.now());
@@ -66,6 +66,8 @@ public class RecuperacaoSenhaService {
         }
         recuperacao.getUsuario().setSenha(encoder.encode(novaSenha));
         recuperacao.setUtilizadoEm(LocalDateTime.now());
+        recuperacoes.findAllByUsuarioIdAndUtilizadoEmIsNull(recuperacao.getUsuario().getId())
+                .forEach(pendente -> pendente.setUtilizadoEm(LocalDateTime.now()));
     }
 
     private void enviarEmail(String email, String nome, String token) {
