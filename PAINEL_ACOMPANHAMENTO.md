@@ -22,14 +22,14 @@ Este é o ponto de entrada para acompanhar o projeto no iPhone, no PC e em novos
 
 ### Organização do trabalho com IA
 
-Estado: 🟡 Em andamento
+Estado: 🟢 Publicado e verificado
 
 - [x] Criar regras automáticas de escopo no `AGENTS.md`.
 - [x] Criar mapa inicial de arquivos.
 - [x] Criar modelo de solicitação pequena e rastreável.
 - [x] Criar painel legível no celular e no computador.
-- [ ] Revisar estes arquivos com o proprietário.
-- [ ] Publicar no GitHub após aprovação explícita.
+- [x] Revisar e autorizar a organização com o proprietário.
+- [x] Publicar no GitHub após aprovação explícita.
 - [ ] Confirmar a abertura dos links no iPhone e no PC.
 
 ## Próximas etapas
@@ -94,4 +94,3 @@ Fora do escopo desta tarefa:
 - publicação no GitHub ou Render.
 
 Última atualização deste painel: 29/09/2026.
-
