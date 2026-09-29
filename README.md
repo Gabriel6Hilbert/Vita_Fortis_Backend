@@ -2,6 +2,10 @@
 
 Aplicacao completa da Vita Fortis: API em Spring Boot e interface React compilada dentro do proprio backend. O codigo-fonte React fica em `frontend` e o build servido pelo Spring fica em `src/main/resources/static`.
 
+## Acompanhamento do projeto
+
+Para acompanhar tarefas, arquivos afetados, testes e pendencias pelo computador ou celular, comece pelo [Painel de acompanhamento](PAINEL_ACOMPANHAMENTO.md). Para solicitar uma mudanca pequena e controlada, use o [Modelo de pedido para IA](MODELO_PEDIDO_IA.md).
+
 Ao iniciar o Spring Boot, o site e a API ficam disponíveis no mesmo endereco:
 
 - Site: `http://localhost:5001`
