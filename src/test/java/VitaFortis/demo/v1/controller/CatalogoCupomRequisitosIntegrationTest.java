@@ -19,6 +19,7 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("homologacao")
@@ -32,12 +33,13 @@ class CatalogoCupomRequisitosIntegrationTest {
 
     record Login(long id, MockHttpSession session) {}
     private Login login(String email) throws Exception {
-        var r = mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+        var r = mvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(Map.of("email", email, "senha", "Teste@123")))).andReturn();
         assertEquals(200, r.getResponse().getStatus());
         return new Login(json.readTree(r.getResponse().getContentAsString()).get("id").asLong(), (MockHttpSession) r.getRequest().getSession(false));
     }
     private JsonNode request(MockHttpServletRequestBuilder req, Login login, Object body, int expected) throws Exception {
+        req.with(csrf());
         if (login != null) req.session(login.session());
         if (body != null) req.contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body));
         var r = mvc.perform(req).andReturn().getResponse();
@@ -148,8 +150,8 @@ class CatalogoCupomRequisitosIntegrationTest {
         var bodyA=json.writeValueAsString(pedido(a,produto(),id));var bodyB=json.writeValueAsString(pedido(b,produto(),id));
         var ready=new CountDownLatch(2);var start=new CountDownLatch(1);var pool=Executors.newFixedThreadPool(2);
         try {
-            var fa=pool.submit(()->{ready.countDown();start.await();return mvc.perform(post("/api/v1/pedidos").session(a.session()).contentType(MediaType.APPLICATION_JSON).content(bodyA)).andReturn().getResponse().getStatus();});
-            var fb=pool.submit(()->{ready.countDown();start.await();return mvc.perform(post("/api/v1/pedidos").session(b.session()).contentType(MediaType.APPLICATION_JSON).content(bodyB)).andReturn().getResponse().getStatus();});
+            var fa=pool.submit(()->{ready.countDown();start.await();return mvc.perform(post("/api/v1/pedidos").with(csrf()).session(a.session()).contentType(MediaType.APPLICATION_JSON).content(bodyA)).andReturn().getResponse().getStatus();});
+            var fb=pool.submit(()->{ready.countDown();start.await();return mvc.perform(post("/api/v1/pedidos").with(csrf()).session(b.session()).contentType(MediaType.APPLICATION_JSON).content(bodyB)).andReturn().getResponse().getStatus();});
             assertTrue(ready.await(10,TimeUnit.SECONDS));start.countDown();
             assertEquals(Set.of(201,400),new HashSet<>(List.of(fa.get(20,TimeUnit.SECONDS),fb.get(20,TimeUnit.SECONDS))));
             assertEquals(1,pedidos.countByCupomUtilizadoId(id));

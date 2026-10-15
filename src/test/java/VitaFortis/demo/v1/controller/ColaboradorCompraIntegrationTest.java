@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,13 +45,13 @@ class ColaboradorCompraIntegrationTest {
         String itens = json.writeValueAsString(Map.of("produtoId", produto.getId(), "quantidade", 1));
 
         // Each request completes its own transaction, so subsequent reads also exercise persistence.
-        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", colaborador.id())
+        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", colaborador.id()).with(csrf())
                         .session(colaborador.session()).contentType(MediaType.APPLICATION_JSON).content(itens))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(itemCarrinho + ".produtoImagemUrl", hasItem(produto.getImagemUrl())))
                 .andExpect(jsonPath(itemCarrinho + ".quantidade", hasItem(1)));
 
-        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", colaborador.id())
+        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", colaborador.id()).with(csrf())
                         .session(colaborador.session()).contentType(MediaType.APPLICATION_JSON).content(itens))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(itemCarrinho, hasSize(1)))
@@ -61,7 +62,7 @@ class ColaboradorCompraIntegrationTest {
                 .andExpect(jsonPath(itemCarrinho + ".produtoImagemUrl", hasItem(produto.getImagemUrl())))
                 .andExpect(jsonPath(itemCarrinho + ".quantidade", hasItem(2)));
 
-        var criacao = mvc.perform(post("/api/v1/pedidos")
+        var criacao = mvc.perform(post("/api/v1/pedidos").with(csrf())
                         .session(colaborador.session()).contentType(MediaType.APPLICATION_JSON)
                         .content(pedido(colaborador.id(), produto.getId())))
                 .andExpect(status().isCreated())
@@ -91,7 +92,7 @@ class ColaboradorCompraIntegrationTest {
 
         mvc.perform(get("/api/v1/carrinhos/{usuarioId}", colaborador.id()).session(cliente.session()))
                 .andExpect(status().isForbidden());
-        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", cliente.id())
+        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", cliente.id()).with(csrf())
                         .session(colaborador.session()).contentType(MediaType.APPLICATION_JSON).content(itens))
                 .andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/pedidos/{id}", pedidoId).session(cliente.session()))
@@ -100,7 +101,7 @@ class ColaboradorCompraIntegrationTest {
                 .andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/pedidos/usuario/{usuarioId}", cliente.id()).session(colaborador.session()))
                 .andExpect(status().isForbidden());
-        mvc.perform(post("/api/v1/pedidos")
+        mvc.perform(post("/api/v1/pedidos").with(csrf())
                         .session(colaborador.session()).contentType(MediaType.APPLICATION_JSON)
                         .content(pedido(cliente.id(), produto.getId())))
                 .andExpect(status().isForbidden());
@@ -110,7 +111,7 @@ class ColaboradorCompraIntegrationTest {
     }
 
     private Login login(String email, String tipoUsuario) throws Exception {
-        var resposta = mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+        var resposta = mvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("email", email, "senha", "Teste@123"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tipoUsuario").value(tipoUsuario))

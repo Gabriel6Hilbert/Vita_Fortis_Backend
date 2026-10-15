@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -45,11 +46,11 @@ class PrivacidadeControllerIntegrationTest {
 
     @Test
     void persisteConsentimentoESolicitacaoComCamposObrigatorios() throws Exception {
-        mvc.perform(put("/api/v1/privacidade/consentimento-comunicacoes").session(sessaoUm)
+        mvc.perform(put("/api/v1/privacidade/consentimento-comunicacoes").with(csrf()).session(sessaoUm)
                         .contentType(MediaType.APPLICATION_JSON).content("{\"aceitaComunicacoes\":true}"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.aceitaComunicacoes").value(true));
 
-        mvc.perform(post("/api/v1/privacidade/solicitacoes").session(sessaoUm)
+        mvc.perform(post("/api/v1/privacidade/solicitacoes").with(csrf()).session(sessaoUm)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"tipo\":\"CORRECAO\",\"descricao\":\"Corrigir meu telefone cadastrado.\"}"))
                 .andExpect(status().isCreated())
@@ -78,7 +79,7 @@ class PrivacidadeControllerIntegrationTest {
 
     @Test
     void validaEntradaEProtegeRotasAdministrativas() throws Exception {
-        mvc.perform(post("/api/v1/privacidade/solicitacoes").session(sessaoUm)
+        mvc.perform(post("/api/v1/privacidade/solicitacoes").with(csrf()).session(sessaoUm)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"tipo\":\"EXCLUSAO\",\"descricao\":\" \"}"))
                 .andExpect(status().isUnprocessableEntity());
@@ -94,6 +95,7 @@ class PrivacidadeControllerIntegrationTest {
         long quantidadeUsuarios = usuarios.count();
 
         mvc.perform(patch("/api/v1/admin/privacidade/solicitacoes/{id}", id)
+                        .with(csrf())
                         .with(user("admin.rcp02@teste.local").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"status\":\"NEGADA\",\"decisao\":\"Retenção parcial obrigatória\",\"justificativa\":\"Pedidos e pagamentos devem ser preservados durante o prazo legal aplicável.\"}"))
@@ -120,14 +122,14 @@ class PrivacidadeControllerIntegrationTest {
     }
 
     private MockHttpSession login(Usuario usuario) throws Exception {
-        var result = mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+        var result = mvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(java.util.Map.of("email", usuario.getEmail(), "senha", "Senha123!"))))
                 .andExpect(status().isOk()).andReturn();
         return (MockHttpSession) result.getRequest().getSession(false);
     }
 
     private long abrir(MockHttpSession sessao, String tipo, String descricao) throws Exception {
-        var result = mvc.perform(post("/api/v1/privacidade/solicitacoes").session(sessao)
+        var result = mvc.perform(post("/api/v1/privacidade/solicitacoes").with(csrf()).session(sessao)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(java.util.Map.of("tipo", tipo, "descricao", descricao))))
                 .andExpect(status().isCreated()).andReturn();

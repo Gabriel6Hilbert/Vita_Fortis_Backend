@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import VitaFortis.demo.v1.repository.UsuarioRepository;
@@ -40,7 +41,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, AuthRateLimitFilter authRateLimitFilter) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
+        var csrfTokenRepository = new HttpSessionCsrfTokenRepository();
+        csrfTokenRepository.setHeaderName("X-CSRF-TOKEN");
+        return http.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository))
                 .cors(cors -> {})
                 .headers(headers -> headers
                         .referrerPolicy(policy -> policy.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))

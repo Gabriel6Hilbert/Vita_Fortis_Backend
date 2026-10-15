@@ -4,6 +4,8 @@ const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const SESSION_KEY = 'vita-fortis-session'
 const PUBLIC_CACHE_MS = 30_000
 const publicCache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>()
+type CsrfToken = { headerName: string; token: string }
+let csrfTokenPromise: Promise<CsrfToken> | null = null
 
 type Session = { user: User }
 export type OrderFilters = Partial<Record<'numero' | 'inicio' | 'fim' | 'cliente' | 'status' | 'recebimento' | 'pagamento' | 'statusPagamento', string>>
@@ -42,10 +44,31 @@ export const getSession = (): Session | null => {
 }
 export const setSession = (session: Session | null) => session ? sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)) : sessionStorage.removeItem(SESSION_KEY)
 
+const csrfToken = (): Promise<CsrfToken> => {
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = fetch(`${API_URL}/auth/csrf`, {
+      headers: { Accept: 'application/json' },
+      credentials: 'include',
+    }).then(async (response) => {
+      if (!response.ok) throw new ApiError('Não foi possível iniciar a proteção da sessão.', response.status)
+      return response.json() as Promise<CsrfToken>
+    }).catch((error) => {
+      csrfTokenPromise = null
+      throw error
+    })
+  }
+  return csrfTokenPromise
+}
+
 const request = async <T>(path: string, init: RequestInit = {}, authenticated = false): Promise<T> => {
   const headers = new Headers(init.headers)
   headers.set('Accept', 'application/json')
   if (init.body && !(init.body instanceof FormData)) headers.set('Content-Type', 'application/json')
+  const method = (init.method || 'GET').toUpperCase()
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    const csrf = await csrfToken()
+    headers.set(csrf.headerName, csrf.token)
+  }
   if (authenticated) {
     if (!getSession()) throw new ApiError('Faça login para continuar.', 401)
   }
@@ -57,7 +80,7 @@ const request = async <T>(path: string, init: RequestInit = {}, authenticated = 
   if (!response.ok) {
     throw new ApiError(apiErrorMessage(payload, response.status), response.status, payload)
   }
-  if (init.method && init.method !== 'GET') publicCache.clear()
+  if (method !== 'GET') publicCache.clear()
   return payload as T
 }
 
@@ -92,7 +115,10 @@ export const api = {
   register: (body: { nome: string; email: string; senha: string; cpf: string; telefone?: string }) => request<UserPayload>('/auth/cadastro', { method: 'POST', body: JSON.stringify(body) }).then(normalizeUser),
   requestPasswordReset: (email: string) => request<{message:string}>('/auth/recuperacao-senha', { method: 'POST', body: JSON.stringify({ email }) }),
   resetPassword: (token: string, novaSenha: string) => request<{message:string}>('/auth/redefinicao-senha', { method: 'POST', body: JSON.stringify({ token, novaSenha }) }),
-  logout: () => request<void>('/auth/logout',{method:'POST'},true),
+  logout: async () => {
+    try { await request<void>('/auth/logout',{method:'POST'}) }
+    finally { csrfTokenPromise = null }
+  },
   cart: (userId: number) => request<Cart>(`/carrinhos/${userId}`, {}, true),
   addCart: (userId: number, produtoId: number, quantidade = 1) => request<Cart>(`/carrinhos/${userId}/itens`, { method: 'POST', body: JSON.stringify({ produtoId, quantidade }) }, true),
   updateCart: (userId: number, itemId: number, quantidade: number) => request<Cart>(`/carrinhos/${userId}/itens`, { method: 'PUT', body: JSON.stringify({ itemId, quantidade }) }, true),
@@ -123,7 +149,7 @@ export const api = {
   },
   setProductActive: (id: number, valor: boolean) => request<void>(`/admin/produtos/${id}/ativo?valor=${valor}`, { method: 'PATCH' }, true),
   archiveProduct: (id:number) => request<{resultado:string}>(`/admin/produtos/${id}`,{method:'DELETE'},true),
-  importProducts: async(file:File,preVisualizar=true) => { const body=new FormData();body.append('arquivo',file);const response=await fetch(`${API_URL}/admin/produtos/importacao?preVisualizar=${preVisualizar}`,{method:'POST',body,credentials:'include'});const payload=await response.json();if(!response.ok)throw new ApiError(apiErrorMessage(payload,response.status),response.status,payload);return payload as {preVisualizacao:boolean;inseridos:number;atualizados:number;ignorados:number;rejeitados:number;erros:string[];registros:{codigo:string;nome:string;preco:number;estoque:number;categoria:string;acao:string}[]} },
+  importProducts: (file:File,preVisualizar=true) => { const body=new FormData();body.append('arquivo',file);return request<{preVisualizacao:boolean;inseridos:number;atualizados:number;ignorados:number;rejeitados:number;erros:string[];registros:{codigo:string;nome:string;preco:number;estoque:number;categoria:string;acao:string}[]}>(`/admin/produtos/importacao?preVisualizar=${preVisualizar}`,{method:'POST',body},true) },
   importHistory: () => request<import('../types/api').ImportHistory[]>('/admin/produtos/importacao/historico',{},true),
   importHistoryFileUrl: (id:number) => `${API_URL}/admin/produtos/importacao/historico/${id}/arquivo`,
   setCommercialMetadata: (id: number, body: Pick<Product, 'objetivos'|'esportes'|'vegano'|'vegetariano'|'linhaClinica'|'lancamento'|'destaque'|'oferta'|'kit'|'subcategoria'|'avaliacaoMedia'>) => request<Product>(`/admin/produtos/${id}/metadados-comerciais`, { method: 'PATCH', body: JSON.stringify(body) }, true),

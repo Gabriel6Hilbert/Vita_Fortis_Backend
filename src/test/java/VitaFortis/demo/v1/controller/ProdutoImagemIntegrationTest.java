@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.zip.CRC32;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -95,6 +96,7 @@ class ProdutoImagemIntegrationTest {
         long quantidade = imagens.count();
         mvc.perform(multipart(UPLOAD)
                         .file(new MockMultipartFile("imagem", "grande.png", "image/png", new byte[ProdutoImagemService.MAX_BYTES + 1]))
+                        .with(csrf())
                         .with(user("admin@teste.com").roles("ADMIN")))
                 .andExpect(status().isPayloadTooLarge())
                 .andExpect(jsonPath("$.status").value(413))
@@ -107,6 +109,7 @@ class ProdutoImagemIntegrationTest {
     void outrosPerfisNaoEnviamImagens(String papel) throws Exception {
         long quantidade = imagens.count();
         mvc.perform(multipart(UPLOAD).file(new MockMultipartFile("imagem", "foto.png", "image/png", imagem("png")))
+                        .with(csrf())
                         .with(user("usuario@teste.com").roles(papel)))
                 .andExpect(status().isForbidden());
         assertThat(imagens.count()).isEqualTo(quantidade);
@@ -114,7 +117,7 @@ class ProdutoImagemIntegrationTest {
 
     @Test
     void visitanteNaoEnviaImagem() throws Exception {
-        mvc.perform(multipart(UPLOAD).file(new MockMultipartFile("imagem", "foto.png", "image/png", imagem("png"))))
+        mvc.perform(multipart(UPLOAD).file(new MockMultipartFile("imagem", "foto.png", "image/png", imagem("png"))).with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
@@ -130,7 +133,7 @@ class ProdutoImagemIntegrationTest {
                 new MockMultipartFile("imagem", "foto.png", null, imagem("png"))
         };
         for (var arquivo : invalidos) {
-            mvc.perform(multipart(UPLOAD).file(arquivo).with(user("admin@teste.com").roles("ADMIN")))
+            mvc.perform(multipart(UPLOAD).file(arquivo).with(csrf()).with(user("admin@teste.com").roles("ADMIN")))
                     .andExpect(status().isBadRequest()).andExpect(jsonPath("$.mensagem").isNotEmpty());
         }
         assertThat(imagens.count()).isEqualTo(quantidade);
@@ -160,6 +163,7 @@ class ProdutoImagemIntegrationTest {
     private String enviar(byte[] bytes, String tipo) throws Exception {
         var resultado = mvc.perform(multipart(UPLOAD)
                         .file(new MockMultipartFile("imagem", "../../nome-do-cliente.php", tipo, bytes))
+                        .with(csrf())
                         .with(user("admin@teste.com").roles("ADMIN")))
                 .andExpect(status().isOk()).andReturn();
         return json.readTree(resultado.getResponse().getContentAsString()).get("url").asText();

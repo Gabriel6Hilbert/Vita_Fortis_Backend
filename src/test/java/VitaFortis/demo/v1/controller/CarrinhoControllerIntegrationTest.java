@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,7 +27,7 @@ class CarrinhoControllerIntegrationTest {
 
     @Test
     void limparCarrinhoRemoveOsItensDaResposta() throws Exception {
-        var login = mvc.perform(post("/api/v1/auth/login")
+        var login = mvc.perform(post("/api/v1/auth/login").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"cliente@vitafortis.test\",\"senha\":\"Teste@123\"}"))
                 .andExpect(status().isOk())
@@ -40,13 +41,13 @@ class CarrinhoControllerIntegrationTest {
         long productId = json.readTree(product.getResponse().getContentAsString())
                 .get("content").get(0).get("id").asLong();
 
-        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", userId)
+        mvc.perform(post("/api/v1/carrinhos/{usuarioId}/itens", userId).with(csrf())
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"produtoId\":" + productId + ",\"quantidade\":1}"))
                 .andExpect(status().isOk());
 
-        mvc.perform(delete("/api/v1/carrinhos/{usuarioId}/itens", userId).session(session))
+        mvc.perform(delete("/api/v1/carrinhos/{usuarioId}/itens", userId).with(csrf()).session(session))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.carrinhoItens").isEmpty())
                 .andExpect(jsonPath("$.subtotal").value(0))
