@@ -1,7 +1,7 @@
 # Vita Fortis V2 - matriz consolidada de status
 
 Revisado em: 26/10/2026
-Evidencia tecnica mais recente: homologacao publica do CSRF concluida no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`; regras comerciais validadas e versionadas localmente no commit `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4`, ainda sem push ou deploy.
+Evidencia tecnica mais recente: regras comerciais do commit funcional `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4` publicadas pelo commit documental `c72100a1d8ec4015c53d4bf65b4ed079781c6c54`, com HTTP 200, SHA e hashes confirmados em 26/10/2026.
 
 Este e o documento canonico de acompanhamento do projeto. Em caso de divergencia com relatorios ou guias anteriores, prevalece esta matriz, desde que nenhuma mudanca posterior de codigo invalide as evidencias registradas aqui.
 
@@ -21,7 +21,7 @@ Este e o documento canonico de acompanhamento do projeto. Em caso de divergencia
 | RN07 - destino do cashback | Concluido | Colaborador escolhe Pix ou desconto; a escolha fica persistida e aparece na API e na interface. | Nenhuma pendencia funcional conhecida. |
 | RF22/RF25 - privacidade do colaborador | Concluido | Area e APIs limitam dados, protegem detalhes de clientes e respeitam autorizacao por perfil. | Nenhuma pendencia funcional conhecida. |
 | RF23/RN05 - calculo do cashback | Concluido | Usa o percentual persistido do cupom sobre o total de produtos. Essa e uma decisao de implementacao porque a fonte nao fixa toda a composicao da base. | Alteracao da formula somente se o dono aprovar outra regra comercial. |
-| RF15/RF18 - retirada e revisao | Concluido localmente | Retirada sem frete, preparacao em ate 24 horas, estado `DISPONIVEL_RETIRADA` e revisao de subtotal, desconto, frete, prazo e total, versionados no commit local `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4`. | Endereco e horario de retirada dependem do gerente; push e publicacao comercial nao realizados. |
+| RF15/RF18 - retirada e revisao | Concluido tecnicamente | Retirada sem frete, preparacao em ate 24 horas, estado `DISPONIVEL_RETIRADA` e revisao de subtotal, desconto, frete, prazo e total foram versionados em `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4` e publicados pelo commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54`. | Endereco e horario de retirada dependem do gerente; repetir o fluxo completo do checkout no ambiente publico. |
 | RF16 - frete | Parcial tecnico | Backend atende MG, SP, RJ e ES; frete gratis usa comparacao estrita `> 200` sobre produtos apos desconto; fora de BH e regiao a interface informa ate 5 dias uteis. | Municipios e prazo de BH/regiao, tarifa abaixo do limite, transportadora e rastreamento dependem de definicao. A tarifa fixa anterior continua configuravel, sem nova formula. |
 | RF28/RF30 - produtos, categorias e atributos | Concluido | Inativacao logica de produtos e cadastros persistentes de categorias e atributos. | Preco e estoque dos produtos FTW importados dependem do dono antes da ativacao. |
 | RNF04 - cupons | Concluido | Desconto fixo ou percentual, validade, valor minimo, limite de usos e protecao concorrente. | Nenhuma pendencia funcional conhecida. |
@@ -37,7 +37,7 @@ Este e o documento canonico de acompanhamento do projeto. Em caso de divergencia
 | RF19 - e-mails transacionais | Depende do dono | Recuperacao de senha esta preparada para SMTP; confirmacao/extrato pode usar a mesma infraestrutura apos definicao. | Escolher provedor, remetente e aprovar os modelos de mensagem. |
 | Produtos FTW importados | Depende do dono | 179 produtos foram preservados como rascunho, inativos, sem preco e com estoque zero; a ativacao invalida e bloqueada. | Informar preco, estoque e quais produtos devem ser ativados. |
 | Migracoes de banco | Parcial tecnico | A migracao do RCP-02 possui teste proprio. | Flyway continua desabilitado na configuracao atual; preparar e validar a estrategia antes de qualquer aplicacao em producao. |
-| Homologacao publica | Parcial tecnico | Em 26/10/2026 o commit CSRF foi comprovado publicamente com HTTP 200, SHA completo, hashes dos bundles correspondentes, 181 produtos ativos, pagamento simulado e fluxos publicos de CSRF aprovados. | Homologar ADMIN, COLABORADOR e RCP-02 no ambiente publico; regras comerciais continuam apenas locais. |
+| Homologacao publica | Parcial tecnico | Em 26/10/2026 o commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54` foi comprovado com HTTP 200, SHA completo, `index-BBO_9H0d.js`, CSS com hashes correspondentes, 181 produtos ativos e pagamento simulado. O CSRF tambem foi homologado publicamente. | Homologar o checkout comercial completo, ADMIN, COLABORADOR e RCP-02 no ambiente publico. |
 | Backup e restauracao | Parcial tecnico | O procedimento pode ser ensaiado em banco isolado sem intervencao do dono. | Executar restore controlado, comparar dados e guardar evidencias; producao exige acesso autorizado. |
 | Compatibilidade | Parcial tecnico | Interfaces responsivas ja foram inspecionadas em fluxos anteriores. | Registrar uma matriz final de navegadores, desktop e celular no commit de encerramento. |
 
@@ -62,7 +62,7 @@ Em 15/10/2026 foram registrados para as regras comerciais:
 - QA independente: 5 testes de fluxo aprovados, sem falhas, erros ou ignorados;
 - suite Java completa: 69 aprovados, sem falhas, erros ou ignorados;
 - lint e build React aprovados; bundle ativo `index-BBO_9H0d.js` e CSS `index-BmPCfaig.css` sincronizados com hashes iguais;
-- nenhuma credencial ou integracao real de pagamento/frete foi usada; as regras foram versionadas localmente em `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4`, sem push ou deploy;
+- nenhuma credencial ou integracao real de pagamento/frete foi usada; as regras de `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4` foram publicadas em 26/10/2026 pelo commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54`;
 - pagamento permanece `SIMULADO`.
 
 Na tentativa de homologacao do CSRF em 15/10/2026, `HEAD` e `origin/main` estavam no SHA `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`. Duas execucoes do verificador publico terminaram em `curl (28)` sem bytes; o painel do Render exigiu login. Portanto, HTTP 200, SHA servido, bundles, hashes, catalogo e smoke CSRF publicos nao foram comprovados nesta data.

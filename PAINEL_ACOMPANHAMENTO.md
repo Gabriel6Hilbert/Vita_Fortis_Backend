@@ -99,8 +99,8 @@ Estado comprovado até 26/10/2026:
 
 - CSRF enviado ao GitHub no SHA completo `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`;
 - homologação pública do CSRF concluída em 26/10/2026: HTTP 200, SHA completo, bundles do commit com hashes correspondentes, token e cookie de sessão, rejeição sem token, aceitação com token válido, login CLIENTE, logout autenticado e recuperação de senha comprovados;
-- regras comerciais implementadas, validadas e versionadas localmente no commit `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4`: UFs MG/SP/RJ/ES, retirada sem frete, preparação em até 24 horas, entrega em até 5 dias úteis fora de BH e região, frete grátis somente acima de R$ 200,00, Pix/cartão e conciliação por ADMIN;
+- regras comerciais do commit funcional `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4` publicadas pelo commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54`: UFs MG/SP/RJ/ES, retirada sem frete, preparação em até 24 horas, entrega em até 5 dias úteis fora de BH e região, frete grátis somente acima de R$ 200,00, Pix/cartão e conciliação por ADMIN;
 - prazo de BH e região, tarifa abaixo do limite, endereço/horário de retirada, transportadora e integrações reais continuam pendentes;
-- pagamento permanece simulado; o commit comercial ainda não teve push nem deploy.
+- pagamento permanece simulado; o checkout comercial publicado ainda precisa de smoke test funcional completo.
 
-Última atualização deste painel: 26/10/2026. O CSRF está homologado publicamente no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`. As regras comerciais foram versionadas localmente em `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4`, com 69 testes Java aprovados, lint e build React aprovados e hashes iguais para os assets ativos sincronizados. Nenhum push ou deploy comercial foi realizado.
+Última atualização deste painel: 26/10/2026. O CSRF está homologado publicamente no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`. As regras comerciais foram validadas com 69 testes Java, lint e build React, publicadas pelo commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54` e verificadas com HTTP 200, SHA e hashes correspondentes. O pagamento continua simulado e o smoke test funcional completo do checkout permanece pendente.
