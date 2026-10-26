@@ -1,6 +1,8 @@
 package VitaFortis.demo.v1.service;
 
+import VitaFortis.demo.v1.dto.PedidoRequestDto;
 import VitaFortis.demo.v1.entity.Usuario;
+import VitaFortis.demo.v1.enums.FormaRecebimento;
 import VitaFortis.demo.v1.enums.TipoUsuario;
 import VitaFortis.demo.v1.integration.PagamentoGateway;
 import VitaFortis.demo.v1.mapper.CarrinhoItemMapper;
@@ -41,6 +43,16 @@ class OwnershipAuthorizationTest {
         Usuario atual = usuario(3L, TipoUsuario.COLABORADOR);
         when(usuarios.findByEmail("colaborador@teste.com")).thenReturn(Optional.of(atual));
         assertThrows(AccessDeniedException.class, () -> pedidoService.listarUsuario(2L, "colaborador@teste.com"));
+    }
+
+    @Test void novoPedidoAceitaSomentePixOuCartao() {
+        Usuario atual = usuario(1L, TipoUsuario.CLIENTE);
+        when(usuarios.findByEmail("cliente@teste.com")).thenReturn(Optional.of(atual));
+        PedidoRequestDto dto = new PedidoRequestDto();
+        dto.setUsuarioId(1L);
+        dto.setFormaRecebimento(FormaRecebimento.RETIRADA);
+        dto.setFormaPagamento("BOLETO");
+        assertThrows(IllegalArgumentException.class, () -> pedidoService.revisar(dto, "cliente@teste.com"));
     }
 
     private Usuario usuario(Long id, TipoUsuario tipo) {

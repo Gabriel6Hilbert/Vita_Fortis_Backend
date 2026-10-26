@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 @Service
 public class FreteService {
 
+    private static final BigDecimal LIMITE_FRETE_GRATIS = new BigDecimal("200.00");
+
     private final BigDecimal valorFixo;
     private final int prazoPadraoDias;
     private final Set<String> ufsAtendidas;
@@ -21,7 +23,7 @@ public class FreteService {
     public FreteService(
             @Value("${vita-fortis.checkout.frete-fixo:15.00}") BigDecimal valorFixo,
             @Value("${vita-fortis.checkout.prazo-padrao-dias:5}") int prazoPadraoDias,
-            @Value("${vita-fortis.checkout.ufs-atendidas:SP}") String ufsAtendidas) {
+            @Value("${vita-fortis.checkout.ufs-atendidas:MG,SP,RJ,ES}") String ufsAtendidas) {
         this.valorFixo = valorFixo.setScale(2, RoundingMode.HALF_UP);
         this.prazoPadraoDias = prazoPadraoDias;
         this.ufsAtendidas = Arrays.stream(ufsAtendidas.split(","))
@@ -29,7 +31,7 @@ public class FreteService {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    public CotacaoFrete calcular(Endereco endereco) {
+    public CotacaoFrete calcular(Endereco endereco, BigDecimal valorProdutosAposDesconto) {
         if (endereco == null || endereco.getCep() == null) {
             throw new IllegalArgumentException("Endereco obrigatorio para entrega");
         }
@@ -37,7 +39,11 @@ public class FreteService {
         if (!ufsAtendidas.contains("*") && !ufsAtendidas.contains(uf)) {
             throw new IllegalArgumentException("Regiao ainda nao atendida para entrega: " + uf);
         }
-        return new CotacaoFrete(valorFixo, prazoPadraoDias);
+        BigDecimal valor = valorProdutosAposDesconto != null
+                && valorProdutosAposDesconto.compareTo(LIMITE_FRETE_GRATIS) > 0
+                ? BigDecimal.ZERO.setScale(2)
+                : valorFixo;
+        return new CotacaoFrete(valor, prazoPadraoDias);
     }
 
     public record CotacaoFrete(BigDecimal valor, int prazoDias) {

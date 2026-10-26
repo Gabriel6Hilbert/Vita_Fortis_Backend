@@ -53,7 +53,7 @@ public class PedidoService {
         BigDecimal subtotal = adicionarItens(pedido, dto.getItens());
         Cupom cupom = obterCupom(dto.getCupomId(), subtotal, true);
         BigDecimal desconto = calcularDesconto(cupom, subtotal);
-        aplicarRecebimento(pedido, dto);
+        aplicarRecebimento(pedido, dto, subtotal.subtract(desconto));
 
         pedido.setCupomUtilizado(cupom);
         pedido.setSubtotal(subtotal);
@@ -91,7 +91,7 @@ public class PedidoService {
         pedido.setCupomUtilizado(cupom);
         pedido.setSubtotal(subtotal);
         pedido.setDesconto(calcularDesconto(cupom, subtotal));
-        aplicarRecebimento(pedido, dto);
+        aplicarRecebimento(pedido, dto, subtotal.subtract(pedido.getDesconto()));
         pedido.setTotal(subtotal.subtract(pedido.getDesconto()).add(pedido.getFrete()).setScale(2, RoundingMode.HALF_UP));
         return toDto(pedido);
     }
@@ -193,7 +193,7 @@ public class PedidoService {
     }
 
     private Pedido novoPedido(Usuario usuario, PedidoRequestDto dto) {
-        if (!java.util.Set.of("PIX", "CARTAO", "BOLETO").contains(dto.getFormaPagamento().trim().toUpperCase())) {
+        if (!java.util.Set.of("PIX", "CARTAO").contains(dto.getFormaPagamento().trim().toUpperCase())) {
             throw new IllegalArgumentException("Forma de pagamento invalida");
         }
         Pedido pedido = new Pedido();
@@ -234,7 +234,7 @@ public class PedidoService {
         return item;
     }
 
-    private void aplicarRecebimento(Pedido pedido, PedidoRequestDto dto) {
+    private void aplicarRecebimento(Pedido pedido, PedidoRequestDto dto, BigDecimal valorProdutosAposDesconto) {
         pedido.setFormaRecebimento(dto.getFormaRecebimento());
         if (dto.getFormaRecebimento() == FormaRecebimento.RETIRADA) {
             pedido.setFrete(BigDecimal.ZERO.setScale(2));
@@ -244,7 +244,7 @@ public class PedidoService {
             throw new IllegalArgumentException("Endereco obrigatorio para entrega");
         }
         Endereco endereco = enderecos.buscarParaCheckout(dto.getUsuarioId(), dto.getEnderecoId());
-        FreteService.CotacaoFrete cotacao = fretes.calcular(endereco);
+        FreteService.CotacaoFrete cotacao = fretes.calcular(endereco, valorProdutosAposDesconto);
         pedido.setEnderecoEntrega(endereco.formatado());
         pedido.setPrazoEntregaDias(cotacao.prazoDias());
         pedido.setFrete(cotacao.valor());

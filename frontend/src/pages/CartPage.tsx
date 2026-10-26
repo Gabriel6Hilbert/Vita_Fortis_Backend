@@ -19,7 +19,7 @@ const emptyAddress: AddressInput = {
   uf: "",
   principal: true,
 };
-const UFS=['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+const UFS = ["MG", "SP", "RJ", "ES"];
 
 export function CartPage() {
   const { user } = useAuth();
@@ -261,7 +261,7 @@ export function CartPage() {
             </div>
           )}
           <div className="checkout-section">
-            <div className="review-alert"><strong>Pagamento simulado — ambiente de homologação</strong><span>Nenhum dado de cartão, CVV, boleto ou Pix real é coletado. A confirmação é administrativa.</span></div>
+            <div className="review-alert"><strong>Pagamento simulado — ambiente de homologação</strong><span>Nenhum dado de cartão, CVV ou Pix real é coletado. A conciliação é responsabilidade do perfil ADMIN.</span></div>
             <label className="checkout-field">
               Como deseja receber?
               <select
@@ -373,7 +373,6 @@ export function CartPage() {
               >
                 <option value="PIX">Pix simulado</option>
                 <option value="CARTAO">Cartão simulado</option>
-                <option value="BOLETO">Boleto simulado</option>
               </select>
             </label>
           </div>
@@ -393,7 +392,8 @@ export function CartPage() {
               {receiving === "RETIRADA" ? "Grátis" : quote ? money(quote.frete) : "Disponível na revisão"}
             </span>
           </div>
-          {quote && receiving === "ENTREGA" && <p className="summary-message">Prazo estimado: {quote.prazoEntregaDias} dias. Frete de homologação com tarifa fixa.</p>}
+          {receiving === "RETIRADA" && <p className="summary-message">Retirada sem frete. O pedido pode levar até 24 horas para preparação; endereço e horário de retirada ainda serão informados.</p>}
+          {quote && receiving === "ENTREGA" && <p className="summary-message">Preparação em até 24 horas. Fora de BH e região, entrega em até {quote.prazoEntregaDias} dias úteis. O prazo para BH e região ainda está pendente. Frete grátis somente quando o valor dos produtos após desconto for maior que R$ 200,00.</p>}
           <div className="coupon">
             <label>
               Cupom
