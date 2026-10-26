@@ -42,20 +42,24 @@ Estado: 🟡 Em andamento
 - [ ] Definir países permitidos e exceções necessárias.
 - [x] Implementar proteção local contra excesso de tentativas em login, cadastro e recuperação de senha.
 - [x] Reforçar validação, expiração, uso único e concorrência dos tokens de recuperação.
+- [x] Implementar proteção CSRF vinculada à sessão para operações mutáveis no backend e no frontend.
+- [x] Validar rejeição sem CSRF, aceitação com token válido, login, logout e recuperação de senha.
 - [x] Validar localmente a proteção com testes Java, lint e build do frontend.
-- [x] Publicar a proteção de autenticação no GitHub.
-- [ ] Homologar a proteção no ambiente público.
+- [x] Publicar a proteção anterior de autenticação no GitHub.
+- [x] Enviar a proteção CSRF ao GitHub no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`.
+- [x] Homologar a proteção no ambiente público no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9` (26/10/2026).
 - [ ] Adicionar proteção complementar na borda para login, recuperação de senha e APIs sensíveis.
 - [ ] Evitar acesso que contorne a proteção pelo endereço do Render.
 - [ ] Testar bloqueio, rate limit e tráfego brasileiro legítimo.
 
 ### Organização do repositório
 
-Estado: ⬜ A fazer
+Estado: 🟡 Em andamento
 
 - [ ] Classificar alterações locais existentes.
 - [ ] Identificar bundles ativos e obsoletos.
 - [ ] Remover somente arquivos gerados comprovadamente sem uso.
+- [x] Sincronizar o bundle React com proteção CSRF no pacote servido pelo Spring (TEC-03, validado localmente em 09/10/2026).
 - [ ] Consolidar os documentos de status sem apagar histórico necessário.
 
 ### Encerramento técnico
@@ -81,21 +85,22 @@ Estado: 🔴 Aguardando decisões ou insumos
 
 ## Registro da tarefa atual
 
-Objetivo: organizar o acompanhamento e limitar o escopo das alterações feitas com IA.
+Objetivo: concluir a homologação pública do CSRF e implementar localmente as regras comerciais confirmadas.
 
 Arquivos desta tarefa:
 
-- `AGENTS.md`
+- `src/main/java/VitaFortis/demo/config/SecurityConfig.java`
+- `src/main/java/VitaFortis/demo/config/CsrfController.java`
+- `frontend/src/services/api.ts`
+- testes de integração e segurança em `src/test/java`
 - `PAINEL_ACOMPANHAMENTO.md`
-- `MAPA_ARQUIVOS.md`
-- `MODELO_PEDIDO_IA.md`
 
-Fora do escopo desta tarefa:
+Estado comprovado até 26/10/2026:
 
-- código Java;
-- código React;
-- banco de dados;
-- configuração de produção;
-- publicação no GitHub ou Render.
+- CSRF enviado ao GitHub no SHA completo `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`;
+- homologação pública do CSRF concluída em 26/10/2026: HTTP 200, SHA completo, bundles do commit com hashes correspondentes, token e cookie de sessão, rejeição sem token, aceitação com token válido, login CLIENTE, logout autenticado e recuperação de senha comprovados;
+- regras comerciais implementadas, validadas e versionadas localmente no commit `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4`: UFs MG/SP/RJ/ES, retirada sem frete, preparação em até 24 horas, entrega em até 5 dias úteis fora de BH e região, frete grátis somente acima de R$ 200,00, Pix/cartão e conciliação por ADMIN;
+- prazo de BH e região, tarifa abaixo do limite, endereço/horário de retirada, transportadora e integrações reais continuam pendentes;
+- pagamento permanece simulado; o commit comercial ainda não teve push nem deploy.
 
-Última atualização deste painel: 29/09/2026, após validação local da segurança de autenticação.
+Última atualização deste painel: 26/10/2026. O CSRF está homologado publicamente no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`. As regras comerciais foram versionadas localmente em `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4`, com 69 testes Java aprovados, lint e build React aprovados e hashes iguais para os assets ativos sincronizados. Nenhum push ou deploy comercial foi realizado.
