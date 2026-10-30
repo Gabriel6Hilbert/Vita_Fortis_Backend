@@ -64,14 +64,14 @@ Estado: 🟡 Em andamento
 
 ### Encerramento técnico
 
-Estado: ⬜ A fazer
+Estado: 🟡 Em andamento
 
-- [ ] Validar Flyway em banco isolado.
-- [ ] Ensaiar backup e restauração.
-- [ ] Executar testes Java, lint e build do frontend.
+- [x] Validar Flyway em banco isolado e registrar baseline 2 no MySQL real.
+- [x] Executar backup real e ensaiar a restauração com 23 tabelas sem divergências.
+- [x] Executar 78 testes Java, lint e build do frontend.
 - [ ] Homologar ADMIN, CLIENTE, COLABORADOR e RCP-02.
 - [ ] Registrar compatibilidade em iPhone, desktop e navegadores.
-- [ ] Publicar e verificar o mesmo commit homologado.
+- [x] Publicar e verificar o mesmo commit homologado.
 
 ### Dependências do proprietário
 
@@ -85,7 +85,7 @@ Estado: 🔴 Aguardando decisões ou insumos
 
 ## Registro da tarefa atual
 
-Objetivo: concluir a homologação pública do CSRF e implementar localmente as regras comerciais confirmadas.
+Objetivo: testar, publicar e homologar o pacote operacional consolidado.
 
 Arquivos desta tarefa:
 
@@ -95,7 +95,12 @@ Arquivos desta tarefa:
 - testes de integração e segurança em `src/test/java`
 - `PAINEL_ACOMPANHAMENTO.md`
 
-Estado comprovado até 26/10/2026:
+Estado comprovado até 29/10/2026:
+
+- release funcional `c875f7af465eff16ec287fa30a94042bb7d203b5` publicada no Render e verificada com HTTP 200, SHA e hashes dos bundles correspondentes;
+- rotas de catálogo e políticas e o endpoint CSRF responderam HTTP 200;
+- 181 produtos ativos foram encontrados e o pagamento permanece identificado como `SIMULADO`;
+- validação local concluída com 78 testes Java sem falhas ou erros, lint e build React e pacote Spring;
 
 - CSRF enviado ao GitHub no SHA completo `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`;
 - homologação pública do CSRF concluída em 26/10/2026: HTTP 200, SHA completo, bundles do commit com hashes correspondentes, token e cookie de sessão, rejeição sem token, aceitação com token válido, login CLIENTE, logout autenticado e recuperação de senha comprovados;
@@ -103,4 +108,4 @@ Estado comprovado até 26/10/2026:
 - prazo de BH e região, tarifa abaixo do limite, endereço/horário de retirada, transportadora e integrações reais continuam pendentes;
 - pagamento permanece simulado; o checkout comercial publicado ainda precisa de smoke test funcional completo.
 
-Última atualização deste painel: 26/10/2026. O CSRF está homologado publicamente no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`. As regras comerciais foram validadas com 69 testes Java, lint e build React, publicadas pelo commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54` e verificadas com HTTP 200, SHA e hashes correspondentes. O pagamento continua simulado e o smoke test funcional completo do checkout permanece pendente.
+Última atualização deste painel: 29/10/2026. A release `c875f7af465eff16ec287fa30a94042bb7d203b5` foi publicada e verificada no Render. O pagamento continua simulado; a homologação autenticada completa dos três perfis e os testes formais em aparelhos e navegadores permanecem pendentes.
