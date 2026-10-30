@@ -32,6 +32,7 @@ import {
   type AdminMetrics,
   type Coupon,
   type Order,
+  type AdminOrderDetail,
   type Product,
   type ImportHistory,
   type Review,
@@ -92,7 +93,7 @@ export function AdminPage() {
   const [importFile,setImportFile]=useState<File|null>(null);
   const [importPreview,setImportPreview]=useState<{inseridos:number;atualizados:number;rejeitados:number;erros:string[];registros:{codigo:string;nome:string;preco:number;estoque:number;categoria:string;acao:string}[]}|null>(null);
   const [importHistory,setImportHistory]=useState<ImportHistory[]>([]);
-  const [orderOpen, setOrderOpen] = useState<Order | null>(null);
+  const [orderOpen, setOrderOpen] = useState<AdminOrderDetail | null>(null);
   const [couponForm, setCouponForm] = useState<Partial<Coupon> | null>(null);
   const [cashbackForm, setCashbackForm] = useState<{
     id: number;
@@ -772,7 +773,7 @@ export function AdminPage() {
                             <td>
                               <button
                                 className="icon-button"
-                                onClick={() => setOrderOpen(o)}
+                                onClick={() => void api.adminOrder(o.id).then(setOrderOpen).catch(e => setError(e instanceof Error ? e.message : 'Falha ao abrir o pedido.'))}
                               >
                                 <Eye />
                               </button>
@@ -1462,12 +1463,15 @@ export function AdminPage() {
         <div className="modal-backdrop">
           <div className="admin-modal small">
             <header>
-              <h2>Pedido #{orderOpen.id}</h2>
+              <h2>Pedido #{orderOpen.pedido.id}</h2>
               <button onClick={() => setOrderOpen(null)}>
                 <X />
               </button>
             </header>
-            {orderOpen.itens.map((item) => (
+            <p><strong>{orderOpen.clienteNome}</strong><br />{orderOpen.clienteEmail}{orderOpen.clienteTelefone && <> · {orderOpen.clienteTelefone}</>}</p>
+            {orderOpen.enderecoEntrega && <p><strong>Entrega própria:</strong> {orderOpen.enderecoEntrega}</p>}
+            {orderOpen.whatsappUrl && <a className="button primary" href={orderOpen.whatsappUrl} target="_blank" rel="noreferrer"><MessageSquare size={18}/> Atender entrega no WhatsApp</a>}
+            {orderOpen.pedido.itens.map((item) => (
               <div className="order-detail-row" key={item.id}>
                 <img src={item.produtoImagemUrl||"/assets/imagens/logo-vita-fortis-brand.webp"} alt="" onError={e => { const img = e.currentTarget; const fallback = "/assets/imagens/logo-vita-fortis-brand.webp"; if (!img.src.endsWith(fallback)) img.src = fallback; }} />
                 <span>
@@ -1477,7 +1481,7 @@ export function AdminPage() {
               </div>
             ))}
             <footer>
-              <strong>Total: {money(orderOpen.total)}</strong>
+              <strong>Total: {money(orderOpen.pedido.total)}</strong>
             </footer>
           </div>
         </div>

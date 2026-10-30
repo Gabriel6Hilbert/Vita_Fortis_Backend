@@ -52,7 +52,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/assets/**", "/uploads/**", "/*.html", "/catalogo", "/marcas", "/objetivos", "/produto/**",
                                 "/entrar", "/sacola", "/conta", "/pedidos", "/admin", "/colaborador", "/favoritos",
-                                "/ofertas", "/novidades", "/kits", "/sobre", "/politicas", "/faq",
+                                "/ofertas", "/novidades", "/kits", "/sobre", "/politicas", "/politica-de-privacidade",
+                                "/politica-de-cookies", "/termos-de-uso-e-compra", "/entrega-e-retirada",
+                                "/trocas-devolucoes-e-arrependimento", "/faq",
                                 "/trabalhe-conosco", "/contato", "/error").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/produtos/**", "/api/v1/loja", "/api/v1/loja/versao").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()

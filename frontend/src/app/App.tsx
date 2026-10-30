@@ -11,6 +11,7 @@ import { HomePage } from '../pages/HomePage'
 import { OrdersPage } from '../pages/OrdersPage'
 import { ProductPage } from '../pages/ProductPage'
 import { CollaboratorPage } from '../pages/CollaboratorPage'
+import { LegalPage } from '../pages/LegalPages'
 
 function RouteEffects() {
   const location = useLocation()
@@ -23,4 +24,4 @@ function RouteEffects() {
   return null
 }
 
-export function App() { return <><RouteEffects/><Routes><Route element={<Layout />}><Route index element={<HomePage />} /><Route path="catalogo" element={<CatalogPage />} /><Route path="marcas" element={<BrandsPage />} /><Route path="objetivos" element={<GoalsPage />} /><Route path="produto/:id" element={<ProductPage />} /><Route path="entrar" element={<AuthPage />} /><Route path="sacola" element={<CartPage />} /><Route path="conta" element={<AccountPage />} /><Route path="pedidos" element={<OrdersPage />} /><Route path="admin" element={<AdminPage />} /><Route path="colaborador" element={<CollaboratorPage />} /><Route path="favoritos" element={<FavoritesPage/>}/>{['ofertas','novidades','kits'].map((path) => <Route key={path} path={path} element={<CuratedPage/>}/>) }{['sobre','politicas','faq','trabalhe-conosco'].map((path) => <Route key={path} path={path} element={<InstitutionalPage/>}/>) }<Route path="contato" element={<ContactPage/>}/><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes></> }
+export function App() { return <><RouteEffects/><Routes><Route element={<Layout />}><Route index element={<HomePage />} /><Route path="catalogo" element={<CatalogPage />} /><Route path="marcas" element={<BrandsPage />} /><Route path="objetivos" element={<GoalsPage />} /><Route path="produto/:id" element={<ProductPage />} /><Route path="entrar" element={<AuthPage />} /><Route path="sacola" element={<CartPage />} /><Route path="conta" element={<AccountPage />} /><Route path="pedidos" element={<OrdersPage />} /><Route path="admin" element={<AdminPage />} /><Route path="colaborador" element={<CollaboratorPage />} /><Route path="favoritos" element={<FavoritesPage/>}/>{['ofertas','novidades','kits'].map((path) => <Route key={path} path={path} element={<CuratedPage/>}/>) }{['sobre','faq','trabalhe-conosco'].map((path) => <Route key={path} path={path} element={<InstitutionalPage/>}/>) }{['politicas','politica-de-privacidade','politica-de-cookies','termos-de-uso-e-compra','entrega-e-retirada','trocas-devolucoes-e-arrependimento'].map((path) => <Route key={path} path={path} element={<LegalPage/>}/>) }<Route path="contato" element={<ContactPage/>}/><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes></> }

@@ -77,7 +77,7 @@ Estado: ⬜ A fazer
 
 Estado: 🔴 Aguardando decisões ou insumos
 
-- RCP-01 e aprovação jurídica do RCP-03.
+- RCP-01 e RCP-03 possuem minutas técnicas locais; ainda faltam retenção, decisão sobre tecnologias de publicidade, prazo de BH/região, revisão e aprovação jurídica.
 - Gateway e regras de pagamento real.
 - Provedor SMTP, remetente e modelos de e-mail.
 - Decisão sobre transportadora externa.

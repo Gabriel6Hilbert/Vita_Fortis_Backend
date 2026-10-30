@@ -2,6 +2,7 @@ package VitaFortis.demo.v1.controller;
 
 import VitaFortis.demo.v1.dto.PedidoResponseDto;
 import VitaFortis.demo.v1.dto.PedidoFiltroDto;
+import VitaFortis.demo.v1.dto.PedidoAdminDetalheDto;
 import VitaFortis.demo.v1.enums.StatusCompra;
 import VitaFortis.demo.v1.service.PedidoService;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ public class PedidoAdminController {
     private final PedidoService pedidos;
     public PedidoAdminController(PedidoService pedidos) { this.pedidos = pedidos; }
     @GetMapping public List<PedidoResponseDto> listar(@ModelAttribute PedidoFiltroDto filtro) { return pedidos.listarTodos(filtro); }
+    @GetMapping("/{id}") public PedidoAdminDetalheDto detalhar(@PathVariable Long id) { return pedidos.detalharParaAdministracao(id); }
     @PatchMapping("/{id}/status") public PedidoResponseDto status(@PathVariable Long id, @RequestParam StatusCompra valor, @RequestParam(required = false) String observacao) { return pedidos.alterarStatus(id, valor, observacao); }
     @PatchMapping("/{id}/pagamento/aprovar") public PedidoResponseDto aprovarPagamento(@PathVariable Long id, @RequestParam(required=false) String observacao) { return pedidos.confirmarPagamento(id, true, observacao); }
     @PatchMapping("/{id}/pagamento/recusar") public PedidoResponseDto recusarPagamento(@PathVariable Long id, @RequestParam(required=false) String observacao) { return pedidos.confirmarPagamento(id, false, observacao); }

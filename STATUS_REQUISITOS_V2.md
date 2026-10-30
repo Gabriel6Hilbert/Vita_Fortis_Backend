@@ -1,55 +1,17 @@
-# Status dos requisitos Vitta Fortis 2.1
+# Status dos requisitos Vita Fortis V2
 
-Fonte analisada: `Levantamento_Requisitos_VittaFortis_Atualizado.docx`.
+Atualizado em: 28/09/2026.
 
-## Implementado nesta revisao
+A fonte unica e atual de acompanhamento e [STATUS_CONSOLIDADO_V2.md](STATUS_CONSOLIDADO_V2.md). Este arquivo permanece como entrada curta para quem procurar o antigo status de requisitos.
 
-- Codigo-fonte React incorporado ao repositorio em `frontend`.
-- Checkout com escolha entre retirada e entrega.
-- Enderecos de cliente persistentes, com endereco principal e autorizacao por proprietario.
-- Frete calculado no backend; retirada sempre com frete zero.
-- Revisao financeira do pedido com subtotal, desconto, frete e total em `BigDecimal`.
-- Porta de pagamento desacoplada e implementacao local para desenvolvimento, sem armazenar cartao.
-- Status e referencia de pagamento registrados no pedido.
-- Perfil autenticado, preferencia de comunicacao e alteracao segura de senha.
-- Cupom vinculado a colaborador e percentual de cashback configuravel.
-- Credito, estorno, ajuste e baixa de cashback com saldo anterior, saldo novo, responsavel e justificativa.
-- Area propria do colaborador no frontend, com saldo, extrato auditavel, cupons vinculados, vendas, pedidos e desempenho.
-- Painel administrativo separado da conta do cliente, com produtos ativos e inativos, estoque, pedidos, usuarios, colaboradores e cupons.
-- Cadastro administrativo de colaborador, ativacao/desativacao e permissao individual para relatorios.
-- Formulario de cupom com vinculo ao colaborador e percentual de cashback.
-- RF28: exclusao administrativa de produto por inativacao, preservando banco e historico; itens inativos nao aparecem em catalogo, detalhe publico, favoritos ou sacola e nao sao reativados pela carga inicial.
-- RF30: gestao persistente de categorias e atributos pelo painel, com criacao, edicao, inativacao e reativacao, sem categorias fixas no codigo.
-- RNF04: cupons com desconto percentual ou fixo, inicio e fim de validade, valor minimo e limite de uso; validacao na sacola, revisao e checkout, inclusive concorrencia no ultimo uso.
-- Area do colaborador com desconto, cashback, validade, consumo, limite e situacao de cada cupom vinculado.
-- Consultas do catalogo otimizadas com busca agregada de filtros, carregamento em lote das colecoes e cache curto de requisicoes publicas repetidas no navegador.
-- Catalogo, detalhes do produto, favoritos persistidos, avaliacoes, relacionados, sacola e checkout integrados.
-- Cupom aplicado na sacola transportado ao pedido, com desconto e cashback do colaborador apresentados separadamente.
-- API administrativa de produtos lista todo o inventario, inclusive itens inativos; a API publica continua ocultando inativos.
-- Indicadores do painel conectados a API existente `/api/v1/admin/metricas`, usando por padrao o mes corrente.
-- Relatorios CSV de pedidos, produtos, clientes, cupons e cashback.
-- RF38-RF40: filtros administrativos por relatório, vendas e faturamento somente de pagamentos aprovados, utilizações de cupons, estoque baixo e exportações CSV/XLSX/PDF paginadas.
-- RF15: retirada com frete zero e estado operacional próprio `DISPONIVEL_RETIRADA`.
-- RF16/RF18: revisão final com subtotal, desconto, frete, prazo e total revalidado; regiões atendidas configuráveis por UF.
-- RF33-RF35: prévia detalhada CSV/XLSX, validação integral, importação transacional e histórico persistente com arquivo, hash, data, responsável e resultado.
-- Remocao das APIs, rotas e textos de fidelidade por pontos e Vitta Diamante.
-- Prompt reutilizavel de Clean Code em `CLEAN_CODE_PROMPT.md`.
+## Resumo atual
 
-## Dependencias externas ainda nao concluidas
+- **Concluido:** nucleo comercial e administrativo, estoque apos aprovacao, cashback, catalogo, carrinho, checkout interno, pedidos, cupons, importacao, filtros, relatorios, recuperacao segura por token e RCP-02.
+- **Parcial tecnico:** envio real da recuperacao de senha, estrategia de migracao/Flyway, nova homologacao publica, backup/restauracao e matriz final de compatibilidade.
+- **Depende do dono:** RCP-01, aprovacao das politicas RCP-03, pagamento real, provedor SMTP, eventual transportadora externa e preco/estoque dos produtos FTW importados.
 
-Estes itens dependem de decisoes ou credenciais que o proprio documento lista como pontos para validacao:
+Recuperacao de senha nao esta pendente como funcionalidade interna: token, expiracao, uso unico, endpoints e telas existem. O que falta e a entrega real por um SMTP escolhido e configurado.
 
-- PagBank real e webhook: falta definir conta, credenciais, meios habilitados e politica de idempotencia.
-- Cotacao externa de frete: o fluxo interno e a validacao regional estao concluidos; falta definir transportadora e credenciais caso a regra configuravel seja substituida por um provedor.
-- E-mail transacional: falta escolher provedor, remetente e templates.
-- Reserva versus baixa de estoque: falta confirmacao comercial do momento exato. Hoje o estoque e reservado ao criar o pedido e devolvido no cancelamento.
+LGPD tambem nao deve ser registrada genericamente como ausente: o RCP-02 esta implementado. Permanecem dependentes de definicao do dono/juridico o inventario e as bases legais do RCP-01 e a aprovacao dos textos do RCP-03.
 
-## Proximas lacunas internas
-
-- Livro de movimentacoes de estoque com motivo e responsavel para todo ajuste.
-- Recuperacao de senha por e-mail com token temporario.
-- Politicas completas de LGPD, cookies e solicitacoes de titular.
-- Migracoes versionadas de banco para producao; o ambiente atual ainda usa `ddl-auto=update` em desenvolvimento.
-- Ampliar a cobertura alem dos testes atuais de contexto, entidade e autorizacao da area do colaborador, especialmente checkout, estorno e relatorios.
-
-Nenhum item desta ultima lista deve ser apresentado como concluido antes de sua implementacao e validacao.
+Estoque e relatorios estao concluidos conforme a regra implementada e os testes de referencia. Qualquer mudanca na formula de cashback, na politica comercial de estoque ou no fornecedor externo deve ser tratada como nova decisao, nao como falha da implementacao atual.

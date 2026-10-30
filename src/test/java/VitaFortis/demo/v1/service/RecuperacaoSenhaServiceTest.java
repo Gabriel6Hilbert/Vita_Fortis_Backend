@@ -5,8 +5,6 @@ import VitaFortis.demo.v1.entity.Usuario;
 import VitaFortis.demo.v1.repository.RecuperacaoSenhaRepository;
 import VitaFortis.demo.v1.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -25,9 +23,8 @@ class RecuperacaoSenhaServiceTest {
     private final UsuarioRepository usuarios = mock(UsuarioRepository.class);
     private final RecuperacaoSenhaRepository recuperacoes = mock(RecuperacaoSenhaRepository.class);
     private final PasswordEncoder encoder = mock(PasswordEncoder.class);
-    @SuppressWarnings("unchecked")
-    private final ObjectProvider<JavaMailSender> mailSender = mock(ObjectProvider.class);
-    private final RecuperacaoSenhaService service = new RecuperacaoSenhaService(usuarios, recuperacoes, encoder, mailSender);
+    private final EmailTransacionalService emails = mock(EmailTransacionalService.class);
+    private final RecuperacaoSenhaService service = new RecuperacaoSenhaService(usuarios, recuperacoes, encoder, emails);
 
     @Test
     void redefineSenhaEInvalidaTokensPendentes() {

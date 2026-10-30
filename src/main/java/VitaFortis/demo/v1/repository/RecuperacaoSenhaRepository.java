@@ -10,10 +10,12 @@ import jakarta.persistence.LockModeType;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 public interface RecuperacaoSenhaRepository extends JpaRepository<RecuperacaoSenha, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from RecuperacaoSenha r where r.tokenHash = :tokenHash and r.utilizadoEm is null")
     Optional<RecuperacaoSenha> findDisponivelForUpdate(@Param("tokenHash") String tokenHash);
     List<RecuperacaoSenha> findAllByUsuarioIdAndUtilizadoEmIsNull(Long usuarioId);
+    long deleteByExpiraEmBefore(LocalDateTime limite);
 }

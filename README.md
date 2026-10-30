@@ -109,16 +109,45 @@ As rotas do React sao encaminhadas para `index.html` pelo `SpaForwardController`
 O arquivo `application-prod.properties` aceita configuracao por variaveis de ambiente:
 
 - `PORT`
-- `JDBC_URL`
-- `DB_USER`
-- `DB_PASS`
+- `DB_URL`
+- `DB_USERNAME`
+- `DB_PASSWORD`
 
 Exemplo:
 
 ```powershell
 $env:SPRING_PROFILES_ACTIVE = "prod"
-$env:JDBC_URL = "jdbc:mysql://localhost:3306/vitafortis"
-$env:DB_USER = "usuario"
-$env:DB_PASS = "senha"
+$env:DB_URL = "jdbc:mysql://localhost:3306/vitafortis"
+$env:DB_USERNAME = "usuario"
+$env:DB_PASSWORD = "senha"
 .\mvnw.cmd spring-boot:run
 ```
+
+Nao ative o perfil `prod` em um banco existente sem executar o procedimento de inventario,
+backup, restauracao isolada e baseline descrito em `docs/operacao/BANCO_BACKUP_FLYWAY.md`.
+
+## E-mail transacional
+
+O projeto usa Spring Mail e esta preparado para o relay SMTP da Brevo. Em producao, cadastre
+os valores abaixo como segredos do provedor de hospedagem; nunca grave a chave SMTP no repositorio:
+
+- `MAIL_HOST=smtp-relay.brevo.com`
+- `MAIL_PORT=587`
+- `MAIL_USERNAME`
+- `MAIL_PASSWORD`
+- `MAIL_SMTP_AUTH=true`
+- `MAIL_STARTTLS=true`
+- `EMAIL_FROM` e `EMAIL_REPLY_TO`
+- `FRONTEND_URL`
+- `EMAIL_ENABLED=true`, somente depois de verificar remetente, DKIM/DMARC e realizar o teste real
+
+Enquanto `EMAIL_ENABLED=false`, nenhum e-mail e enviado. Falhas de notificacao de pedido sao
+registradas depois do commit e nao desfazem pedido, pagamento ou estoque.
+
+## Backup e Flyway
+
+- Procedimento seguro: `docs/operacao/BANCO_BACKUP_FLYWAY.md`.
+- Backup diario: `scripts/database/backup-mysql.ps1`.
+- Restauracao isolada: `scripts/database/restore-verify-mysql.ps1`.
+
+Os scripts nunca recebem senha como argumento. Use as variaveis temporarias indicadas no runbook.

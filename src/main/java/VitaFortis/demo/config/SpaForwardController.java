@@ -24,6 +24,11 @@ public class SpaForwardController {
             "/kits",
             "/sobre",
             "/politicas",
+            "/politica-de-privacidade",
+            "/politica-de-cookies",
+            "/termos-de-uso-e-compra",
+            "/entrega-e-retirada",
+            "/trocas-devolucoes-e-arrependimento",
             "/faq",
             "/trabalhe-conosco",
             "/contato"

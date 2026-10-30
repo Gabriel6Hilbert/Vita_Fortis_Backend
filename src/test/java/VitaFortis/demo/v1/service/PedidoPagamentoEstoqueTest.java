@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import java.math.BigDecimal;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,11 +21,12 @@ class PedidoPagamentoEstoqueTest {
     @Mock PedidoRepository pedidos; @Mock UsuarioRepository usuarios; @Mock ProdutoRepository produtos;
     @Mock CupomRepository cupons; @Mock EnderecoService enderecos; @Mock FreteService fretes;
     @Mock PagamentoGateway pagamentos; @Mock CashbackService cashback;
+    @Mock ApplicationEventPublisher eventos;
     PedidoService service;
 
     @BeforeEach void setup() {
         service = new PedidoService(pedidos, usuarios, produtos, cupons, enderecos, fretes,
-                pagamentos, cashback, new CupomRegrasService(pedidos));
+                pagamentos, cashback, new CupomRegrasService(pedidos), eventos);
     }
 
     @Test void pagamentoRecusadoNaoBaixaEstoque() {

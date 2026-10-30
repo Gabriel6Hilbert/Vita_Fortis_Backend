@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -60,6 +61,21 @@ class SecurityCsrfIntegrationTest {
                         .content("{\"email\":\"nao-cadastrado@vitafortis.test\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").isNotEmpty());
+    }
+
+    @Test
+    void paginasJuridicasSaoPublicasEServidasPeloReact() throws Exception {
+        for (String rota : new String[]{
+                "/politicas",
+                "/politica-de-privacidade",
+                "/politica-de-cookies",
+                "/termos-de-uso-e-compra",
+                "/entrega-e-retirada",
+                "/trocas-devolucoes-e-arrependimento"}) {
+            mvc.perform(get(rota))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/index.html"));
+        }
     }
 
     private CsrfContext csrf() throws Exception {

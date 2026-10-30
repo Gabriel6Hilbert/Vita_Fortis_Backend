@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
@@ -26,11 +27,12 @@ class OwnershipAuthorizationTest {
     @Mock CarrinhoMapper carrinhoMapper; @Mock CarrinhoItemMapper itemMapper; @Mock UsuarioRepository usuarios;
     @Mock CupomRepository cupons; @Mock PedidoRepository pedidos; @Mock EnderecoService enderecos;
     @Mock FreteService fretes; @Mock PagamentoGateway pagamentos; @Mock CashbackService cashback;
+    @Mock ApplicationEventPublisher eventos;
     CarrinhoService carrinhoService; PedidoService pedidoService;
 
     @BeforeEach void setup() {
         carrinhoService = new CarrinhoService(carrinhos, itens, produtos, carrinhoMapper, itemMapper, usuarios, cupons, new CupomRegrasService(pedidos));
-        pedidoService = new PedidoService(pedidos, usuarios, produtos, cupons, enderecos, fretes, pagamentos, cashback, new CupomRegrasService(pedidos));
+        pedidoService = new PedidoService(pedidos, usuarios, produtos, cupons, enderecos, fretes, pagamentos, cashback, new CupomRegrasService(pedidos), eventos);
     }
 
     @Test void clienteNaoAcessaCarrinhoDeOutroUsuario() {

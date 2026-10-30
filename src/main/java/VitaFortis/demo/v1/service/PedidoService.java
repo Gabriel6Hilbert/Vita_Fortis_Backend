@@ -6,6 +6,7 @@ import VitaFortis.demo.v1.enums.*;
 import VitaFortis.demo.v1.integration.PagamentoGateway;
 import VitaFortis.demo.v1.repository.*;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class PedidoService {
@@ -28,10 +31,12 @@ public class PedidoService {
     private final FreteService fretes;
     private final PagamentoGateway pagamentos;
     private final CashbackService cashback;
+    private final ApplicationEventPublisher eventos;
 
     public PedidoService(PedidoRepository pedidos, UsuarioRepository usuarios, ProdutoRepository produtos,
                          CupomRepository cupons, EnderecoService enderecos, FreteService fretes,
-                         PagamentoGateway pagamentos, CashbackService cashback, CupomRegrasService regrasCupom) {
+                         PagamentoGateway pagamentos, CashbackService cashback, CupomRegrasService regrasCupom,
+                         ApplicationEventPublisher eventos) {
         this.regrasCupom = regrasCupom;
         this.pedidos = pedidos;
         this.usuarios = usuarios;
@@ -41,6 +46,7 @@ public class PedidoService {
         this.fretes = fretes;
         this.pagamentos = pagamentos;
         this.cashback = cashback;
+        this.eventos = eventos;
     }
 
     @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
@@ -68,7 +74,9 @@ public class PedidoService {
         PagamentoGateway.PagamentoPendente pagamento = pagamentos.iniciar(
                 salvo.getId(), salvo.getTotal(), salvo.getFormaPagamento());
         salvo.setReferenciaPagamento(pagamento.referencia());
-        return toDto(pedidos.save(salvo));
+        Pedido finalizado = pedidos.save(salvo);
+        publicarNotificacao(finalizado);
+        return toDto(finalizado);
     }
 
     @Transactional(readOnly = true)
@@ -118,7 +126,9 @@ public class PedidoService {
         }
         pedido.setStatus(novoStatus);
         adicionarHistorico(pedido, novoStatus, observacao);
-        return toDto(pedidos.save(pedido));
+        Pedido salvo = pedidos.save(pedido);
+        publicarNotificacao(salvo);
+        return toDto(salvo);
     }
 
     @Transactional
@@ -190,6 +200,29 @@ public class PedidoService {
             throw new AccessDeniedException("Acesso negado ao pedido");
         }
         return toDto(pedido);
+    }
+
+    @Transactional(readOnly = true)
+    public PedidoAdminDetalheDto detalharParaAdministracao(Long id) {
+        Pedido pedido = buscar(id);
+        String telefone = somenteDigitos(pedido.getUsuario().getTelefone());
+        String url = null;
+        if (!telefone.isBlank()) {
+            if (!telefone.startsWith("55")) telefone = "55" + telefone;
+            String mensagem = "Olá, " + pedido.getUsuario().getNome() + ". Aqui é a equipe Vita Fortis sobre o pedido #" +
+                    pedido.getId() + ". Estamos organizando " +
+                    (pedido.getFormaRecebimento() == FormaRecebimento.ENTREGA ? "a entrega própria" : "a retirada") +
+                    ". Podemos confirmar as informações por aqui?";
+            url = "https://wa.me/" + telefone + "?text=" +
+                    URLEncoder.encode(mensagem, StandardCharsets.UTF_8).replace("+", "%20");
+        }
+        return new PedidoAdminDetalheDto(toDto(pedido), pedido.getUsuario().getNome(),
+                pedido.getUsuario().getEmail(), pedido.getUsuario().getTelefone(),
+                pedido.getEnderecoEntrega(), url);
+    }
+
+    private String somenteDigitos(String valor) {
+        return valor == null ? "" : valor.replaceAll("\\D", "");
     }
 
     private Pedido novoPedido(Usuario usuario, PedidoRequestDto dto) {
@@ -325,6 +358,11 @@ public class PedidoService {
         historico.setStatus(status);
         historico.setObservacao(observacao);
         pedido.getHistoricoStatus().add(historico);
+    }
+
+    private void publicarNotificacao(Pedido pedido) {
+        eventos.publishEvent(new PedidoStatusAlteradoEvent(pedido.getId(), pedido.getUsuario().getEmail(),
+                pedido.getUsuario().getNome(), pedido.getStatus(), pedido.getFormaRecebimento()));
     }
 
     public PedidoResponseDto toDto(Pedido pedido) {

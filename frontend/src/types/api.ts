@@ -128,6 +128,14 @@ export interface OrderDetail extends Order {
   enderecoMascarado?: string;
   historicoStatus?: OrderStatusEvent[];
 }
+export interface AdminOrderDetail {
+  pedido: Order;
+  clienteNome: string;
+  clienteEmail: string;
+  clienteTelefone?: string;
+  enderecoEntrega?: string;
+  whatsappUrl?: string;
+}
 export interface Review {
   id: number;
   produtoId: number;

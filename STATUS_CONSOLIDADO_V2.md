@@ -1,6 +1,6 @@
 # Vita Fortis V2 - matriz consolidada de status
 
-Revisado em: 26/10/2026
+Revisado em: 28/10/2026
 Evidencia tecnica mais recente: regras comerciais do commit funcional `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4` publicadas pelo commit documental `c72100a1d8ec4015c53d4bf65b4ed079781c6c54`, com HTTP 200, SHA e hashes confirmados em 26/10/2026.
 
 Este e o documento canonico de acompanhamento do projeto. Em caso de divergencia com relatorios ou guias anteriores, prevalece esta matriz, desde que nenhuma mudanca posterior de codigo invalide as evidencias registradas aqui.
@@ -22,26 +22,36 @@ Este e o documento canonico de acompanhamento do projeto. Em caso de divergencia
 | RF22/RF25 - privacidade do colaborador | Concluido | Area e APIs limitam dados, protegem detalhes de clientes e respeitam autorizacao por perfil. | Nenhuma pendencia funcional conhecida. |
 | RF23/RN05 - calculo do cashback | Concluido | Usa o percentual persistido do cupom sobre o total de produtos. Essa e uma decisao de implementacao porque a fonte nao fixa toda a composicao da base. | Alteracao da formula somente se o dono aprovar outra regra comercial. |
 | RF15/RF18 - retirada e revisao | Concluido tecnicamente | Retirada sem frete, preparacao em ate 24 horas, estado `DISPONIVEL_RETIRADA` e revisao de subtotal, desconto, frete, prazo e total foram versionados em `b6ccf4b0198126146deb1c8c32d4fd35b1acedd4` e publicados pelo commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54`. | Endereco e horario de retirada dependem do gerente; repetir o fluxo completo do checkout no ambiente publico. |
-| RF16 - frete | Parcial tecnico | Backend atende MG, SP, RJ e ES; frete gratis usa comparacao estrita `> 200` sobre produtos apos desconto; fora de BH e regiao a interface informa ate 5 dias uteis. | Municipios e prazo de BH/regiao, tarifa abaixo do limite, transportadora e rastreamento dependem de definicao. A tarifa fixa anterior continua configuravel, sem nova formula. |
+| RF16 - frete e entrega propria | Concluido tecnicamente | A Vita Fortis fara a propria entrega, sem transportadora externa. O backend atende MG, SP, RJ e ES; frete gratis usa comparacao estrita `> 200` sobre produtos apos desconto; abaixo do limite permanece a tarifa configurada no sistema. O ADMIN possui handoff manual para WhatsApp com mensagem pronta. | Confirmar no ambiente real o numero do cliente e o fluxo operacional; prazo detalhado por municipio pode ser refinado depois. Nao ha rastreio de transportadora. |
 | RF28/RF30 - produtos, categorias e atributos | Concluido | Inativacao logica de produtos e cadastros persistentes de categorias e atributos. | Preco e estoque dos produtos FTW importados dependem do dono antes da ativacao. |
 | RNF04 - cupons | Concluido | Desconto fixo ou percentual, validade, valor minimo, limite de usos e protecao concorrente. | Nenhuma pendencia funcional conhecida. |
 | RF33-RF35 - importacao | Concluido | Previa CSV/XLSX, validacao integral, transacao e historico persistente com arquivo, hash, data, responsavel e resultado. | Nenhuma pendencia funcional conhecida. |
 | RF36 - consulta de pedidos | Concluido | Filtros combinaveis usam dados persistidos no fluxo banco, backend, API e frontend. | Nenhuma pendencia funcional conhecida. |
 | RF38-RF40 - indicadores e relatorios | Concluido | Filtros administrativos, vendas aprovadas, cupons, estoque baixo e exportacoes CSV/XLSX/PDF. | Nenhuma pendencia funcional conhecida. |
-| RF07 - recuperacao de senha | Parcial tecnico | Token seguro, expiracao, uso unico, endpoints e telas estao implementados. | A equipe pode testar localmente; entrega real depende do provedor SMTP definido pelo dono. |
+| RF07 - recuperacao de senha | Parcial tecnico | Token seguro, expiracao, uso unico, endpoints, telas e modelo transacional centralizado estao implementados. | Criar e autenticar a conta Brevo, cadastrar segredos no Render e testar entrega real. |
 | RCP-02 - consentimento e direitos do titular | Concluido | Consentimento e solicitacoes de acesso, correcao e exclusao possuem isolamento por usuario, tratamento administrativo, retencao e auditoria. | Executar novamente o fluxo completo no ambiente publico na proxima homologacao. |
 | Seguranca de sessao e CSRF | Concluido | A protecao vinculada a sessao foi homologada publicamente no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`: emissao de token e cookie, rejeicao sem token ou com token invalido, aceitacao com token valido, login CLIENTE, logout autenticado e recuperacao de senha foram comprovados. | Manter regressao nas proximas alteracoes de autenticacao e nas novas operacoes mutaveis. |
-| RCP-01 - base legal e inventario | Depende do dono | A estrutura tecnica pode ser levantada e uma minuta pode ser preparada. | Dono/juridico deve definir finalidade, base legal, prazo de retencao e responsavel por cada tratamento. |
-| RCP-03 - politicas | Depende do dono | As paginas e a estrutura de publicacao podem ser preparadas. | Aprovar privacidade, cookies, termos, entrega/retirada e troca/devolucao de modo coerente com o RCP-01. |
+| RCP-01 - base legal e inventario | Parcial tecnico | Inventario criado com controlador, tratamentos, finalidades, bases propostas e tabela operacional de retencao. Tokens expirados passam a ser excluidos automaticamente. | Juridico deve validar bases e prazos, confirmar operadores/transferencias e a regra para menores. |
+| RCP-03 - politicas | Parcial tecnico | Minutas separadas foram estruturadas e a politica de privacidade recebeu os prazos propostos de retencao. | Decidir tecnologias de publicidade, revisar juridicamente e autorizar publicacao. |
 | RF17 - pagamento | Parcial tecnico | Novos pedidos apresentam e aceitam Pix ou cartao; a conciliacao simulada permanece restrita ao ADMIN, sem armazenar numero do cartao ou CVV. | Pagamento real permanece pendente: escolher gateway, criar conta, fornecer credenciais e definir parcelamento, juros, validade do Pix, estorno e webhook. |
-| RF19 - e-mails transacionais | Depende do dono | Recuperacao de senha esta preparada para SMTP; confirmacao/extrato pode usar a mesma infraestrutura apos definicao. | Escolher provedor, remetente e aprovar os modelos de mensagem. |
-| Produtos FTW importados | Depende do dono | 179 produtos foram preservados como rascunho, inativos, sem preco e com estoque zero; a ativacao invalida e bloqueada. | Informar preco, estoque e quais produtos devem ser ativados. |
-| Migracoes de banco | Parcial tecnico | A migracao do RCP-02 possui teste proprio. | Flyway continua desabilitado na configuracao atual; preparar e validar a estrategia antes de qualquer aplicacao em producao. |
+| RF19 - e-mails transacionais | Parcial tecnico | Brevo foi definido como relay SMTP. Recuperacao de senha e atualizacoes de pedido usam modelos simples; eventos de pedido sao processados apos o commit e falha de e-mail nao desfaz a compra. | Criar conta, verificar remetente e dominio com DKIM/DMARC, cadastrar segredos no Render e testar Gmail/Outlook. |
+| Produtos FTW importados | Concluido como fluxo operacional | Produtos importados permanecem inativos, sem preco e com estoque zero. A equipe da Vita Fortis define preco/estoque e ativa somente o que estiver disponivel. | Cadastro operacional continuo da loja; nao bloqueia o encerramento tecnico. |
+| Migracoes de banco | Parcial tecnico | O perfil `prod` foi endurecido. Em banco isolado, V1/V2 foram aplicadas, validadas e a segunda execucao aplicou zero migracoes; o baseline 2 de esquema legado integral tambem foi ensaiado. | Repetir no clone MySQL da mesma versao da producao, apos inventario e backup real; so depois ativar `SPRING_PROFILES_ACTIVE=prod`. |
 | Homologacao publica | Parcial tecnico | Em 26/10/2026 o commit `c72100a1d8ec4015c53d4bf65b4ed079781c6c54` foi comprovado com HTTP 200, SHA completo, `index-BBO_9H0d.js`, CSS com hashes correspondentes, 181 produtos ativos e pagamento simulado. O CSRF tambem foi homologado publicamente. | Homologar o checkout comercial completo, ADMIN, COLABORADOR e RCP-02 no ambiente publico. |
-| Backup e restauracao | Parcial tecnico | O procedimento pode ser ensaiado em banco isolado sem intervencao do dono. | Executar restore controlado, comparar dados e guardar evidencias; producao exige acesso autorizado. |
-| Compatibilidade | Parcial tecnico | Interfaces responsivas ja foram inspecionadas em fluxos anteriores. | Registrar uma matriz final de navegadores, desktop e celular no commit de encerramento. |
+| Backup e restauracao | Parcial tecnico | Scripts seguros criados para dump com hash, 7 diarios, 4 semanais e restauracao restrita a banco isolado. Sintaxe validada sem credenciais. | Identificar provedor/versao do MySQL e armazenamento externo, cadastrar segredos e executar a primeira copia/restauracao real controlada. Nunca sobrescrever a unica copia. |
+| Compatibilidade | Aceite pelo cliente | Interfaces responsivas ja foram inspecionadas tecnicamente; o cliente assumiu os testes finais de navegadores e celulares. | Registrar os resultados informados pelo cliente no encerramento. |
 
 ## Validacao de referencia
+
+Em 28/10/2026, na arvore local ainda sem commit ou publicacao:
+
+- 77 testes Java aprovados, sem falhas, erros ou ignorados;
+- lint e build de producao React aprovados;
+- modelos de e-mail, eventos pos-commit e handoff administrativo para WhatsApp validados localmente;
+- configuracao segura do perfil `prod` e runbook de backup/Flyway preparados, sem conexao ou alteracao no banco real;
+- bundles antigos do Spring removidos e o build atual sincronizado em `src/main/resources/static`;
+- nenhum segredo SMTP foi cadastrado e nenhum e-mail real foi enviado;
+- nenhum commit, push, deploy ou homologacao publica foi executado.
 
 Em 26/10/2026, apos a reconstrucao do servico MySQL no Aiven, foram comprovados publicamente no commit `8c47bb281293a5d9bf586910dd6ba5084fc40ad9`:
 
@@ -104,9 +114,19 @@ Esses resultados sao evidencias historicas de momentos diferentes. A validacao l
 1. Bases legais, prazos de retencao e responsaveis pelos tratamentos de dados.
 2. Aprovacao dos textos juridicos e das politicas comerciais.
 3. Gateway de pagamento, conta, credenciais e regras financeiras.
-4. Provedor SMTP, remetente e modelos de e-mail.
-5. Uso ou nao de transportadora externa.
-6. Precos, estoques e ativacao dos produtos importados.
+4. Criacao da conta Brevo, acesso DNS, remetente verificado e segredos SMTP.
+5. Credenciais/autoridade para inventario, backup e migracao controlada do banco real.
+6. Aprovacao juridica dos textos e definicoes de retencao/publicidade que permanecem em espera.
+
+## Decisoes fechadas em 28/10/2026
+
+- Provedor de e-mail: Brevo SMTP Relay, porta 587 com STARTTLS; segredo somente no Render.
+- Entrega: realizada pela propria Vita Fortis; atendimento operacional por WhatsApp manual a partir do ADMIN.
+- Frete gratis: somente quando o valor dos produtos apos descontos for estritamente superior a R$ 200,00.
+- Catalogo FTW: importacao inativa; a loja informa preco/estoque e ativa os produtos gradualmente.
+- Backup: copia diaria externa com rotacao, checksum e restauracao mensal em banco isolado.
+- Flyway: nenhuma ativacao cega; inventario, clone restaurado e baseline/migracao reconciliadora antes do perfil `prod`.
+- Compatibilidade final: testes de navegadores e celulares serao executados pelo cliente.
 
 ## Criterio para declarar o projeto concluido
 

@@ -159,6 +159,7 @@ export const api = {
   setDiscountValue: (id:number,valor:number) => request<Product>(`/admin/produtos/${id}/desconto-valor?valor=${valor}`,{method:'PATCH'},true),
   clearDiscount: (id:number) => request<Product>(`/admin/produtos/${id}/desconto`,{method:'DELETE'},true),
   adminOrders: (filters: OrderFilters = {}) => request<Order[]>(`/admin/pedidos${query(filters)}`, {}, true),
+  adminOrder: (id: number) => request<import('../types/api').AdminOrderDetail>(`/admin/pedidos/${id}`, {}, true),
   setOrderStatus: (id: number, valor: string) => request<Order>(`/admin/pedidos/${id}/status?valor=${valor}`, { method: 'PATCH' }, true),
   approvePayment: (id:number) => request<Order>(`/admin/pedidos/${id}/pagamento/aprovar`,{method:'PATCH'},true),
   rejectPayment: (id:number) => request<Order>(`/admin/pedidos/${id}/pagamento/recusar`,{method:'PATCH'},true),
