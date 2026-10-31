@@ -9,6 +9,18 @@ import static org.mockito.Mockito.*;
 
 class PedidoEmailListenerTest {
     @Test
+    void encaminhaEventoDoPedidoParaServicoDeEmail() {
+        EmailTransacionalService emails = mock(EmailTransacionalService.class);
+        PedidoEmailListener listener = new PedidoEmailListener(emails);
+
+        listener.notificar(new PedidoStatusAlteradoEvent(
+                10L, "cliente@example.com", "Cliente", StatusCompra.PENDENTE, FormaRecebimento.RETIRADA));
+
+        verify(emails).enviarStatusPedido(
+                10L, "cliente@example.com", "Cliente", StatusCompra.PENDENTE, FormaRecebimento.RETIRADA);
+    }
+
+    @Test
     void falhaDoSmtpNaoDesfazOperacaoDoPedido() {
         EmailTransacionalService emails = mock(EmailTransacionalService.class);
         doThrow(new IllegalStateException("SMTP indisponivel")).when(emails)

@@ -10,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -48,6 +49,20 @@ class EmailTransacionalServiceTest {
         verify(sender).send(captor.capture());
         assertTrue(captor.getValue().getText().contains("equipe Vita Fortis"));
         assertTrue(!captor.getValue().getText().toLowerCase().contains("transportadora"));
+    }
+
+    @Test
+    void pedidoCriadoGeraMensagemDeRecebimentoParaCliente() {
+        service.enviarStatusPedido(42L, "cliente@example.com", "Cliente",
+                StatusCompra.PENDENTE, FormaRecebimento.RETIRADA);
+
+        var captor = org.mockito.ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(sender).send(captor.capture());
+        SimpleMailMessage mensagem = captor.getValue();
+        assertEquals("Atualização do pedido #42 — Vita Fortis", mensagem.getSubject());
+        assertEquals("cliente@example.com", mensagem.getTo()[0]);
+        assertTrue(mensagem.getText().contains("foi recebido e aguarda a confirmação do pagamento"));
+        assertTrue(mensagem.getText().contains("https://vitafortis.example/pedidos"));
     }
 
     @Test

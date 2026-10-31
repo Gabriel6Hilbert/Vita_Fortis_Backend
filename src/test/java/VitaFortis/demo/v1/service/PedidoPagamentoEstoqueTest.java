@@ -11,9 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.mockito.ArgumentCaptor;
 import java.math.BigDecimal;
 import java.util.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,6 +43,7 @@ class PedidoPagamentoEstoqueTest {
 
     @Test void pedidoPendenteValidaDisponibilidadeSemBaixarEstoque() {
         Usuario cliente = new Usuario(); cliente.setId(2L); cliente.setTipo(TipoUsuario.CLIENTE);
+        cliente.setNome("Cliente Teste"); cliente.setEmail("cliente@teste.com");
         Produto produto = new Produto(); produto.setId(10L); produto.setNome("Produto");
         produto.setPreco(new BigDecimal("15.00")); produto.setQuantidadeEstoque(5); produto.setAtivo(true);
         ItemCompraRequestDto item = new ItemCompraRequestDto(); item.setProdutoId(10L); item.setQuantidade(2);
@@ -57,6 +59,16 @@ class PedidoPagamentoEstoqueTest {
 
         verify(produtos, never()).debitarEstoque(anyLong(), anyInt());
         verify(produtos, never()).alterarTotalVendido(anyLong(), anyInt());
+
+        ArgumentCaptor<PedidoStatusAlteradoEvent> evento = ArgumentCaptor.forClass(PedidoStatusAlteradoEvent.class);
+        verify(eventos).publishEvent(evento.capture());
+        assertAll(
+                () -> assertEquals(1L, evento.getValue().pedidoId()),
+                () -> assertEquals("cliente@teste.com", evento.getValue().email()),
+                () -> assertEquals("Cliente Teste", evento.getValue().nome()),
+                () -> assertEquals(StatusCompra.PENDENTE, evento.getValue().status()),
+                () -> assertEquals(FormaRecebimento.RETIRADA, evento.getValue().recebimento())
+        );
     }
 
     @Test void pagamentoConfirmadoBaixaEstoqueUmaUnicaVez() {
