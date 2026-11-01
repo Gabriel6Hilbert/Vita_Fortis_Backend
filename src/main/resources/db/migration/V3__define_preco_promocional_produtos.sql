@@ -1,0 +1,4 @@
+UPDATE produto
+SET PRECO = 1.00,
+    DESC_PERCENT = NULL,
+    DESC_VALOR = NULL;

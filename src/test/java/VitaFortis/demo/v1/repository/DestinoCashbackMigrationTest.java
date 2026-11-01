@@ -15,6 +15,7 @@ class DestinoCashbackMigrationTest {
         try (var connection = DriverManager.getConnection(url, "sa", "");
              var statement = connection.createStatement()) {
             statement.execute("create table usuario (usuario_id bigint primary key)");
+            statement.execute("create table produto (produto_id bigint primary key, preco decimal(12,2), desc_percent decimal(5,2), desc_valor decimal(12,2))");
         }
 
         Flyway.configure()

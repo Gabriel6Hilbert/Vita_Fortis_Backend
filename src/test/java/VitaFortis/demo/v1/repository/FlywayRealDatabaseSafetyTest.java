@@ -36,13 +36,13 @@ class FlywayRealDatabaseSafetyTest {
                 .baselineVersion("2")
                 .load();
 
-        assertEquals(0, flyway.migrate().migrationsExecuted,
-                "O schema existente deveria receber apenas baseline 2");
+        assertEquals(1, flyway.migrate().migrationsExecuted,
+                "O schema existente deveria receber apenas a migracao comercial V3");
         flyway.validate();
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Historico Flyway nao foi criado");
-        assertEquals("2", current.getVersion().toString());
+        assertEquals("3", current.getVersion().toString());
         assertEquals(0, flyway.migrate().migrationsExecuted,
                 "Uma segunda execucao deve ser idempotente");
     }

@@ -11,9 +11,10 @@ class FlywaySafetyTest {
         String url = "jdbc:h2:mem:flyway_seguro;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1";
         try (var connection = DriverManager.getConnection(url, "sa", ""); var statement = connection.createStatement()) {
             statement.execute("create table usuario (usuario_id bigint primary key)");
+            statement.execute("create table produto (produto_id bigint primary key, preco decimal(12,2), desc_percent decimal(5,2), desc_valor decimal(12,2))");
         }
         Flyway flyway = Flyway.configure().dataSource(url, "sa", "").baselineOnMigrate(true).baselineVersion("0").load();
-        assertEquals(2, flyway.migrate().migrationsExecuted);
+        assertEquals(3, flyway.migrate().migrationsExecuted);
         flyway.validate();
         assertEquals(0, flyway.migrate().migrationsExecuted);
     }
@@ -25,10 +26,11 @@ class FlywaySafetyTest {
             statement.execute("create table usuario (usuario_id bigint primary key, destino_cashback varchar(20))");
             statement.execute("create table solicitacao_privacidade (solicitacao_id bigint primary key)");
             statement.execute("create table auditoria_solicitacao_privacidade (auditoria_id bigint primary key)");
+            statement.execute("create table produto (produto_id bigint primary key, preco decimal(12,2), desc_percent decimal(5,2), desc_valor decimal(12,2))");
         }
         Flyway flyway = Flyway.configure().dataSource(url, "sa", "").baselineOnMigrate(true).baselineVersion("2").load();
-        assertEquals(0, flyway.migrate().migrationsExecuted);
+        assertEquals(1, flyway.migrate().migrationsExecuted);
         flyway.validate();
-        assertEquals("2", flyway.info().current().getVersion().toString());
+        assertEquals("3", flyway.info().current().getVersion().toString());
     }
 }
