@@ -66,7 +66,7 @@ public class Produto {
     @Column(name = "CATEGORIA", nullable = false, length = 40)
     private String categoria;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @org.hibernate.annotations.BatchSize(size = 100)
     @CollectionTable(name = "produto_atributo", joinColumns = @JoinColumn(name = "produto_id"))
     @MapKeyColumn(name = "atributo", length = 40)
@@ -88,13 +88,13 @@ public class Produto {
     @Column(name = "IMAGEM_CONTENT_TYPE")
     private String imagemContentType;
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @org.hibernate.annotations.BatchSize(size = 100)
     @CollectionTable(name = "PRODUTO_OBJETIVO", joinColumns = @JoinColumn(name = "PRODUTO_ID"))
     @Column(name = "OBJETIVO", length = 50)
     private Set<String> objetivos = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @org.hibernate.annotations.BatchSize(size = 100)
     @CollectionTable(name = "PRODUTO_ESPORTE", joinColumns = @JoinColumn(name = "PRODUTO_ID"))
     @Column(name = "ESPORTE", length = 50)

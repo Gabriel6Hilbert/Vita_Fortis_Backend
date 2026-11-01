@@ -15,6 +15,18 @@ public interface ProdutoMapper {
     @Mapping(target = "precoFinal",    expression = "java(produto.getPrecoFinal())")
     ProdutoResponseDto toResponseDto(Produto produto);
 
+    /**
+     * Cards e listagens públicas não exibem as coleções comerciais. Evitar
+     * inicializá-las elimina consultas extras para cada página do catálogo;
+     * o endpoint de detalhe continua usando o mapeamento completo acima.
+     */
+    @Mapping(target = "valorDesconto", expression = "java(produto.getValorDesconto())")
+    @Mapping(target = "precoFinal", expression = "java(produto.getPrecoFinal())")
+    @Mapping(target = "atributos", expression = "java(java.util.Map.of())")
+    @Mapping(target = "objetivos", expression = "java(java.util.Set.of())")
+    @Mapping(target = "esportes", expression = "java(java.util.Set.of())")
+    ProdutoResponseDto toCatalogResponseDto(Produto produto);
+
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "versao", ignore = true)
     @Mapping(target = "ativo", expression = "java(produtoRequestDto.getAtivo() == null || produtoRequestDto.getAtivo())")

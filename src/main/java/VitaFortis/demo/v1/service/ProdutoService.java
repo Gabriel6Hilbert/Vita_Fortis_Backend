@@ -145,10 +145,11 @@ public class ProdutoService {
         Pageable pageable = PageRequest.of(page, tamanho, sort);
 
         return produtoRepository.findAll(spec, pageable)
-                .map(produtoMapper::toResponseDto);
+                .map(produtoMapper::toCatalogResponseDto);
     }
 
     //getById(ADMIN)
+    @Transactional(readOnly = true)
     public ProdutoResponseDto getByIdAdmin(Long produtoId) {
         Produto p = produtoRepository.findById(produtoId)
                 .orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
