@@ -1,5 +1,6 @@
 package VitaFortis.demo.v1.service;
 
+import VitaFortis.demo.exception.RevisaoDivergenteException;
 import VitaFortis.demo.v1.dto.*;
 import VitaFortis.demo.v1.entity.*;
 import VitaFortis.demo.v1.enums.*;
@@ -15,6 +16,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -32,11 +34,12 @@ public class PedidoService {
     private final PagamentoGateway pagamentos;
     private final CashbackService cashback;
     private final ApplicationEventPublisher eventos;
+    private final CarrinhoService carrinhos;
 
     public PedidoService(PedidoRepository pedidos, UsuarioRepository usuarios, ProdutoRepository produtos,
                          CupomRepository cupons, EnderecoService enderecos, FreteService fretes,
                          PagamentoGateway pagamentos, CashbackService cashback, CupomRegrasService regrasCupom,
-                         ApplicationEventPublisher eventos) {
+                         ApplicationEventPublisher eventos, CarrinhoService carrinhos) {
         this.regrasCupom = regrasCupom;
         this.pedidos = pedidos;
         this.usuarios = usuarios;
@@ -47,14 +50,23 @@ public class PedidoService {
         this.pagamentos = pagamentos;
         this.cashback = cashback;
         this.eventos = eventos;
+        this.carrinhos = carrinhos;
     }
 
-    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
+    @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED,
+            noRollbackFor = RevisaoDivergenteException.class)
     public PedidoResponseDto criar(PedidoRequestDto dto, String emailAutenticado) {
         Usuario usuario = usuarioAutenticado(emailAutenticado);
         if (!usuario.getId().equals(dto.getUsuarioId())) {
             throw new AccessDeniedException("Nao e permitido criar pedido para outro usuario");
         }
+        CarrinhoService.ResultadoReconciliacao reconciliacao = carrinhos.reconciliarParaPedido(usuario.getId(), emailAutenticado);
+        Carrinho carrinho = reconciliacao.carrinho();
+        if (dto.getRevisaoVersao() == null || !reconciliacao.alteracoesPreco().isEmpty()
+                || !dto.getRevisaoVersao().equals(carrinho.getVersao())) {
+            throw new RevisaoDivergenteException("A sacola mudou desde a revisão. Confira os valores atualizados antes de confirmar.");
+        }
+        validarSolicitacaoContraCarrinho(dto, carrinho);
         Pedido pedido = novoPedido(usuario, dto);
         BigDecimal subtotal = adicionarItens(pedido, dto.getItens());
         Cupom cupom = obterCupom(dto.getCupomId(), subtotal, true);
@@ -65,8 +77,8 @@ public class PedidoService {
         pedido.setSubtotal(subtotal);
         pedido.setDesconto(desconto);
         pedido.setTotal(subtotal.subtract(desconto).add(pedido.getFrete()).setScale(2, RoundingMode.HALF_UP));
-        if (dto.getTotalRevisado() != null && dto.getTotalRevisado().compareTo(pedido.getTotal()) != 0) {
-            throw new IllegalArgumentException("O valor do pedido mudou. Revise novamente antes de confirmar.");
+        if (dto.getTotalRevisado() == null || dto.getTotalRevisado().compareTo(pedido.getTotal()) != 0) {
+            throw new RevisaoDivergenteException("O valor do pedido mudou. Revise novamente antes de confirmar.");
         }
         adicionarHistorico(pedido, StatusCompra.PENDENTE, "Pedido criado e aguardando pagamento");
 
@@ -75,14 +87,18 @@ public class PedidoService {
                 salvo.getId(), salvo.getTotal(), salvo.getFormaPagamento());
         salvo.setReferenciaPagamento(pagamento.referencia());
         Pedido finalizado = pedidos.save(salvo);
+        carrinhos.esvaziarAposPedido(carrinho);
         publicarNotificacao(finalizado);
         return toDto(finalizado);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public PedidoResponseDto revisar(PedidoRequestDto dto, String emailAutenticado) {
         Usuario usuario = usuarioAutenticado(emailAutenticado);
         if (!usuario.getId().equals(dto.getUsuarioId())) throw new AccessDeniedException("Acesso negado ao pedido");
+        CarrinhoService.ResultadoReconciliacao reconciliacao = carrinhos.reconciliarParaPedido(usuario.getId(), emailAutenticado);
+        Carrinho carrinho = reconciliacao.carrinho();
+        validarSolicitacaoContraCarrinho(dto, carrinho);
         Pedido pedido = novoPedido(usuario, dto);
         BigDecimal subtotal = BigDecimal.ZERO;
         var quantidades = new java.util.LinkedHashMap<Long, Integer>();
@@ -101,7 +117,28 @@ public class PedidoService {
         pedido.setDesconto(calcularDesconto(cupom, subtotal));
         aplicarRecebimento(pedido, dto, subtotal.subtract(pedido.getDesconto()));
         pedido.setTotal(subtotal.subtract(pedido.getDesconto()).add(pedido.getFrete()).setScale(2, RoundingMode.HALF_UP));
-        return toDto(pedido);
+        PedidoResponseDto resposta = toDto(pedido);
+        resposta.setRevisaoVersao(carrinho.getVersao());
+        resposta.setPrecoAlterado(!reconciliacao.alteracoesPreco().isEmpty());
+        resposta.setAlteracoesPreco(reconciliacao.alteracoesPreco());
+        return resposta;
+    }
+
+    private void validarSolicitacaoContraCarrinho(PedidoRequestDto dto, Carrinho carrinho) {
+        LinkedHashMap<Long, Integer> solicitados = new LinkedHashMap<>();
+        for (ItemCompraRequestDto item : dto.getItens()) {
+            solicitados.merge(item.getProdutoId(), item.getQuantidade(), Math::addExact);
+        }
+        LinkedHashMap<Long, Integer> atuais = new LinkedHashMap<>();
+        for (CarrinhoItem item : carrinho.getItens()) atuais.put(item.getProduto().getId(), item.getQuantidade());
+        if (atuais.isEmpty() || !atuais.equals(solicitados)) {
+            throw new RevisaoDivergenteException("Os itens ou quantidades da sacola mudaram. Revise novamente antes de confirmar.");
+        }
+        Long cupomAtual = carrinho.getCupomCodigo() == null ? null : cupons.findByCodigoIgnoreCase(carrinho.getCupomCodigo())
+                .map(Cupom::getId).orElse(null);
+        if (!java.util.Objects.equals(cupomAtual, dto.getCupomId())) {
+            throw new RevisaoDivergenteException("O cupom da sacola mudou. Revise novamente antes de confirmar.");
+        }
     }
 
     @Transactional
@@ -376,6 +413,12 @@ public class PedidoService {
         dto.setTotal(pedido.getTotal());
         dto.setStatus(pedido.getStatus().name());
         dto.setCupomCodigo(pedido.getCupomUtilizado() == null ? null : pedido.getCupomUtilizado().getCodigo());
+        if (pedido.getCupomUtilizado() != null && pedido.getCupomUtilizado().getColaborador() != null
+                && pedido.getCupomUtilizado().getPercentualCashback() != null) {
+            dto.setCashbackColaborador(pedido.getSubtotal().subtract(pedido.getDesconto())
+                    .multiply(pedido.getCupomUtilizado().getPercentualCashback())
+                    .divide(CEM, 2, RoundingMode.HALF_UP));
+        }
         dto.setFormaRecebimento(pedido.getFormaRecebimento().name());
         dto.setEnderecoMascarado(mascararEndereco(pedido.getEnderecoEntrega()));
         dto.setPrazoEntregaDias(pedido.getPrazoEntregaDias());

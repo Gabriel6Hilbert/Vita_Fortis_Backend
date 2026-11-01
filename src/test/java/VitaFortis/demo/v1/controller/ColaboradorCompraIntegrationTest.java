@@ -62,9 +62,16 @@ class ColaboradorCompraIntegrationTest {
                 .andExpect(jsonPath(itemCarrinho + ".produtoImagemUrl", hasItem(produto.getImagemUrl())))
                 .andExpect(jsonPath(itemCarrinho + ".quantidade", hasItem(2)));
 
+        var pedidoBody = (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(pedido(colaborador.id(), produto.getId()));
+        var revisao = mvc.perform(post("/api/v1/pedidos/revisao").with(csrf())
+                        .session(colaborador.session()).contentType(MediaType.APPLICATION_JSON).content(pedidoBody.toString()))
+                .andExpect(status().isOk()).andReturn();
+        var revisaoJson = json.readTree(revisao.getResponse().getContentAsString());
+        pedidoBody.put("revisaoVersao", revisaoJson.get("revisaoVersao").asLong());
+        pedidoBody.put("totalRevisado", revisaoJson.get("total").decimalValue());
         var criacao = mvc.perform(post("/api/v1/pedidos").with(csrf())
                         .session(colaborador.session()).contentType(MediaType.APPLICATION_JSON)
-                        .content(pedido(colaborador.id(), produto.getId())))
+                        .content(pedidoBody.toString()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.usuarioId").value(colaborador.id()))
                 .andExpect(jsonPath("$.status").value("PENDENTE"))

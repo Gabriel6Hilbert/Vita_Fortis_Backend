@@ -27,4 +27,8 @@ public class PedidoResponseDto {
     private String statusPagamento;
     private String referenciaPagamentoMascarada;
     private List<HistoricoStatusPedidoDto> historicoStatus;
+    private BigDecimal cashbackColaborador;
+    private Long revisaoVersao;
+    private boolean precoAlterado;
+    private List<AlteracaoPrecoDto> alteracoesPreco;
 }

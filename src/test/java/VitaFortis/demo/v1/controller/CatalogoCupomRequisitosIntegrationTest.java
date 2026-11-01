@@ -63,6 +63,17 @@ class CatalogoCupomRequisitosIntegrationTest {
         return Map.of("usuarioId",cliente.id(),"formaRecebimento","RETIRADA","formaPagamento","PIX","cupomId",cupomId,
                 "itens",List.of(Map.of("produtoId",p.getId(),"quantidade",1)));
     }
+    private Map<String,Object> pedidoRevisado(Login cliente, Produto p, long cupomId) throws Exception {
+        request(delete("/api/v1/carrinhos/"+cliente.id()+"/itens"),cliente,null,200);
+        request(post("/api/v1/carrinhos/"+cliente.id()+"/itens"),cliente,Map.of("produtoId",p.getId(),"quantidade",1),200);
+        String codigo=cupons.findById(cupomId).orElseThrow().getCodigo();
+        request(post("/api/v1/carrinhos/"+cliente.id()+"/cupom/"+codigo),cliente,null,200);
+        Map<String,Object> body=new HashMap<>(pedido(cliente,p,cupomId));
+        JsonNode revisao=request(post("/api/v1/pedidos/revisao"),cliente,body,200);
+        body.put("revisaoVersao",revisao.get("revisaoVersao").asLong());
+        body.put("totalRevisado",revisao.get("total").decimalValue());
+        return body;
+    }
 
     @Test void rf28InativaPreservaBancoEOcultaCatalogoDetalheFavoritoESacola() throws Exception {
         var admin = login("admin@vitafortis.test"); var cliente = login("cliente@vitafortis.test"); var p = produto();
@@ -113,10 +124,10 @@ class CatalogoCupomRequisitosIntegrationTest {
         BigDecimal saldoAnterior=request(get("/api/v1/colaborador/cashback/resumo"),colab,null,200).get("saldo").decimalValue();
         var p=produto();var dto=cupom();dto.put("colaboradorId",colab.id());dto.put("percentualCashback",5);
         var coupon=request(post("/api/v1/admin/cupons"),admin,dto,201);long id=coupon.get("id").asLong();
-        var order=pedido(cliente,p,id);
-        assertEquals(90,request(post("/api/v1/pedidos/revisao"),cliente,order,200).get("total").asInt());
+        var order=pedidoRevisado(cliente,p,id);
+        assertEquals(90,new BigDecimal(order.get("totalRevisado").toString()).intValue());
         long orderId=request(post("/api/v1/pedidos"),cliente,order,201).get("id").asLong();
-        request(post("/api/v1/pedidos"),cliente,order,400);request(post("/api/v1/pedidos/revisao"),cliente,order,400);
+        request(post("/api/v1/pedidos"),cliente,order,409);request(post("/api/v1/pedidos/revisao"),cliente,order,409);
         assertEquals(1,pedidos.countByCupomUtilizadoId(id));
         request(post("/api/v1/carrinhos/"+cliente.id()+"/itens"),cliente,Map.of("produtoId",p.getId(),"quantidade",1),200);
         request(post("/api/v1/carrinhos/"+cliente.id()+"/cupom/"+dto.get("codigo")),cliente,null,400);
@@ -133,21 +144,26 @@ class CatalogoCupomRequisitosIntegrationTest {
         dto.put("dataInicio",LocalDateTime.now().plusDays(3).toString());request(post("/api/v1/admin/cupons"),admin,dto,400);
         dto=cupom();dto.put("dataInicio",LocalDateTime.now().plusHours(5).toString());
         long id=request(post("/api/v1/admin/cupons"),admin,dto,201).get("id").asLong();var p=produto();
-        request(post("/api/v1/pedidos/revisao"),cliente,pedido(cliente,p,id),400);
+        request(delete("/api/v1/carrinhos/"+cliente.id()+"/itens"),cliente,null,200);
+        request(post("/api/v1/carrinhos/"+cliente.id()+"/itens"),cliente,Map.of("produtoId",p.getId(),"quantidade",1),200);
+        request(post("/api/v1/carrinhos/"+cliente.id()+"/cupom/"+dto.get("codigo")),cliente,null,400);
         dto.put("dataInicio",null);dto.put("minSubtotal",101);request(put("/api/v1/admin/cupons/"+id),admin,dto,200);
-        request(post("/api/v1/pedidos"),cliente,pedido(cliente,p,id),400);
+        request(post("/api/v1/carrinhos/"+cliente.id()+"/cupom/"+dto.get("codigo")),cliente,null,400);
         dto.put("minSubtotal",null);dto.put("dataVencimento",null);dto.put("limiteUso",null);
         request(put("/api/v1/admin/cupons/"+id),admin,dto,200);
         var saved=cupons.findById(id).orElseThrow();assertNull(saved.getDataInicio());assertNull(saved.getDataVencimento());assertNull(saved.getMinSubtotal());assertNull(saved.getLimiteUso());
-        request(post("/api/v1/pedidos/revisao"),cliente,pedido(cliente,p,id),200);
+        request(post("/api/v1/carrinhos/"+cliente.id()+"/cupom/"+dto.get("codigo")),cliente,null,200);
+        Map<String,Object> order=new HashMap<>(pedido(cliente,p,id));
+        JsonNode revisao=request(post("/api/v1/pedidos/revisao"),cliente,order,200);
+        order.put("revisaoVersao",revisao.get("revisaoVersao").asLong());order.put("totalRevisado",revisao.get("total").decimalValue());
         saved.setDataVencimento(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")).minusMinutes(1));cupons.saveAndFlush(saved);
-        request(post("/api/v1/pedidos"),cliente,pedido(cliente,p,id),400);
+        request(post("/api/v1/pedidos"),cliente,order,409);
     }
 
     @Test void rnf04ComprasConcorrentesNaoUltrapassamLimite() throws Exception {
         var admin=login("admin@vitafortis.test");var a=login("cliente@vitafortis.test");var b=login("cliente2@vitafortis.test");
         long id=request(post("/api/v1/admin/cupons"),admin,cupom(),201).get("id").asLong();
-        var bodyA=json.writeValueAsString(pedido(a,produto(),id));var bodyB=json.writeValueAsString(pedido(b,produto(),id));
+        var bodyA=json.writeValueAsString(pedidoRevisado(a,produto(),id));var bodyB=json.writeValueAsString(pedidoRevisado(b,produto(),id));
         var ready=new CountDownLatch(2);var start=new CountDownLatch(1);var pool=Executors.newFixedThreadPool(2);
         try {
             var fa=pool.submit(()->{ready.countDown();start.await();return mvc.perform(post("/api/v1/pedidos").with(csrf()).session(a.session()).contentType(MediaType.APPLICATION_JSON).content(bodyA)).andReturn().getResponse().getStatus();});

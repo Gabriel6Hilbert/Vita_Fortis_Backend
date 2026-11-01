@@ -6,7 +6,7 @@ import { useAuth } from './AuthContext'
 const GUEST_CART='vita-fortis-guest-cart'
 const readGuest=():CartItem[]=>{try{return JSON.parse(sessionStorage.getItem(GUEST_CART)||'[]')}catch{return []}}
 const saveGuest=(items:CartItem[])=>{sessionStorage.setItem(GUEST_CART,JSON.stringify(items));window.dispatchEvent(new Event('vita-cart'))}
-const guestCart=(items:CartItem[]):Cart=>{const subtotal=items.reduce((sum,item)=>sum+Number(item.subtotal),0);return{carrinhoId:0,usuarioId:0,carrinhoItens:items,subtotal,descontos:0,total:subtotal}}
+const guestCart=(items:CartItem[]):Cart=>{const subtotal=items.reduce((sum,item)=>sum+Number(item.subtotal),0);return{carrinhoId:0,usuarioId:0,carrinhoItens:items,subtotal,descontos:0,total:subtotal,versao:0,precoAlterado:false,alteracoesPreco:[]}}
 type CartContextValue = { cart: Cart | null; loading: boolean; error: string; count: number; total: number; refresh: () => Promise<void>; add: (productId: number, quantity?: number) => Promise<void>; update: (itemId: number, quantity: number) => Promise<void>; remove: (itemId: number) => Promise<void>; clear: () => Promise<void> }
 const CartContext = createContext<CartContextValue | null>(null)
 

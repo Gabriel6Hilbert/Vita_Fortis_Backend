@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Lock;
 
 import java.util.Optional;
 import java.util.List;
@@ -59,6 +60,10 @@ public interface ProdutoRepository extends JpaRepository<Produto,Long>, JpaSpeci
 //    int reativar(Long produtoId);
 
     Optional<Produto> findByIdAndAtivoTrue(Long id);
+
+    @Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Produto p where p.id = :id and p.ativo = true")
+    Optional<Produto> findAtivoParaAtualizacao(Long id);
 
     @Query("select p.categoria, count(p) from Produto p where p.ativo = true group by p.categoria")
     List<Object[]> contarAtivosPorCategoria();

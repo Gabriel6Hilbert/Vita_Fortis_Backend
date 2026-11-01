@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.math.BigDecimal;
+import VitaFortis.demo.v1.dto.AlteracaoPrecoDto;
 
 @Getter
 @Setter
@@ -20,4 +21,7 @@ public class CarrinhoResponseDto {
     private Long cupomId;
     private String colaboradorNome;
     private BigDecimal cashbackColaborador;
+    private Long versao;
+    private boolean precoAlterado;
+    private List<AlteracaoPrecoDto> alteracoesPreco;
 }

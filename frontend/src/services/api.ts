@@ -10,7 +10,7 @@ let csrfTokenPromise: Promise<CsrfToken> | null = null
 type Session = { user: User }
 export type OrderFilters = Partial<Record<'numero' | 'inicio' | 'fim' | 'cliente' | 'status' | 'recebimento' | 'pagamento' | 'statusPagamento', string>>
 type UserPayload = User & { tipo?: UserRole; role?: UserRole }
-export type OrderInput = { usuarioId: number; itens: { produtoId: number; quantidade: number }[]; cupomId?:number; formaRecebimento: 'RETIRADA' | 'ENTREGA'; enderecoId?: number; formaPagamento: string; totalRevisado?: number }
+export type OrderInput = { usuarioId: number; itens: { produtoId: number; quantidade: number }[]; cupomId?:number; formaRecebimento: 'RETIRADA' | 'ENTREGA'; enderecoId?: number; formaPagamento: string; totalRevisado?: number; revisaoVersao?: number }
 const normalizeUser = (user: UserPayload): User => ({ ...user, tipoUsuario: user.tipoUsuario || user.tipo || user.role })
 
 export class ApiError extends Error {

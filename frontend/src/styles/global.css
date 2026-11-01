@@ -1787,6 +1787,58 @@ p {
     display: none;
   }
 }
+
+/* Admin: ações explícitas e detalhes completos do pedido. */
+.order-number-link {
+  display: inline-flex;
+  padding: 0;
+  color: #171715;
+  font: inherit;
+  font-weight: 900;
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  text-decoration-color: var(--brand-yellow);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.order-detail-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  color: #171715;
+  font-weight: 900;
+  background: var(--brand-yellow);
+  border: 1px solid #171715;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.order-detail-trigger:disabled { cursor: progress; opacity: .65; }
+.order-detail-error {
+  display: block;
+  max-width: 220px;
+  margin-top: 8px;
+  color: #9d1c1c;
+}
+.order-detail-modal { width: min(760px, calc(100vw - 32px)); }
+.order-detail-section { padding: 16px 0; border-bottom: 1px solid #dedbd0; }
+.order-detail-section h3 { margin: 0 0 10px; }
+.order-detail-section p { margin: 6px 0; }
+.order-status-history { display: grid; gap: 10px; margin: 0; padding-left: 22px; }
+.order-status-history li { padding-left: 4px; }
+.order-status-history span,
+.order-status-history small { display: block; color: #666257; }
+.order-financial-summary { display: grid; width: min(100%, 360px); margin-left: auto; gap: 8px; }
+.order-financial-summary span { display: flex; justify-content: space-between; gap: 24px; }
+.order-financial-summary .order-total { padding-top: 10px; font-size: 1.1rem; border-top: 2px solid #171715; }
+
+@media (max-width: 700px) {
+  .order-detail-trigger { width: 100%; }
+}
 @media (max-width: 430px) {
   .product-grid,
   .catalog-results .product-grid {
@@ -4894,4 +4946,24 @@ body {
   .catalog-mega h2 { color: var(--brand-yellow); }
   .catalog-mega a { color: #eee; }
   .catalog-mega a small { color: #aaa69a; }
+}
+
+/* Ordem final da cascata: o painel nunca pode impor largura ao documento. */
+.admin-shell { width: 100%; min-width: 0; max-width: 100%; grid-template-columns: 240px minmax(0, 1fr); overflow-x: clip; }
+.admin-shell > *, .admin-content { min-width: 0; max-width: 100%; }
+.admin-content { width: 100%; }
+.admin-content .table-wrap { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; }
+.admin-modal.order-detail-modal { width: min(760px, calc(100vw - 32px)); }
+
+@media (max-width: 1024px) {
+  .admin-shell { grid-template-columns: 88px minmax(0, 1fr); }
+}
+
+@media (max-width: 700px) {
+  .admin-shell { display: grid; grid-template-columns: minmax(0, 1fr); overflow-x: clip; }
+  .admin-nav { display: flex; width: 100%; min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+  .admin-nav button { flex: 0 0 auto; min-height: 44px; }
+  .admin-content { width: 100%; min-width: 0; max-width: 100%; padding-inline: 16px; overflow-x: clip; }
+  .admin-content .table-wrap { max-width: 100%; }
+  .admin-modal.order-detail-modal { width: 100%; max-width: none; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0; overflow-y: auto; }
 }

@@ -72,9 +72,9 @@ public final class FiltroProduto {
     }
 
     private static Specification<Produto> categoriaIgual(String cat) {
-        return (root, q, cb) -> (cat == null)
+        return (root, q, cb) -> (cat == null || cat.isBlank())
                 ? cb.conjunction()
-                : cb.equal(root.get("categoria"), cat);
+                : cb.equal(cb.upper(root.get("categoria")), cat.trim().toUpperCase());
     }
 
     private static Specification<Produto> precoEntre(BigDecimal min, BigDecimal max) {
@@ -97,9 +97,14 @@ public final class FiltroProduto {
     private static Specification<Produto> conjuntoContem(String campo, java.util.Set<String> valores) {
         return (root, q, cb) -> {
             if (valores == null || valores.isEmpty()) return cb.conjunction();
-            q.distinct(true);
-            var join = root.<Produto, String>joinSet(campo);
-            return join.in(valores.stream().map(v -> v.trim().toUpperCase()).toList());
+            var normalizados = valores.stream().filter(java.util.Objects::nonNull).map(String::trim)
+                    .filter(v -> !v.isBlank()).map(String::toUpperCase).collect(java.util.stream.Collectors.toSet());
+            if (normalizados.isEmpty()) return cb.conjunction();
+            var subquery = q.subquery(Integer.class);
+            var produtoCorrelacionado = subquery.correlate(root);
+            var associacao = produtoCorrelacionado.<Produto, String>joinSet(campo);
+            subquery.select(cb.literal(1)).where(cb.upper(associacao).in(normalizados));
+            return cb.exists(subquery);
         };
     }
     private static Specification<Produto> oferta(Boolean valor) {

@@ -91,7 +91,11 @@ export interface Cart {
   cupomId?: number;
   colaboradorNome?: string;
   cashbackColaborador?: number;
+  versao: number;
+  precoAlterado: boolean;
+  alteracoesPreco: PriceChange[];
 }
+export interface PriceChange { produtoId: number; produtoNome: string; precoAnterior: number; precoAtual: number }
 export interface OrderItem {
   id: number;
   produtoId: number;
@@ -117,6 +121,10 @@ export interface Order {
   referenciaPagamentoMascarada?: string;
   itens: OrderItem[];
   cupomCodigo?: string;
+  cashbackColaborador?: number;
+  revisaoVersao?: number;
+  precoAlterado?: boolean;
+  alteracoesPreco?: PriceChange[];
 }
 export interface OrderStatusEvent {
   status: string;
@@ -129,7 +137,7 @@ export interface OrderDetail extends Order {
   historicoStatus?: OrderStatusEvent[];
 }
 export interface AdminOrderDetail {
-  pedido: Order;
+  pedido: OrderDetail;
   clienteNome: string;
   clienteEmail: string;
   clienteTelefone?: string;

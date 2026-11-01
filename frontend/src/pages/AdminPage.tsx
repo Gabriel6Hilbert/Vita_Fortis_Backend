@@ -94,6 +94,8 @@ export function AdminPage() {
   const [importPreview,setImportPreview]=useState<{inseridos:number;atualizados:number;rejeitados:number;erros:string[];registros:{codigo:string;nome:string;preco:number;estoque:number;categoria:string;acao:string}[]}|null>(null);
   const [importHistory,setImportHistory]=useState<ImportHistory[]>([]);
   const [orderOpen, setOrderOpen] = useState<AdminOrderDetail | null>(null);
+  const [orderOpeningId, setOrderOpeningId] = useState<number | null>(null);
+  const [orderDetailError, setOrderDetailError] = useState("");
   const [couponForm, setCouponForm] = useState<Partial<Coupon> | null>(null);
   const [cashbackForm, setCashbackForm] = useState<{
     id: number;
@@ -175,6 +177,17 @@ export function AdminPage() {
     void load();
   }, [tab]);
   useEffect(() => { setSearch('') }, [tab]);
+  const openOrder = async (id: number) => {
+    setOrderOpeningId(id);
+    setOrderDetailError("");
+    try {
+      setOrderOpen(await api.adminOrder(id));
+    } catch (e) {
+      setOrderDetailError(e instanceof Error ? e.message : "Falha ao abrir o pedido.");
+    } finally {
+      setOrderOpeningId(null);
+    }
+  };
   const visibleProducts = useMemo(
     () =>
       products.filter((p) =>
@@ -708,7 +721,14 @@ export function AdminPage() {
                         .map((o) => (
                           <tr key={o.id}>
                             <td>
-                              <strong>#{o.id}</strong>
+                              <button
+                                type="button"
+                                className="order-number-link"
+                                onClick={() => void openOrder(o.id)}
+                                aria-label={`Ver detalhes do pedido número ${o.id}`}
+                              >
+                                #{o.id}
+                              </button>
                               <small>
                                 {o.itens.length} item(ns) • pagamento{" "}
                                 {titleCase(o.statusPagamento)}
@@ -772,11 +792,19 @@ export function AdminPage() {
                             </td>
                             <td>
                               <button
-                                className="icon-button"
-                                onClick={() => void api.adminOrder(o.id).then(setOrderOpen).catch(e => setError(e instanceof Error ? e.message : 'Falha ao abrir o pedido.'))}
+                                type="button"
+                                className="order-detail-trigger"
+                                onClick={() => void openOrder(o.id)}
+                                aria-label={`Ver detalhes do pedido número ${o.id}`}
+                                title={`Ver detalhes do pedido número ${o.id}`}
+                                disabled={orderOpeningId === o.id}
                               >
-                                <Eye />
+                                <Eye size={18} aria-hidden="true" />
+                                {orderOpeningId === o.id ? "Abrindo…" : "Ver detalhes"}
                               </button>
+                              {orderDetailError && orderOpeningId !== o.id && (
+                                <small className="order-detail-error" role="alert">{orderDetailError}</small>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -1461,27 +1489,58 @@ export function AdminPage() {
       )}
       {orderOpen && (
         <div className="modal-backdrop">
-          <div className="admin-modal small">
+          <div className="admin-modal order-detail-modal" role="dialog" aria-modal="true" aria-labelledby="order-detail-title">
             <header>
-              <h2>Pedido #{orderOpen.pedido.id}</h2>
-              <button onClick={() => setOrderOpen(null)}>
-                <X />
+              <h2 id="order-detail-title">Pedido #{orderOpen.pedido.id}</h2>
+              <button type="button" onClick={() => setOrderOpen(null)} aria-label="Fechar detalhes do pedido">
+                <X aria-hidden="true" />
               </button>
             </header>
-            <p><strong>{orderOpen.clienteNome}</strong><br />{orderOpen.clienteEmail}{orderOpen.clienteTelefone && <> · {orderOpen.clienteTelefone}</>}</p>
-            {orderOpen.enderecoEntrega && <p><strong>Entrega própria:</strong> {orderOpen.enderecoEntrega}</p>}
+            <section className="order-detail-section">
+              <h3>Cliente</h3>
+              <p><strong>{orderOpen.clienteNome}</strong><br />{orderOpen.clienteEmail}{orderOpen.clienteTelefone && <> · {orderOpen.clienteTelefone}</>}</p>
+            </section>
+            <section className="order-detail-section">
+              <h3>Recebimento e pagamento</h3>
+              <p><strong>Recebimento:</strong> {titleCase(orderOpen.pedido.formaRecebimento)}</p>
+              {orderOpen.enderecoEntrega && <p><strong>Endereço:</strong> {orderOpen.enderecoEntrega}</p>}
+              <p><strong>Pagamento:</strong> {titleCase(orderOpen.pedido.formaPagamento || "não informado")} · {titleCase(orderOpen.pedido.statusPagamento)}</p>
+              {orderOpen.pedido.referenciaPagamentoMascarada && <p><strong>Referência:</strong> {orderOpen.pedido.referenciaPagamentoMascarada}</p>}
+            </section>
             {orderOpen.whatsappUrl && <a className="button primary" href={orderOpen.whatsappUrl} target="_blank" rel="noreferrer"><MessageSquare size={18}/> Atender entrega no WhatsApp</a>}
-            {orderOpen.pedido.itens.map((item) => (
-              <div className="order-detail-row" key={item.id}>
-                <img src={item.produtoImagemUrl||"/assets/imagens/logo-vita-fortis-brand.webp"} alt="" onError={e => { const img = e.currentTarget; const fallback = "/assets/imagens/logo-vita-fortis-brand.webp"; if (!img.src.endsWith(fallback)) img.src = fallback; }} />
-                <span>
-                  <b>{item.produtoNome}</b><small>{item.quantidade} unidade(s) · {money(item.precoUnitario)} cada</small>
-                </span>
-                <b>{money(item.subtotal)}</b>
-              </div>
-            ))}
+            <section className="order-detail-section">
+              <h3>Itens</h3>
+              {orderOpen.pedido.itens.map((item) => (
+                <div className="order-detail-row" key={item.id}>
+                  <img src={item.produtoImagemUrl||"/assets/imagens/logo-vita-fortis-brand.webp"} alt="" onError={e => { const img = e.currentTarget; const fallback = "/assets/imagens/logo-vita-fortis-brand.webp"; if (!img.src.endsWith(fallback)) img.src = fallback; }} />
+                  <span>
+                    <b>{item.produtoNome}</b><small>{item.quantidade} unidade(s) · {money(item.precoUnitario)} cada</small>
+                  </span>
+                  <b>{money(item.subtotal)}</b>
+                </div>
+              ))}
+            </section>
+            {orderOpen.pedido.historicoStatus?.length ? (
+              <section className="order-detail-section">
+                <h3>Histórico</h3>
+                <ol className="order-status-history">
+                  {orderOpen.pedido.historicoStatus.map((evento, index) => (
+                    <li key={`${evento.status}-${evento.data}-${index}`}>
+                      <strong>{titleCase(evento.status)}</strong>
+                      <span>{date(evento.data)}</span>
+                      {(evento.descricao || evento.observacao) && <small>{evento.descricao || evento.observacao}</small>}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
             <footer>
-              <strong>Total: {money(orderOpen.pedido.total)}</strong>
+              <div className="order-financial-summary">
+                <span>Subtotal <strong>{money(orderOpen.pedido.subtotal)}</strong></span>
+                <span>Desconto <strong>- {money(orderOpen.pedido.desconto)}</strong></span>
+                <span>Frete <strong>{money(orderOpen.pedido.frete)}</strong></span>
+                <span className="order-total">Total <strong>{money(orderOpen.pedido.total)}</strong></span>
+              </div>
             </footer>
           </div>
         </div>

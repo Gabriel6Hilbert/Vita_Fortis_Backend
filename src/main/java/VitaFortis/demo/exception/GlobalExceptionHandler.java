@@ -29,6 +29,11 @@ public class GlobalExceptionHandler {
         return resposta(HttpStatus.BAD_REQUEST, ex.getMessage(), null);
     }
 
+    @ExceptionHandler(RevisaoDivergenteException.class)
+    ResponseEntity<Map<String, Object>> revisaoDivergente(RevisaoDivergenteException ex) {
+        return resposta(HttpStatus.CONFLICT, ex.getMessage(), null);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<Map<String, Object>> validacao(MethodArgumentNotValidException ex) {
         Map<String, String> campos = new LinkedHashMap<>();

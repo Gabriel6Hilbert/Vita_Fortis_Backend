@@ -137,7 +137,7 @@ public class ProdutoService {
     @Transactional(readOnly = true)
     public Page<ProdutoResponseDto> listarPublicos (ProdutoFiltroDto filtro) {
         int page = filtro.getPagina() == null ? 0 :Math.max(0, filtro.getPagina());
-        int tamanho = filtro.getTamanho() == null ? 12 : Math.max(1, filtro.getTamanho());
+        int tamanho = filtro.getTamanho() == null ? 12 : Math.min(100, Math.max(1, filtro.getTamanho()));
 
         Specification<Produto> spec = FiltroProduto.buildSpec(filtro);
         Sort sort = FiltroProduto.buildSort(filtro);

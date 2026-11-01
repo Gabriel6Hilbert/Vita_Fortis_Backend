@@ -67,6 +67,10 @@ export function CartPage() {
     setReviewedInput(null);
   }, [cart, user?.id]);
 
+  useEffect(() => {
+    if (cart?.precoAlterado) setMessage("O preço de um ou mais produtos foi atualizado. Revise os novos valores antes de confirmar.");
+  }, [cart?.versao, cart?.precoAlterado]);
+
   if (loading && !cart)
     return (
       <div className="page container">
@@ -121,14 +125,17 @@ export function CartPage() {
       };
       if (!reviewing || !quote || !reviewedInput) {
         const result = await api.reviewOrder(input);
-        setReviewedInput(input);
+        setReviewedInput({ ...input, revisaoVersao: result.revisaoVersao });
         setQuote(result);
         if (selectedAddressId) setAddressId(selectedAddressId);
         setReviewing(true);
-        setMessage("Confira o frete, o prazo e o total calculados antes de confirmar.");
+        setMessage(result.precoAlterado
+          ? "O preço de um ou mais produtos foi atualizado. Confira novamente todos os valores."
+          : "Confira o frete, o prazo e o total calculados antes de confirmar.");
         return;
       }
-      const order = await api.createOrder({ ...reviewedInput, totalRevisado: Number(quote.total) });
+      if (quote.revisaoVersao == null) throw new Error("A revisão venceu. Revise o pedido novamente.");
+      const order = await api.createOrder({ ...reviewedInput, revisaoVersao: quote.revisaoVersao, totalRevisado: Number(quote.total) });
       // A compra já foi criada. Uma falha ao limpar a sacola não deve permitir repeti-la.
       try { await clear(); } catch { /* O pedido permanece acessível em Meus pedidos. */ }
       navigate(`/pedidos?novo=${order.id}`);
@@ -141,6 +148,7 @@ export function CartPage() {
           ? error.message
           : "Não foi possível criar o pedido.",
       );
+      await refresh().catch(() => undefined);
     } finally {
       setOrdering(false);
     }
@@ -380,7 +388,7 @@ export function CartPage() {
             <span>Subtotal</span>
             <strong>{money(quote?.subtotal ?? cart.subtotal ?? total)}</strong>
           </div>
-          {(cart.descontos || 0) > 0 && (
+          {((reviewing ? quote?.desconto : cart.descontos) || 0) > 0 && (
             <div className="summary-line discount-line">
               <span>Desconto ({cart.cupomCodigo})</span>
               <strong>-{money(quote?.desconto ?? cart.descontos)}</strong>
@@ -408,9 +416,9 @@ export function CartPage() {
               Aplicar
             </button>
           </div>
-          {(cart.cashbackColaborador || 0) > 0 && (
+          {((reviewing ? quote?.cashbackColaborador : cart.cashbackColaborador) || 0) > 0 && (
             <p className="cashback-disclosure">
-              Este pedido gerará {money(cart.cashbackColaborador)} de cashback
+              Este pedido gerará {money(reviewing ? quote?.cashbackColaborador : cart.cashbackColaborador)} de cashback
               para {cart.colaboradorNome}. Esse valor não é desconto nem crédito
               para o cliente.
             </p>
@@ -428,13 +436,14 @@ export function CartPage() {
                 setReviewing(false);
                 setQuote(null);
                 setReviewedInput(null);
-                setMessage("");
+                setMessage("Atualizando a sacola com os valores vigentes…");
+                void refresh().then(() => setMessage("")).catch(error => setMessage(error instanceof Error ? error.message : "Não foi possível atualizar a sacola."));
               }}
             >
               Voltar e editar
             </button>
           )}
-          <button className="button primary" disabled={ordering}>
+          <button className="button primary" disabled={ordering || (reviewing && quote?.revisaoVersao == null)}>
             {ordering ? (
               "Finalizando…"
             ) : reviewing ? (

@@ -4,6 +4,7 @@ import VitaFortis.demo.v1.dto.Carrinho.CarrinhoItemRequestDto;
 import VitaFortis.demo.v1.dto.Carrinho.CarrinhoRequestDto;
 import VitaFortis.demo.v1.dto.Carrinho.CarrinhoResponseDto;
 import VitaFortis.demo.v1.dto.CupomRequestDto;
+import VitaFortis.demo.v1.dto.AlteracaoPrecoDto;
 import VitaFortis.demo.v1.entity.*;
 import VitaFortis.demo.v1.enums.CupomTipo;
 import VitaFortis.demo.v1.mapper.CarrinhoItemMapper;
@@ -17,6 +18,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class CarrinhoService {
@@ -143,7 +146,7 @@ public class CarrinhoService {
     @Transactional
     public CarrinhoResponseDto obterCarrinho (Long usuarioId, String emailAutenticado) {
         validarProprietario(usuarioId, emailAutenticado);
-        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndAtivoTrue(usuarioId)
+        Carrinho carrinho = carrinhoRepository.findAtivoParaAtualizacao(usuarioId)
                 .orElseGet(() -> getOrCreateAtivoEntity(usuarioId));
         return resposta(carrinho);
     }
@@ -266,11 +269,33 @@ public class CarrinhoService {
         return resposta(carrinho);
     }
 
+    public ResultadoReconciliacao reconciliarParaPedido(Long usuarioId, String emailAutenticado) {
+        validarProprietario(usuarioId, emailAutenticado);
+        Carrinho carrinho = carrinhoRepository.findAtivoParaAtualizacao(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("A sacola está vazia."));
+        List<AlteracaoPrecoDto> alteracoes = reconciliarPrecos(carrinho);
+        recalcularTotais(carrinho);
+        carrinhoRepository.saveAndFlush(carrinho);
+        return new ResultadoReconciliacao(carrinho, alteracoes);
+    }
+
+    public void esvaziarAposPedido(Carrinho carrinho) {
+        carrinho.getItens().clear();
+        carrinho.setCupomCodigo(null);
+        carrinho.setSubtotal(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        carrinho.setDescontos(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        carrinho.setTotal(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
+        carrinhoRepository.saveAndFlush(carrinho);
+    }
+
     private CarrinhoResponseDto resposta(Carrinho carrinho) {
         carrinho.getItens().removeIf(item -> !item.getProduto().isAtivo());
-        carrinhoRepository.flush();
+        List<AlteracaoPrecoDto> alteracoes = reconciliarPrecos(carrinho);
         recalcularTotais(carrinho);
+        carrinhoRepository.saveAndFlush(carrinho);
         CarrinhoResponseDto dto = carrinhoMapper.toResponseDto(carrinho);
+        dto.setPrecoAlterado(!alteracoes.isEmpty());
+        dto.setAlteracoesPreco(alteracoes);
         if (carrinho.getCupomCodigo() != null) {
             cupomRepository.findByCodigoIgnoreCase(carrinho.getCupomCodigo()).ifPresent(cupom -> {
                 dto.setCupomId(cupom.getId());
@@ -283,6 +308,25 @@ public class CarrinhoService {
         }
         return dto;
     }
+
+    private List<AlteracaoPrecoDto> reconciliarPrecos(Carrinho carrinho) {
+        List<AlteracaoPrecoDto> alteracoes = new ArrayList<>();
+        for (CarrinhoItem item : carrinho.getItens()) {
+            Produto produto = produtoRepository.findAtivoParaAtualizacao(item.getProduto().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Produto indisponível: " + item.getProduto().getNome()));
+            BigDecimal anterior = item.getPrecoUnitario().setScale(2, RoundingMode.HALF_UP);
+            BigDecimal atual = produto.getPrecoFinal().setScale(2, RoundingMode.HALF_UP);
+            if (anterior.compareTo(atual) != 0) {
+                alteracoes.add(new AlteracaoPrecoDto(produto.getId(), produto.getNome(), anterior, atual));
+                item.setPrecoUnitario(atual);
+                carrinhoItemRepository.save(item);
+            }
+        }
+        if (!alteracoes.isEmpty()) carrinho.setAtualizadoEm(LocalDateTime.now());
+        return alteracoes;
+    }
+
+    public record ResultadoReconciliacao(Carrinho carrinho, List<AlteracaoPrecoDto> alteracoesPreco) {}
 
     private Usuario validarProprietario(Long usuarioId, String emailAutenticado) {
         Usuario atual = usuarioRepository.findByEmail(emailAutenticado.trim().toLowerCase())

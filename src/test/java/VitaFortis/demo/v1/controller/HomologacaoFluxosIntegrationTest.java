@@ -57,14 +57,20 @@ class HomologacaoFluxosIntegrationTest {
         var body=new HashMap<String,Object>();
         body.put("usuarioId",cliente.id()); body.put("formaRecebimento","ENTREGA"); body.put("formaPagamento","PIX"); body.put("enderecoId",enderecoId);
         body.put("itens",List.of(Map.of("produtoId",produto.getId(),"quantidade",2)));
-        mvc.perform(post("/api/v1/pedidos/revisao").with(csrf()).session(cliente.session()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
+        mvc.perform(delete("/api/v1/carrinhos/{id}/itens", cliente.id()).with(csrf()).session(cliente.session()))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/v1/carrinhos/{id}/itens", cliente.id()).with(csrf()).session(cliente.session())
+                        .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("produtoId",produto.getId(),"quantidade",2))))
+                .andExpect(status().isOk());
+        var revisao=mvc.perform(post("/api/v1/pedidos/revisao").with(csrf()).session(cliente.session()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.subtotal").value(49.80))
                 .andExpect(jsonPath("$.frete").value(15)).andExpect(jsonPath("$.total").value(64.80))
-                .andExpect(jsonPath("$.prazoEntregaDias").value(5));
+                .andExpect(jsonPath("$.prazoEntregaDias").value(5)).andReturn();
+        body.put("revisaoVersao",json.readTree(revisao.getResponse().getContentAsString()).get("revisaoVersao").asLong());
         assertEquals(10,produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque());
         body.put("totalRevisado",49.80);
         mvc.perform(post("/api/v1/pedidos").with(csrf()).session(cliente.session()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
         assertEquals(10,produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque(),"Erro de total deve desfazer a reserva");
         body.put("totalRevisado",64.80);
         var criado=mvc.perform(post("/api/v1/pedidos").with(csrf()).session(cliente.session()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
@@ -116,7 +122,17 @@ class HomologacaoFluxosIntegrationTest {
         var produto=produto();
         var body=new HashMap<String,Object>();
         body.put("usuarioId",cliente.id()); body.put("formaRecebimento","RETIRADA"); body.put("formaPagamento","PIX");
-        body.put("itens",List.of(Map.of("produtoId",produto.getId(),"quantidade",1))); body.put("totalRevisado",new BigDecimal("24.90"));
+        body.put("itens",List.of(Map.of("produtoId",produto.getId(),"quantidade",1)));
+        mvc.perform(delete("/api/v1/carrinhos/{id}/itens", cliente.id()).with(csrf()).session(cliente.session()))
+                .andExpect(status().isOk());
+        mvc.perform(post("/api/v1/carrinhos/{id}/itens", cliente.id()).with(csrf()).session(cliente.session())
+                        .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("produtoId",produto.getId(),"quantidade",1))))
+                .andExpect(status().isOk());
+        var revisao=mvc.perform(post("/api/v1/pedidos/revisao").with(csrf()).session(cliente.session())
+                        .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
+                .andExpect(status().isOk()).andReturn();
+        var revisaoJson=json.readTree(revisao.getResponse().getContentAsString());
+        body.put("revisaoVersao",revisaoJson.get("revisaoVersao").asLong()); body.put("totalRevisado",revisaoJson.get("total").decimalValue());
         var criado=mvc.perform(post("/api/v1/pedidos").with(csrf()).session(cliente.session()).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)))
                 .andExpect(status().isCreated()).andReturn();
         long id=json.readTree(criado.getResponse().getContentAsString()).get("id").asLong();

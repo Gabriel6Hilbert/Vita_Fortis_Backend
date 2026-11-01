@@ -23,11 +23,12 @@ class PedidoPagamentoEstoqueTest {
     @Mock CupomRepository cupons; @Mock EnderecoService enderecos; @Mock FreteService fretes;
     @Mock PagamentoGateway pagamentos; @Mock CashbackService cashback;
     @Mock ApplicationEventPublisher eventos;
+    @Mock CarrinhoService carrinhos;
     PedidoService service;
 
     @BeforeEach void setup() {
         service = new PedidoService(pedidos, usuarios, produtos, cupons, enderecos, fretes,
-                pagamentos, cashback, new CupomRegrasService(pedidos), eventos);
+                pagamentos, cashback, new CupomRegrasService(pedidos), eventos, carrinhos);
     }
 
     @Test void pagamentoRecusadoNaoBaixaEstoque() {
@@ -49,7 +50,13 @@ class PedidoPagamentoEstoqueTest {
         ItemCompraRequestDto item = new ItemCompraRequestDto(); item.setProdutoId(10L); item.setQuantidade(2);
         PedidoRequestDto dto = new PedidoRequestDto(); dto.setUsuarioId(2L); dto.setItens(List.of(item));
         dto.setFormaRecebimento(FormaRecebimento.RETIRADA); dto.setFormaPagamento("PIX");
+        dto.setRevisaoVersao(1L); dto.setTotalRevisado(new BigDecimal("30.00"));
+        Carrinho carrinho = new Carrinho(); carrinho.setVersao(1L); carrinho.setUsuario(cliente);
+        CarrinhoItem carrinhoItem = new CarrinhoItem(); carrinhoItem.setProduto(produto); carrinhoItem.setQuantidade(2);
+        carrinhoItem.setPrecoUnitario(new BigDecimal("15.00")); carrinho.addItem(carrinhoItem);
         when(usuarios.findByEmail("cliente@teste.com")).thenReturn(Optional.of(cliente));
+        when(carrinhos.reconciliarParaPedido(2L, "cliente@teste.com"))
+                .thenReturn(new CarrinhoService.ResultadoReconciliacao(carrinho, List.of()));
         when(produtos.findByIdAndAtivoTrue(10L)).thenReturn(Optional.of(produto));
         when(pedidos.save(any())).thenAnswer(invocation -> { Pedido p = invocation.getArgument(0); p.setId(1L); return p; });
         when(pagamentos.iniciar(1L, new BigDecimal("30.00"), "PIX"))
