@@ -8,7 +8,7 @@ const company = {
   tradeName: 'Vita Fortis',
   cnpj: '61.156.510/0001-47',
   address: 'Avenida Waldyr Soeiro Emrich, 5230, Bairro Diamante (Barreiro), Belo Horizonte/MG, CEP 30660-560',
-  supportEmail: 'lojavitafortis@gmail.com',
+  supportEmail: 'atendimento@vitafortis.com.br',
   privacyEmail: 'vitafortis@atendimentos.com.br',
   phone: '(31) 9 8898-7188',
 }
@@ -24,7 +24,7 @@ const legalLinks = [
 const documents: Record<string, LegalDocument> = {
   '/politica-de-privacidade': {
     title: 'Política de Privacidade', eyebrow: 'Privacidade e LGPD',
-    intro: 'Esta minuta explica como a Vita Fortis trata dados pessoais no cadastro, atendimento, navegação e processamento de pedidos.',
+    intro: 'Esta minuta explica como a Vita Fortis trata dados pessoais no cadastro, atendimento, navegação e processamento de pedidos. Os dados de identificação e os canais operacionais foram atualizados com as informações fornecidas pela empresa.',
     pending: 'Os prazos de retenção abaixo são uma proposta operacional e devem ser validados pelo responsável jurídico antes da publicação definitiva.',
     sections: [
       { title: 'Controlador e contato', paragraphs: [
