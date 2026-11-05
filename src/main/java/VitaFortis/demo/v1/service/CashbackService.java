@@ -44,9 +44,7 @@ public class CashbackService {
         Cupom cupom = pedido.getCupomUtilizado();
         if (cupom == null || cupom.getColaborador() == null || cupom.getPercentualCashback() == null) return;
         if (movimentos.existsByPedidoIdAndTipo(pedido.getId(), TipoMovimentoCashback.CREDITO)) return;
-        BigDecimal baseElegivel = pedido.getSubtotal().max(BigDecimal.ZERO);
-        BigDecimal valor = baseElegivel.multiply(cupom.getPercentualCashback())
-                .divide(CEM, 2, RoundingMode.HALF_UP);
+        BigDecimal valor = calcularSobreSubtotal(pedido.getSubtotal(), cupom.getPercentualCashback());
         registrar(cupom.getColaborador(), pedido, TipoMovimentoCashback.CREDITO, valor,
                 "Cashback do pedido confirmado", "SISTEMA");
     }
@@ -57,10 +55,13 @@ public class CashbackService {
         if (cupom == null || cupom.getColaborador() == null) return;
         if (!movimentos.existsByPedidoIdAndTipo(pedido.getId(), TipoMovimentoCashback.CREDITO)
                 || movimentos.existsByPedidoIdAndTipo(pedido.getId(), TipoMovimentoCashback.ESTORNO)) return;
-        BigDecimal base = pedido.getSubtotal().max(BigDecimal.ZERO);
-        BigDecimal valor = base.multiply(cupom.getPercentualCashback()).divide(CEM, 2, RoundingMode.HALF_UP).negate();
+        BigDecimal valor = calcularSobreSubtotal(pedido.getSubtotal(), cupom.getPercentualCashback()).negate();
         registrar(cupom.getColaborador(), pedido, TipoMovimentoCashback.ESTORNO, valor,
                 "Estorno por cancelamento do pedido", "SISTEMA");
+    }
+
+    static BigDecimal calcularSobreSubtotal(BigDecimal subtotal, BigDecimal percentual) {
+        return subtotal.max(BigDecimal.ZERO).multiply(percentual).divide(CEM, 2, RoundingMode.HALF_UP);
     }
 
     @Transactional

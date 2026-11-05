@@ -3538,6 +3538,9 @@ p {
     display: block;
     width: 100%;
   }
+  .account-page .table-wrap table {
+    min-width: 0;
+  }
   .table-wrap thead {
     display: none;
   }
@@ -3787,6 +3790,7 @@ p {
 @media (max-width: 600px) {
   .cart-item {
     align-items: flex-start;
+    gap: 12px;
     padding: 16px;
     min-height: 0;
   }
@@ -3799,11 +3803,13 @@ p {
   .cart-item-main h2 {
     font-size: 16px;
   }
+  .cart-item-main .quantity {
+    min-width: 0;
+    width: 100%;
+    max-width: 138px;
+  }
   .cart-item-price {
-    position: absolute;
-    right: 16px;
-    bottom: 16px;
-    align-items: flex-end;
+    align-self: flex-end;
   }
   .cart-item-price strong {
     display: none;

@@ -116,3 +116,12 @@ Estado: 🟣 Candidato testado localmente no Edge e em MySQL isolado. O pacote J
 
 - [Matriz de cenários e capturas](docs/evidencias-qa-2026-11-05.md)
 - [Guia de operação](docs/guia-operacao-qa.md)
+
+## Homologação funcional de 05/11/2026
+
+Estado atual: 🟡 Homologação parcial. A liberação integral segue pendente.
+
+- Candidato local inicial `e2374dde8c2fc5b333ba5c96d4236dd32a91c8a6`. Render conferido somente em leitura, com SHA `0ac066878cd3d2b896b499cc0392de6c30d7432f` e pagamento simulado.
+- A rodada registrou evidências dos três perfis em banco isolado. Foram tratadas a largura da tabela de privacidade, os controles da sacola móvel, a divergência da previsão de cashback, a sessão de conta inativa e o retorno ao login após recuperação.
+- A permissão de relatórios do colaborador foi conferida em sessões renovadas. A área do perfil não apresenta relatório próprio. A homologação física e pública do candidato continua pendente.
+- [Matriz e parecer](docs/homologacao-funcional-2026-11-05.md) · [Guia de operação](docs/guia-operacao-qa.md) · [Backlog](docs/technical-backlog.md).

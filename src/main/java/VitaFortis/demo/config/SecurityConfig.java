@@ -40,7 +40,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, AuthRateLimitFilter authRateLimitFilter) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, AuthRateLimitFilter authRateLimitFilter,
+                                            UsuarioRepository usuarios) throws Exception {
         var csrfTokenRepository = new HttpSessionCsrfTokenRepository();
         csrfTokenRepository.setHeaderName("X-CSRF-TOKEN");
         return http.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository))
@@ -64,6 +65,7 @@ public class SecurityConfig {
                 // A autenticação da aplicação é feita pelo endpoint /auth/login e pela sessão.
                 // Desabilitar Basic evita o popup nativo do navegador em respostas 401.
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .addFilterBefore(new AccountSessionFilter(usuarios), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

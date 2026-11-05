@@ -1,5 +1,6 @@
 package VitaFortis.demo.v1.controller;
 
+import VitaFortis.demo.config.AccountSessionFilter;
 import VitaFortis.demo.v1.dto.Usuario.UsuarioLoginDto;
 import VitaFortis.demo.v1.dto.Usuario.UsuarioRequestDto;
 import VitaFortis.demo.v1.dto.Usuario.UsuarioResponseDto;
@@ -40,7 +41,9 @@ public class AuthController {
         var context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
-        request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+        var session = request.getSession(true);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+        session.setAttribute(AccountSessionFilter.LOGIN_SESSION_ATTRIBUTE, true);
         return usuarios.buscarPorEmail(dto.getEmail());
     }
 

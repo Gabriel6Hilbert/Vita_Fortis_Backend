@@ -6,6 +6,8 @@ Na loja, abra **Entrar → Cadastrar**. Informe nome completo, CPF válido, e-ma
 
 Se houver erro, leia o aviso junto ao campo ou ao botão. Corrija os dados indicados e digite a senha novamente se ela tiver sido limpa. Se a conexão falhar, confira a internet e tente de novo. Se o e-mail já estiver em uso, entre com ele ou use **Esqueci minha senha**.
 
+Em **Esqueci minha senha**, informe o e-mail, abra o link recebido, escolha a nova senha e aguarde o formulário de login. Entre com a nova senha. Cada link funciona uma vez. A homologação local usa uma caixa de captura.
+
 Para cadastrar um colaborador, entre como administrador, abra **Usuários → Novo colaborador**, preencha os mesmos dados e clique em **Cadastrar colaborador**. Aguarde a confirmação e procure o novo cadastro na lista.
 
 ## Comprar e acompanhar
@@ -37,3 +39,8 @@ Em **Categorias e atributos**, escolha o tipo, informe um código único para aq
 - **Destaques.** Em **Produtos → Editar**, marque **Exibir em destaque** e salve. Confira a seção **Produtos em destaque** na página inicial. Para retirar um item da vitrine, desmarque a opção e salve. A seção exibe produtos ativos escolhidos e informa quando a seleção está vazia.
 - **Galeria.** Em **Produtos → Editar**, use **Adicionar imagem à galeria** para enviar JPG, PNG ou WebP de até 5 MB. A galeria aceita até oito imagens. Use **Mover antes**, **Mover depois**, **Definir capa** e **Remover imagem**. Salve o produto e abra sua página na loja para conferir a capa e os botões **Anterior** e **Próxima**.
 - **Usuários.** Abra **Usuários** e digite parte do nome ou e-mail em **Buscar usuários**. Use **Limpar busca** para voltar à lista completa.
+
+## Conferir cashback e revogação de acesso
+
+- Em uma compra com cupom vinculado a colaborador, confira a previsão de cashback na revisão. Ela é calculada sobre o subtotal dos produtos. O ADMIN aprova o pagamento simulado e o colaborador confere o crédito no seu saldo. Se o pedido aprovado for cancelado, confira também o estorno e a recomposição do estoque.
+- Para desativar um colaborador, abra **Usuários → Desativar** e confirme. Confira a negativa em um login novo e em uma sessão aberta antes da mudança. Na sessão antiga, abra novamente a Área do colaborador para disparar a verificação de acesso.

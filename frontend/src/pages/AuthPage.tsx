@@ -52,7 +52,10 @@ export function AuthPage() {
         if (senha !== confirmacao) throw new Error('As senhas informadas não coincidem.')
         const result = await api.resetPassword(resetToken, senha)
         setSuccess(result.message)
-        setTimeout(() => navigate('/entrar', { replace: true }), 1600)
+        setTimeout(() => {
+          changeMode('login')
+          navigate('/entrar', { replace: true })
+        }, 1600)
         return
       }
       const email = String(data.get('email')).trim()

@@ -415,9 +415,8 @@ public class PedidoService {
         dto.setCupomCodigo(pedido.getCupomUtilizado() == null ? null : pedido.getCupomUtilizado().getCodigo());
         if (pedido.getCupomUtilizado() != null && pedido.getCupomUtilizado().getColaborador() != null
                 && pedido.getCupomUtilizado().getPercentualCashback() != null) {
-            dto.setCashbackColaborador(pedido.getSubtotal().subtract(pedido.getDesconto())
-                    .multiply(pedido.getCupomUtilizado().getPercentualCashback())
-                    .divide(CEM, 2, RoundingMode.HALF_UP));
+            dto.setCashbackColaborador(CashbackService.calcularSobreSubtotal(
+                    pedido.getSubtotal(), pedido.getCupomUtilizado().getPercentualCashback()));
         }
         dto.setFormaRecebimento(pedido.getFormaRecebimento().name());
         dto.setEnderecoMascarado(mascararEndereco(pedido.getEnderecoEntrega()));

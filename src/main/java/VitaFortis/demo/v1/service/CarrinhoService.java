@@ -301,8 +301,8 @@ public class CarrinhoService {
                 dto.setCupomId(cupom.getId());
                 if (cupom.getColaborador() != null && cupom.getPercentualCashback() != null) {
                     dto.setColaboradorNome(cupom.getColaborador().getNome());
-                    dto.setCashbackColaborador(carrinho.getSubtotal().subtract(carrinho.getDescontos())
-                            .multiply(cupom.getPercentualCashback()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
+                    dto.setCashbackColaborador(CashbackService.calcularSobreSubtotal(
+                            carrinho.getSubtotal(), cupom.getPercentualCashback()));
                 }
             });
         }
