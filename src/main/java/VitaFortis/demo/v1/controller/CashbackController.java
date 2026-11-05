@@ -2,6 +2,7 @@ package VitaFortis.demo.v1.controller;
 
 import VitaFortis.demo.v1.dto.CashbackSaldoDto;
 import VitaFortis.demo.v1.dto.ColaboradorResumoDto;
+import VitaFortis.demo.v1.dto.ColaboradorRelatorioDto;
 import VitaFortis.demo.v1.dto.DestinoCashbackRequestDto;
 import VitaFortis.demo.v1.service.CashbackService;
 import jakarta.validation.Valid;
@@ -29,6 +30,11 @@ public class CashbackController {
     @GetMapping("/resumo")
     public ColaboradorResumoDto resumo(Authentication authentication) {
         return cashback.meuResumo(authentication.getName());
+    }
+
+    @GetMapping("/relatorio")
+    public ColaboradorRelatorioDto relatorio(Authentication authentication) {
+        return cashback.meuRelatorio(authentication.getName());
     }
 
     @PutMapping("/destino")

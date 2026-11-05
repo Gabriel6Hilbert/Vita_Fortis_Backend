@@ -1,6 +1,13 @@
 package VitaFortis.demo.v1.controller;
 
 import VitaFortis.demo.v1.entity.Produto;
+import VitaFortis.demo.v1.entity.Cupom;
+import VitaFortis.demo.v1.entity.Usuario;
+import VitaFortis.demo.v1.enums.CupomTipo;
+import VitaFortis.demo.v1.enums.TipoUsuario;
+import VitaFortis.demo.v1.repository.CupomRepository;
+import VitaFortis.demo.v1.repository.UsuarioRepository;
+import VitaFortis.demo.v1.service.CashbackService;
 import VitaFortis.demo.v1.repository.ProdutoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -9,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -35,6 +44,73 @@ class ColaboradorCompraIntegrationTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired ProdutoRepository produtos;
+    @Autowired UsuarioRepository usuarios;
+    @Autowired CupomRepository cupons;
+    @Autowired CashbackService cashback;
+    @Autowired PasswordEncoder encoder;
+
+    @Test
+    void relatorioExigePermissaoAtualEConsultaSomenteOTitularDaSessao() throws Exception {
+        var a = colaboradorFicticio("a", "28287953011", "QA-REL-A", "1.25");
+        var b = colaboradorFicticio("b", "97727375025", "QA-REL-B", "3.75");
+        var admin = login("admin@vitafortis.test", "ADMIN");
+        var sessaoSemPermissao = login(a.getEmail(), "COLABORADOR");
+        String relatorio = "/api/v1/colaborador/cashback/relatorio";
+        mvc.perform(get(relatorio).session(sessaoSemPermissao.session())).andExpect(status().isForbidden());
+        alterar(admin, a.getId(), "permissao-relatorios", true);
+        alterar(admin, b.getId(), "permissao-relatorios", true);
+        var sessaoA = login(a.getEmail(), "COLABORADOR");
+        var sessaoB = login(b.getEmail(), "COLABORADOR");
+        mvc.perform(get(relatorio).param("colaboradorId", b.getId().toString()).session(sessaoA.session()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cupons", hasSize(1)))
+                .andExpect(jsonPath("$.cupons[0].codigo").value("QA-REL-A"))
+                .andExpect(jsonPath("$.movimentos", hasSize(1)))
+                .andExpect(jsonPath("$.movimentos[0].valor").value(1.25))
+                .andExpect(jsonPath("$.movimentos[0].responsavel").doesNotExist())
+                .andExpect(jsonPath("$.movimentos[0].justificativa").doesNotExist());
+        mvc.perform(get(relatorio).session(sessaoB.session())).andExpect(status().isOk())
+                .andExpect(jsonPath("$.cupons", hasSize(1)))
+                .andExpect(jsonPath("$.cupons[0].codigo").value("QA-REL-B"))
+                .andExpect(jsonPath("$.movimentos", hasSize(1)))
+                .andExpect(jsonPath("$.movimentos[0].valor").value(3.75));
+        mvc.perform(get("/api/v1/admin/usuarios").session(sessaoA.session())).andExpect(status().isForbidden());
+        alterar(admin, a.getId(), "permissao-relatorios", false);
+        mvc.perform(get(relatorio).session(sessaoA.session())).andExpect(status().isForbidden());
+        var sessaoRenovada = login(a.getEmail(), "COLABORADOR");
+        mvc.perform(get(relatorio).session(sessaoRenovada.session())).andExpect(status().isForbidden());
+        alterar(admin, a.getId(), "ativo", false);
+        mvc.perform(get("/api/v1/colaborador/cashback/resumo").session(sessaoRenovada.session()))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("email", a.getEmail(), "senha", "Teste@123"))))
+                .andExpect(status().isForbidden());
+    }
+
+    private void alterar(Login admin, Long id, String acao, boolean valor) throws Exception {
+        mvc.perform(patch("/api/v1/admin/usuarios/{id}/{acao}", id, acao).with(csrf())
+                        .session(admin.session()).param("valor", String.valueOf(valor)))
+                .andExpect(status().isOk());
+    }
+
+    private Usuario colaboradorFicticio(String sufixo, String cpf, String codigo, String saldo) {
+        var usuario = new Usuario();
+        usuario.setNome("Colaborador QA " + sufixo);
+        usuario.setEmail("relatorio-" + sufixo + "@vitafortis.test");
+        usuario.setCpf(cpf);
+        usuario.setAtivo(true);
+        usuario.setTipo(TipoUsuario.COLABORADOR);
+        usuario.setSenha(encoder.encode("Teste@123"));
+        usuario = usuarios.saveAndFlush(usuario);
+        var cupom = new Cupom();
+        cupom.setCodigo(codigo);
+        cupom.setTipo(CupomTipo.PERCENTUAL);
+        cupom.setDesconto(BigDecimal.TEN);
+        cupom.setColaborador(usuario);
+        cupons.saveAndFlush(cupom);
+        cashback.ajustar(usuario.getId(), new BigDecimal(saldo), "Movimento fictício", "QA");
+        return usuario;
+    }
 
     @Test
     void colaboradorCompraEAcompanhaPedidoComImagemSemAcessarDadosDeOutroUsuario() throws Exception {

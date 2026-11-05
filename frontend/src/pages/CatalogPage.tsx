@@ -1,5 +1,5 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ProductCard } from '../components/ProductCard'
 import { Empty, ErrorState, Loading } from '../components/States'
@@ -10,9 +10,35 @@ const supported = new Set(['busca','marca','categoria','precoMin','precoMax','or
 
 export function CatalogPage() {
   const [params,setParams] = useSearchParams(); const [page,setPage] = useState<Page<Product>|null>(null); const [categories,setCategories] = useState<CategorySummary[]>([]); const [brands,setBrands] = useState<BrandSummary[]>([]); const [goals,setGoals] = useState<GoalSummary[]>([]); const [loading,setLoading] = useState(true); const [error,setError] = useState(''); const [filtersOpen,setFiltersOpen] = useState(false)
-  const key=params.toString(); const apiFilters=useMemo(()=>Object.fromEntries([...params].filter(([name])=>supported.has(name))),[key])
-  const load=()=>{setLoading(true);setError('');api.products({...apiFilters,pagina:Number(params.get('pagina')||0),tamanho:12}).then(result=>{if(result.totalPages>0&&result.number>=result.totalPages){const next=new URLSearchParams(params);next.delete('pagina');setParams(next,{replace:true});return}setPage(result)}).catch((e:Error)=>setError(e.message)).finally(()=>setLoading(false))}
-  useEffect(load,[key]); useEffect(()=>{Promise.all([api.categories(),api.brands(),api.goals()]).then(([c,b,g])=>{setCategories(c);setBrands(b);setGoals(g)}).catch(()=>undefined)},[])
+  const key = params.toString()
+  const [attempt, setAttempt] = useState(0)
+  const load = () => setAttempt(value => value + 1)
+  useLayoutEffect(() => {
+    let current = true
+    const query = new URLSearchParams(key)
+    const filters = Object.fromEntries([...query].filter(([name]) => supported.has(name)))
+    setLoading(true)
+    setError('')
+    setPage(null)
+    api.products({ ...filters, pagina: Number(query.get('pagina') || 0), tamanho: 12 })
+      .then(result => {
+        if (!current) return
+        if (query.has('pagina') && result.totalPages > 0 && result.number >= result.totalPages) {
+          query.delete('pagina')
+          setParams(query, { replace: true })
+          return
+        }
+        setPage(result)
+        setLoading(false)
+      })
+      .catch((error: Error) => {
+        if (!current) return
+        setError(error.message)
+        setLoading(false)
+      })
+    return () => { current = false }
+  }, [key, attempt, setParams])
+  useEffect(()=>{Promise.all([api.categories(),api.brands(),api.goals()]).then(([c,b,g])=>{setCategories(c);setBrands(b);setGoals(g)}).catch(()=>undefined)},[])
   const set=(name:string,value:string)=>{const next=new URLSearchParams(params);if(value)next.set(name,value);else next.delete(name);if(name!=='pagina')next.delete('pagina');setParams(next)}; const active=[...params].filter(([name])=>name!=='pagina')
   const title=params.get('marca')?`Produtos ${params.get('marca')}`:params.get('oferta')?'Ofertas Vita Fortis':params.get('kit')?'Kits Vita Fortis':params.get('objetivos')?'Produtos para o seu objetivo':params.get('categoria')?titleCase(params.get('categoria')!):'Catálogo Vita Fortis'
   return <div className="page container"><header className="page-header catalog-header"><span className="eyebrow">Catálogo único</span><h1>{title}</h1><p>Combine filtros e encontre a melhor escolha para sua rotina.</p></header>

@@ -125,3 +125,10 @@ Estado atual: 🟡 Homologação parcial. A liberação integral segue pendente.
 - A rodada registrou evidências dos três perfis em banco isolado. Foram tratadas a largura da tabela de privacidade, os controles da sacola móvel, a divergência da previsão de cashback, a sessão de conta inativa e o retorno ao login após recuperação.
 - A permissão de relatórios do colaborador foi conferida em sessões renovadas. A área do perfil não apresenta relatório próprio. A homologação física e pública do candidato continua pendente.
 - [Matriz e parecer](docs/homologacao-funcional-2026-11-05.md) · [Guia de operação](docs/guia-operacao-qa.md) · [Backlog](docs/technical-backlog.md).
+
+### Preparação do reteste sobre `94d09df`
+
+- A homologação de referência confirmou `94d09df` e pagamento simulado no Render. A busca falhou com respostas fora de ordem; a correção passou no Edge local em desktop e celular simulado.
+- O relatório local do colaborador passou a mostrar somente o extrato e os cupons da conta com permissão. Metas e indicadores continuam aguardando definição comercial.
+- Recuperação validada localmente com captura SMTP. O Render continua bloqueado para esse cenário até haver uma caixa de QA autorizada.
+- [Evidências, pendências e roteiro de reteste](docs/reteste-candidato-2026-11-05.md). As mudanças desta rodada aguardam revisão local.

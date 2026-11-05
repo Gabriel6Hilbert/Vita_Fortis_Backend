@@ -273,3 +273,7 @@ export interface AdminPrivacyRequest extends PrivacyRequest {
   clienteEmail: string;
   responsavel?: string;
 }
+export type CollaboratorReport = {
+  movimentos: { id: number; criadoEm: string; tipo: 'CREDITO' | 'ESTORNO' | 'AJUSTE' | 'BAIXA'; valor: number }[]
+  cupons: { codigo: string; ativo: boolean; percentualCashback: number | null }[]
+}

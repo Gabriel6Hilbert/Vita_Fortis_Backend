@@ -34,6 +34,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -118,24 +119,49 @@ class CheckoutReconciliacaoIntegrationTest {
         CountDownLatch prontas = new CountDownLatch(2);
         CountDownLatch iniciar = new CountDownLatch(1);
         var pool = Executors.newFixedThreadPool(2);
+        long pedidoId;
         try {
             var a = pool.submit(() -> confirmarConcorrente(cliente, payload, prontas, iniciar));
             var b = pool.submit(() -> confirmarConcorrente(cliente, payload, prontas, iniciar));
             assertTrue(prontas.await(10, TimeUnit.SECONDS));
             iniciar.countDown();
-            assertEquals(Set.of(201, 409), Set.of(a.get(20, TimeUnit.SECONDS), b.get(20, TimeUnit.SECONDS)));
+            var primeira = a.get(20, TimeUnit.SECONDS);
+            var segunda = b.get(20, TimeUnit.SECONDS);
+            assertEquals(Set.of(201, 409), Set.of(primeira.getStatus(), segunda.getStatus()));
+            var criada = primeira.getStatus() == 201 ? primeira : segunda;
+            pedidoId = json.readTree(criada.getContentAsString()).get("id").asLong();
         } finally {
             pool.shutdownNow();
         }
         assertEquals(pedidosAntes + 1, pedidos.count());
         assertEquals(10, produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque(), "Confirmar pedido não baixa estoque");
+        request(post("/api/v1/pedidos"), cliente, body, 409);
+        assertEquals(pedidosAntes + 1, pedidos.count());
+
+        Login admin = login("admin@vitafortis.test");
+        Login colaborador = login("colaborador@vitafortis.test");
+        String saldoPath = "/api/v1/colaborador/cashback/resumo";
+        BigDecimal saldoInicial = request(get(saldoPath), colaborador, null, 200).get("saldo").decimalValue();
+        String adminPedido = "/api/v1/admin/pedidos/" + pedidoId;
+        assertEquals("SIMULADO", request(get("/api/v1/loja/versao"), cliente, null, 200).get("pagamento").asText());
+        request(patch(adminPedido + "/pagamento/aprovar"), admin, null, 200);
+        assertEquals(9, produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque());
+        BigDecimal saldoCreditado = request(get(saldoPath), colaborador, null, 200).get("saldo").decimalValue();
+        assertEquals(0, saldoInicial.add(new BigDecimal("0.10")).compareTo(saldoCreditado));
+        request(patch(adminPedido + "/pagamento/aprovar"), admin, null, 400);
+        assertEquals(9, produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque());
+        assertEquals(0, saldoCreditado.compareTo(request(get(saldoPath), colaborador, null, 200).get("saldo").decimalValue()));
+        request(patch(adminPedido + "/status").param("valor", "CANCELADO"), admin, null, 200);
+        assertEquals(10, produtos.findById(produto.getId()).orElseThrow().getQuantidadeEstoque());
+        assertEquals(0, saldoInicial.compareTo(request(get(saldoPath), colaborador, null, 200).get("saldo").decimalValue()));
     }
 
-    private int confirmarConcorrente(Login login, String payload, CountDownLatch prontas, CountDownLatch iniciar) throws Exception {
+    private org.springframework.mock.web.MockHttpServletResponse confirmarConcorrente(
+            Login login, String payload, CountDownLatch prontas, CountDownLatch iniciar) throws Exception {
         prontas.countDown();
         iniciar.await();
         return mvc.perform(post("/api/v1/pedidos").with(csrf()).session(login.session)
-                .contentType(MediaType.APPLICATION_JSON).content(payload)).andReturn().getResponse().getStatus();
+                .contentType(MediaType.APPLICATION_JSON).content(payload)).andReturn().getResponse();
     }
 
     private JsonNode request(org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder builder,

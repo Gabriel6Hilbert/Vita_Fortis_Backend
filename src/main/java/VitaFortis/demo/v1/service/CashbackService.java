@@ -2,6 +2,7 @@ package VitaFortis.demo.v1.service;
 
 import VitaFortis.demo.v1.dto.CashbackSaldoDto;
 import VitaFortis.demo.v1.dto.ColaboradorResumoDto;
+import VitaFortis.demo.v1.dto.ColaboradorRelatorioDto;
 import VitaFortis.demo.v1.entity.Cupom;
 import VitaFortis.demo.v1.entity.MovimentoCashback;
 import VitaFortis.demo.v1.entity.Pedido;
@@ -86,6 +87,20 @@ public class CashbackService {
                 .orElseThrow(() -> new AccessDeniedException("Usuario nao autenticado"));
         if (colaborador.getTipo() != TipoUsuario.COLABORADOR) throw new AccessDeniedException("Acesso exclusivo de colaborador");
         return new CashbackSaldoDto(colaborador.getId(), saldo(colaborador));
+    }
+
+    @Transactional(readOnly = true)
+    public ColaboradorRelatorioDto meuRelatorio(String email) {
+        Usuario titular = usuarios.findByEmail(email.trim().toLowerCase())
+                .filter(u -> u.isAtivo() && u.getTipo() == TipoUsuario.COLABORADOR && u.isPermissaoRelatorios())
+                .orElseThrow(() -> new AccessDeniedException("Acesso a relatórios não autorizado"));
+        var lancamentos = movimentos.findAllByColaboradorIdOrderByCriadoEmDesc(titular.getId()).stream()
+                .map(m -> new ColaboradorRelatorioDto.Lancamento(m.getId(), m.getCriadoEm(), m.getTipo(), m.getValor()))
+                .toList();
+        var vinculados = cupons.findAllByColaboradorIdOrderByCodigoAsc(titular.getId()).stream()
+                .map(c -> new ColaboradorRelatorioDto.CupomVinculado(c.getCodigo(), c.isAtivo(), c.getPercentualCashback()))
+                .toList();
+        return new ColaboradorRelatorioDto(lancamentos, vinculados);
     }
 
     @Transactional(readOnly = true)

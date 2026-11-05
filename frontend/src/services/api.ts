@@ -1,4 +1,4 @@
-import type { AdminPrivacyRequest, CatalogRegistration, Address, AddressInput, AdminMetrics, BrandSummary, Cart, CategorySummary, CollaboratorSummary, Coupon, GoalSummary, Order, OrderDetail, Page, PrivacyRequest, PrivacyRequestStatus, PrivacyRequestType, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
+import type { AdminPrivacyRequest, CatalogRegistration, Address, AddressInput, AdminMetrics, BrandSummary, Cart, CategorySummary, CollaboratorReport, CollaboratorSummary, Coupon, GoalSummary, Order, OrderDetail, Page, PrivacyRequest, PrivacyRequestStatus, PrivacyRequestType, Product, Review, StockMovement, StoreInfo, User, UserRole } from '../types/api'
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const SESSION_KEY = 'vita-fortis-session'
@@ -194,6 +194,7 @@ export const api = {
   removeAddress: (userId:number,id:number) => request<void>(`/usuarios/${userId}/enderecos/${id}`,{method:'DELETE'},true),
   metrics: (inicio: string, fim: string) => request<AdminMetrics>(`/admin/metricas${query({ inicio, fim })}`, {}, true),
   collaboratorSummary: () => request<CollaboratorSummary>('/colaborador/cashback/resumo',{},true),
+  collaboratorReport: () => request<CollaboratorReport>('/colaborador/cashback/relatorio',{cache:'no-store'},true),
   chooseCashbackDestination: (destino:'PIX'|'DESCONTO') => request<CollaboratorSummary>('/colaborador/cashback/destino',{method:'PUT',body:JSON.stringify({destino})},true),
   adjustCashback: (id:number,valor:number,justificativa:string) => request(`/admin/colaboradores/${id}/cashback/ajustes`,{method:'POST',body:JSON.stringify({valor,justificativa})},true),
   withdrawCashback: (id:number,valor:number,justificativa:string) => request(`/admin/colaboradores/${id}/cashback/baixas`,{method:'POST',body:JSON.stringify({valor,justificativa})},true),
