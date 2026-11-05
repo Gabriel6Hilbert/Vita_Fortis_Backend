@@ -84,6 +84,13 @@ public class Produto {
     @Column(name = "IMAGEM_URL", length = 500)
     private String imagemUrl;
 
+    @ElementCollection
+    @org.hibernate.annotations.BatchSize(size = 100)
+    @CollectionTable(name = "produto_galeria", joinColumns = @JoinColumn(name = "produto_id"))
+    @OrderColumn(name = "posicao")
+    @Column(name = "url", length = 500, nullable = false)
+    private java.util.List<String> imagensAdicionais = new java.util.ArrayList<>();
+
     @Size(max = 250)
     @Column(name = "IMAGEM_CONTENT_TYPE")
     private String imagemContentType;

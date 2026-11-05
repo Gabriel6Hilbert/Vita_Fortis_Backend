@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/AuthContext";
 import { useCart } from "../app/CartContext";
 import { Empty, ErrorState, Loading } from "../components/States";
-import { api, type OrderInput } from "../services/api";
+import { ApiError, api, type OrderInput } from "../services/api";
 import type { Address, AddressInput, Order } from "../types/api";
 import { money } from "../utils/format";
 
@@ -44,6 +44,9 @@ export function CartPage() {
     "RETIRADA",
   );
   const [payment, setPayment] = useState("PIX");
+  const [addressError, setAddressError] = useState("");
+  const [addressReload, setAddressReload] = useState(0);
+  const [confirmationUncertain, setConfirmationUncertain] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressId, setAddressId] = useState<number | undefined>();
   const [newAddress, setNewAddress] = useState<AddressInput>(emptyAddress);
@@ -52,14 +55,20 @@ export function CartPage() {
 
   useEffect(() => {
     if (!user) return;
+    let active = true;
+    setAddressError("");
     api
       .addresses(user.id)
       .then((items) => {
+        if (!active) return;
         setAddresses(items);
         setAddressId(items.find((item) => item.principal)?.id ?? items[0]?.id);
       })
-      .catch(() => undefined);
-  }, [user]);
+      .catch(error => {
+        if (active) setAddressError(error instanceof Error ? error.message : "Não foi possível carregar seus endereços.");
+      });
+    return () => { active = false; };
+  }, [user, addressReload]);
 
   useEffect(() => {
     setReviewing(false);
@@ -104,6 +113,8 @@ export function CartPage() {
     if (ordering) return;
     setOrdering(true);
     setMessage("");
+    setConfirmationUncertain(false);
+    const confirming = Boolean(reviewing && quote && reviewedInput);
     try {
       let selectedAddressId = addressId;
       if (receiving === "ENTREGA" && !selectedAddressId) {
@@ -136,10 +147,15 @@ export function CartPage() {
       }
       if (quote.revisaoVersao == null) throw new Error("A revisão venceu. Revise o pedido novamente.");
       const order = await api.createOrder({ ...reviewedInput, revisaoVersao: quote.revisaoVersao, totalRevisado: Number(quote.total) });
-      // A compra já foi criada. Uma falha ao limpar a sacola não deve permitir repeti-la.
-      try { await clear(); } catch { /* O pedido permanece acessível em Meus pedidos. */ }
+      // O servidor esvazia a sacola na mesma transação que cria o pedido.
+      void refresh();
       navigate(`/pedidos?novo=${order.id}`);
     } catch (error) {
+      if (confirming && error instanceof ApiError && (error.status === 0 || error.status >= 500)) {
+        setConfirmationUncertain(true);
+        setMessage("Não foi possível confirmar o resultado. Confira Meus pedidos antes de tentar de novo.");
+        return;
+      }
       setReviewing(false);
       setQuote(null);
       setReviewedInput(null);
@@ -273,7 +289,7 @@ export function CartPage() {
             <label className="checkout-field">
               Como deseja receber?
               <select
-                disabled={reviewing}
+                disabled={reviewing || ordering}
                 value={receiving}
                 onChange={(event) =>
                   setReceiving(event.target.value as "RETIRADA" | "ENTREGA")
@@ -285,7 +301,7 @@ export function CartPage() {
             </label>
           </div>
           {receiving === "ENTREGA" &&
-            (addresses.length ? (
+            (addressError ? <p className="form-error" role="alert">{addressError} <button type="button" className="text-action" onClick={() => setAddressReload(value => value + 1)}>Consultar endereços novamente</button></p> : addresses.length ? (
               <div className="checkout-section address-section-cart">
                 <label className="checkout-field">
                   Endereço
@@ -375,7 +391,7 @@ export function CartPage() {
             <label className="checkout-field">
               Pagamento
               <select
-                disabled={reviewing}
+                disabled={reviewing || ordering}
                 value={payment}
                 onChange={(event) => setPayment(event.target.value)}
               >
@@ -428,11 +444,13 @@ export function CartPage() {
             <strong>{money(quote?.total ?? cart.total ?? total)}</strong>
           </div>
           {(message || cartError) && <p className="summary-message" role="status">{message || cartError}</p>}
+          {confirmationUncertain && <Link className="button secondary" to="/pedidos">Conferir Meus pedidos</Link>}
           {reviewing && (
             <button
               type="button"
               className="button secondary"
               onClick={() => {
+                setConfirmationUncertain(false);
                 setReviewing(false);
                 setQuote(null);
                 setReviewedInput(null);
@@ -443,7 +461,7 @@ export function CartPage() {
               Voltar e editar
             </button>
           )}
-          <button className="button primary" disabled={ordering || (reviewing && quote?.revisaoVersao == null)}>
+          <button className="button primary" disabled={ordering || confirmationUncertain || (receiving === "ENTREGA" && Boolean(addressError)) || (reviewing && quote?.revisaoVersao == null)}>
             {ordering ? (
               "Finalizando…"
             ) : reviewing ? (

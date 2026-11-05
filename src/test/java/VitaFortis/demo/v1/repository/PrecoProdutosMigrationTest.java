@@ -25,6 +25,7 @@ class PrecoProdutosMigrationTest {
                 .dataSource(url, "sa", "")
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
+                .target("3")
                 .load();
         assertEquals(3, flyway.migrate().migrationsExecuted);
 

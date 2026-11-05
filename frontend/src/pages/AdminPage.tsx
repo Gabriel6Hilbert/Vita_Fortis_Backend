@@ -23,6 +23,7 @@ import { useAuth } from "../app/AuthContext";
 import { ErrorState, Loading } from "../components/States";
 import { api } from "../services/api";
 import type { OrderFilters } from "../services/api";
+import { StockEditor } from "../components/StockEditor";
 import { CatalogAdmin } from "../components/CatalogAdmin";
 import type { CatalogRegistration } from "../types/api";
 import { OrderFiltersForm } from "../components/OrderFiltersForm";
@@ -50,6 +51,17 @@ type Tab =
   | "reviews"
   | "privacy"
   | "reports";
+const adminTabs = [
+  ["dashboard", BarChart3, "Visão geral"],
+  ["products", Boxes, "Produtos"],
+  ["catalog", Boxes, "Categorias e atributos"],
+  ["orders", PackageCheck, "Pedidos"],
+  ["users", Users, "Usuários"],
+  ["coupons", TicketPercent, "Cupons"],
+  ["reviews", MessageSquare, "Avaliações"],
+  ["privacy", ShieldAlert, "Privacidade"],
+  ["reports", Download, "Relatórios"],
+] as const;
 const blankProduct: Partial<Product> = {
   codigo: "",
   nome: "",
@@ -92,6 +104,8 @@ export function AdminPage() {
   const [productError, setProductError] = useState("");
   const [importFile,setImportFile]=useState<File|null>(null);
   const [importPreview,setImportPreview]=useState<{inseridos:number;atualizados:number;rejeitados:number;erros:string[];registros:{codigo:string;nome:string;preco:number;estoque:number;categoria:string;acao:string}[]}|null>(null);
+  const [importError, setImportError] = useState("");
+  const [importBusy, setImportBusy] = useState(false);
   const [importHistory,setImportHistory]=useState<ImportHistory[]>([]);
   const [orderOpen, setOrderOpen] = useState<AdminOrderDetail | null>(null);
   const [orderOpeningId, setOrderOpeningId] = useState<number | null>(null);
@@ -118,6 +132,10 @@ export function AdminPage() {
   const [reportDownloading,setReportDownloading]=useState(false);
   const filterReport=(name:string,value:string)=>setReportFilters(current=>({...current,[name]:value}));
   const [reportFormat,setReportFormat]=useState<'csv'|'pdf'|'xlsx'>('csv');
+  const [stockProduct, setStockProduct] = useState<Product | null>(null);
+  const [collaboratorOpen, setCollaboratorOpen] = useState(false);
+  const [collaboratorSaving, setCollaboratorSaving] = useState(false);
+  const [collaboratorError, setCollaboratorError] = useState("");
   const [collaboratorForm, setCollaboratorForm] = useState({
     nome: "",
     email: "",
@@ -197,6 +215,7 @@ export function AdminPage() {
       ),
     [products, search],
   );
+  const visibleUsers = users.filter(u => [u.nome, u.email].some(value => value.toLowerCase().includes(search.trim().toLowerCase())));
   if (!user) return <Navigate to="/entrar" replace />;
   if (!isAdmin(user))
     return (
@@ -269,6 +288,17 @@ export function AdminPage() {
       setProductSaving(false);
     }
   };
+  const gallery = productForm ? [productForm.imagemUrl, ...(productForm.imagensAdicionais ?? [])].filter((url): url is string => Boolean(url)) : [];
+  const updateGallery = (images: string[]) => {
+    const [cover = "", ...additional] = images;
+    setProductForm(current => current ? { ...current, imagemUrl: cover, imagensAdicionais: additional } : current);
+  };
+  const moveGalleryImage = (from: number, to: number) => {
+    const images = [...gallery];
+    const [image] = images.splice(from, 1);
+    images.splice(to, 0, image);
+    updateGallery(images);
+  };
   const uploadProductImage = async (file: File) => {
     if (imageUploading || productSaving) return;
     setImageError("");
@@ -284,7 +314,7 @@ export function AdminPage() {
     setImageUploading(true);
     try {
       const uploaded = await api.uploadProductImage(file);
-      setProductForm(current => current ? { ...current, imagemUrl: uploaded.url } : current);
+      updateGallery([...gallery, uploaded.url]);
       setImageStatus("Imagem enviada. Salve o produto para confirmar a alteração.");
     } catch (e) {
       setImageError(e instanceof Error ? e.message : "Não foi possível enviar a imagem. Tente novamente.");
@@ -307,17 +337,7 @@ export function AdminPage() {
           <strong>Administração</strong>
         </div>
         {(
-          [
-            ["dashboard", BarChart3, "Visão geral"],
-            ["products", Boxes, "Produtos"],
-            ["catalog", Boxes, "Categorias e atributos"],
-            ["orders", PackageCheck, "Pedidos"],
-            ["users", Users, "Usuários"],
-            ["coupons", TicketPercent, "Cupons"],
-            ["reviews", MessageSquare, "Avaliações"],
-            ["privacy", ShieldAlert, "Privacidade"],
-            ["reports", Download, "Relatórios"],
-          ] as const
+          adminTabs
         ).map(([value, Icon, label]) => (
           <button
             key={value}
@@ -331,14 +351,14 @@ export function AdminPage() {
       <section className="admin-content">
         <header>
           <span className="eyebrow">Painel operacional</span>
-          <h1>{tab === "dashboard" ? "Visão geral" : titleCase(tab)}</h1>
+          <h1>{adminTabs.find(([value]) => value === tab)?.[2]}</h1>
           <p>
             {tab === "dashboard"
               ? "Indicadores reais do período selecionado."
               : "Dados e ações conectados aos endpoints administrativos."}
           </p>
         </header>
-        {success && <div className="success-toast">{success}</div>}
+        {success && <div className="success-toast" role="status">{success}</div>}
         {tab === "orders" && <OrderFiltersForm applied={orderFilters} loading={loading} onApply={filters => { setOrderFilters(filters); void load(filters); }} />}
         {error && <ErrorState message={error} retry={() => void load()} />}
         {tab === "dashboard" &&
@@ -477,7 +497,21 @@ export function AdminPage() {
                     />
                   </label>
                   {tab === "products" && (
-                    <><a className="button secondary" href="/api/v1/admin/produtos/importacao/modelo">Baixar modelo CSV</a><label className="button secondary">Importar CSV/XLSX<input hidden type="file" accept=".csv,.xlsx" onChange={async e=>{const file=e.target.files?.[0];if(!file)return;setImportFile(file);try{setImportPreview(await api.importProducts(file,true))}catch(error){setError(error instanceof Error?error.message:'Falha na pré-visualização.')}}}/></label><button
+                    <><a className="button secondary" href="/api/v1/admin/produtos/importacao/modelo">Baixar modelo CSV</a><label className="button secondary">Importar CSV/XLSX<input hidden type="file" accept=".csv,.xlsx" disabled={importBusy} onChange={async e => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!file || importBusy) return;
+                      setImportPreview(null);
+                      setImportFile(null);
+                      setImportError("");
+                      setImportBusy(true);
+                      try {
+                        setImportPreview(await api.importProducts(file, true));
+                        setImportFile(file);
+                      } catch (error) {
+                        setImportError(error instanceof Error ? error.message : "Falha na pré-visualização.");
+                      } finally { setImportBusy(false); }
+                    }} /></label><button
                       className="button primary"
                       onClick={() => openProductForm({ ...blankProduct })}
                     >
@@ -486,23 +520,38 @@ export function AdminPage() {
                   )}
                 </div>
               )}
-              {tab==='products'&&importPreview&&<div className="review-alert"><strong>Pré-visualização: {importPreview.inseridos} novos, {importPreview.atualizados} atualizações, {importPreview.rejeitados} rejeitados.</strong>{importPreview.erros.map(error=><span key={error}>{error}</span>)}{importPreview.registros.length>0&&<div className="table-scroll"><table><thead><tr><th>Ação</th><th>SKU</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th></tr></thead><tbody>{importPreview.registros.map(r=><tr key={r.codigo}><td>{r.acao}</td><td>{r.codigo}</td><td>{r.nome}</td><td>{r.categoria}</td><td>{money(r.preco)}</td><td>{r.estoque}</td></tr>)}</tbody></table></div>}<button className="button primary" disabled={!importFile||importPreview.rejeitados>0} onClick={()=>importFile&&void action(async()=>{await api.importProducts(importFile,false);setImportFile(null);setImportPreview(null);setImportHistory(await api.importHistory())},'Importação concluída e registrada no histórico.')}>Confirmar importação transacional</button></div>}
+              {tab === 'products' && <p>Baixe o modelo e mantenha os cabeçalhos. Informe SKU, nome, descrição, marca, unidade, preço, estoque, categoria e situação. O SKU identifica produtos existentes. Selecione o arquivo, revise a prévia e corrija as linhas rejeitadas antes de confirmar.</p>}
+              {tab === 'products' && importError && <p className="form-error" role="alert">{importError}</p>}
+              {tab === 'products' && importBusy && <p role="status">Processando arquivo…</p>}
+              {tab==='products'&&importPreview&&<div className="review-alert"><strong>Pré-visualização: {importPreview.inseridos} novos, {importPreview.atualizados} atualizações, {importPreview.rejeitados} rejeitados.</strong>{importPreview.erros.map(error=><span key={error}>{error}</span>)}{importPreview.registros.length>0&&<div className="table-scroll"><table><thead><tr><th>Ação</th><th>SKU</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th></tr></thead><tbody>{importPreview.registros.map(r=><tr key={r.codigo}><td>{r.acao}</td><td>{r.codigo}</td><td>{r.nome}</td><td>{r.categoria}</td><td>{money(r.preco)}</td><td>{r.estoque}</td></tr>)}</tbody></table></div>}<button className="button primary" disabled={importBusy || !importFile || importPreview.rejeitados > 0} onClick={async () => {
+                if (!importFile || importBusy) return;
+                setImportBusy(true);
+                setImportError("");
+                try {
+                  const result = await api.importProducts(importFile, false);
+                  if (result.rejeitados) {
+                    setImportPreview(result);
+                    setImportError("O arquivo foi rejeitado. Corrija as linhas indicadas e envie novamente.");
+                    return;
+                  }
+                  setImportFile(null);
+                  setImportPreview(null);
+                  setSuccess("Importação concluída e registrada no histórico.");
+                  await load();
+                } catch (error) {
+                  setImportError(error instanceof Error ? error.message : "Falha ao confirmar a importação.");
+                } finally { setImportBusy(false); }
+              }}>Confirmar importação transacional</button></div>}
               {tab==='products'&&importHistory.length>0&&<section className="chart-card"><header><div><h2>Histórico de importações</h2><p>Arquivo, data, responsável e resultado das últimas importações confirmadas.</p></div></header><div className="table-scroll"><table><thead><tr><th>Data</th><th>Arquivo</th><th>Responsável</th><th>Resultado</th><th>Totais</th><th>Comprovante</th></tr></thead><tbody>{importHistory.map(h=><tr key={h.id}><td>{date(h.criadoEm)}</td><td><strong>{h.nomeArquivo}</strong><small>SHA-256: {h.hashArquivo.slice(0,12)}…</small></td><td>{h.responsavel}</td><td>{titleCase(h.resultado)}</td><td>{h.inseridos} inseridos · {h.atualizados} atualizados · {h.rejeitados} rejeitados</td><td><a className="text-link" href={api.importHistoryFileUrl(h.id)}>Baixar arquivo</a></td></tr>)}</tbody></table></div></section>}
               {tab === "users" && (
                 <div className="admin-toolbar">
-                  <span />
-                  <button
-                    className="button primary"
-                    onClick={() =>
-                      setCollaboratorForm({
-                        nome: "NOVO",
-                        email: "",
-                        senha: "",
-                        cpf: "",
-                        telefone: "",
-                      })
-                    }
-                  >
+                  <label>Buscar usuários<input type="search" placeholder="Nome ou e-mail" value={search} onChange={e => setSearch(e.target.value)} /></label>
+                  {search && <button className="button secondary" onClick={() => setSearch("")}>Limpar busca</button>}
+                  <button className="button primary" onClick={() => {
+                    setCollaboratorError("");
+                    setCollaboratorForm({ nome: "", email: "", senha: "", cpf: "", telefone: "" });
+                    setCollaboratorOpen(true);
+                  }}>
                     <UserPlus /> Novo colaborador
                   </button>
                 </div>
@@ -535,6 +584,7 @@ export function AdminPage() {
                         <>
                           <th>Produto</th>
                           <th>Preço</th>
+                          <th>Estoque</th>
                           <th>Status</th>
                           <th>Ações</th>
                         </>
@@ -601,6 +651,7 @@ export function AdminPage() {
                               </small>
                             )}
                           </td>
+                          <td>{p.quantidadeEstoque} un. <button className="text-action" onClick={() => setStockProduct(p)}>Ajustar estoque</button></td>
                           <td>
                             <span
                               className={`status ${p.ativo ? "active" : "cancelado"}`}
@@ -808,8 +859,9 @@ export function AdminPage() {
                             </td>
                           </tr>
                         ))}
+                    {tab === "users" && visibleUsers.length === 0 && <tr><td colSpan={5}><p role="status">Nenhum usuário encontrado.</p></td></tr>}
                     {tab === "users" &&
-                      users.map((u) => (
+                      visibleUsers.map((u) => (
                         <tr key={u.id}>
                           <td>
                             <strong>{u.nome}</strong>
@@ -1105,10 +1157,24 @@ export function AdminPage() {
                 <label htmlFor="product-image">Imagem do produto</label>
                 <div className="image-upload-box">
                   {productForm.imagemUrl ? <img src={productForm.imagemUrl} alt="Pré-visualização do produto" /> : <ImagePlus aria-hidden="true" />}
-                  <div><strong>{imageUploading ? 'Enviando imagem…' : 'Clique para selecionar a imagem'}</strong><small id="product-image-help">JPG, PNG ou WebP · até 5 MB · recomendado 1200 × 1200 px</small></div>
-                  <input id="product-image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby={`product-image-help${imageError ? ' product-image-error' : ''}`} aria-invalid={Boolean(imageError)} disabled={imageUploading || productSaving} onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; if (file) void uploadProductImage(file) }} />
+                  <div><strong>{imageUploading ? 'Enviando imagem…' : 'Adicionar imagem à galeria'}</strong><small id="product-image-help">JPG, PNG ou WebP · até 5 MB · até 8 imagens por produto</small></div>
+                  <input id="product-image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby={`product-image-help${imageError ? ' product-image-error' : ''}`} aria-invalid={Boolean(imageError)} disabled={gallery.length >= 8 || imageUploading || productSaving} onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; if (file) void uploadProductImage(file) }} />
                 </div>
                 {imageError && <p id="product-image-error" className="commerce-feedback error" role="alert">{imageError}</p>}
+                <ol className="gallery-editor">
+                  {gallery.map((url, index) => <li key={url}>
+                    <img src={url} alt={index === 0 ? "Capa" : "Imagem " + (index + 1)} />
+                    <div>
+                      <strong>{index === 0 ? "Capa" : "Imagem " + (index + 1)}</strong>
+                      <div className="gallery-actions">
+                        <button type="button" className="text-action" disabled={imageUploading || productSaving || index === 0} onClick={() => moveGalleryImage(index, 0)}>Definir capa</button>
+                        <button type="button" className="text-action" disabled={imageUploading || productSaving || index === 0} onClick={() => moveGalleryImage(index, index - 1)}>Mover antes</button>
+                        <button type="button" className="text-action" disabled={imageUploading || productSaving || index === gallery.length - 1} onClick={() => moveGalleryImage(index, index + 1)}>Mover depois</button>
+                        <button type="button" className="text-action" disabled={imageUploading || productSaving} onClick={() => updateGallery(gallery.filter((_, position) => position !== index))}>Remover imagem</button>
+                      </div>
+                    </div>
+                  </li>)}
+                </ol>
                 <p className="commerce-feedback" role="status">{imageUploading ? "Enviando imagem. Aguarde para salvar o produto." : imageStatus}</p>
               </div>
               <label className="full">
@@ -1307,97 +1373,44 @@ export function AdminPage() {
           </form>
         </div>
       )}
-      {collaboratorForm.nome && (
+      {stockProduct && <StockEditor product={stockProduct} close={() => setStockProduct(null)} onSaved={saved => {
+        setStockProduct(saved);
+        setProducts(current => current.map(product => product.id === saved.id ? saved : product));
+      }} />}
+      {collaboratorOpen && (
         <div className="modal-backdrop">
-          <form
-            className="admin-modal small"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void action(
-                () =>
-                  api.createCollaborator({
-                    ...collaboratorForm,
-                    nome:
-                      collaboratorForm.nome === "NOVO"
-                        ? ""
-                        : collaboratorForm.nome,
-                  }),
-                "Colaborador cadastrado.",
-              );
-              setCollaboratorForm({
-                nome: "",
-                email: "",
-                senha: "",
-                cpf: "",
-                telefone: "",
-              });
-            }}
-          >
-            <header>
-              <h2>Novo colaborador</h2>
-              <button
-                type="button"
-                onClick={() =>
-                  setCollaboratorForm({
-                    nome: "",
-                    email: "",
-                    senha: "",
-                    cpf: "",
-                    telefone: "",
-                  })
-                }
-              >
-                <X />
-              </button>
-            </header>
-            <div className="form-grid">
-              {(["nome", "email", "cpf", "telefone", "senha"] as const).map(
-                (key) => (
-                  <label key={key}>
-                    {titleCase(key)}
-                    <input
-                      required={key !== "telefone"}
-                      type={
-                        key === "senha"
-                          ? "password"
-                          : key === "email"
-                            ? "email"
-                            : "text"
-                      }
-                      minLength={key === "senha" ? 8 : undefined}
-                      value={
-                        collaboratorForm[key] === "NOVO"
-                          ? ""
-                          : collaboratorForm[key]
-                      }
-                      onChange={(e) =>
-                        setCollaboratorForm({
-                          ...collaboratorForm,
-                          [key]: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                ),
-              )}
-            </div>
+          <form className="admin-modal small" aria-busy={collaboratorSaving} onSubmit={async e => {
+            e.preventDefault();
+            if (collaboratorSaving) return;
+            setCollaboratorSaving(true);
+            setCollaboratorError("");
+            try {
+              await api.createCollaborator(collaboratorForm);
+              setCollaboratorOpen(false);
+              setCollaboratorForm({ nome: "", email: "", senha: "", cpf: "", telefone: "" });
+              setSearch("");
+              setSuccess("Colaborador cadastrado.");
+              await load();
+            } catch (error) {
+              setCollaboratorError(error instanceof Error ? error.message : "Não foi possível cadastrar o colaborador.");
+              setCollaboratorForm(current => ({ ...current, senha: "" }));
+            } finally {
+              setCollaboratorSaving(false);
+            }
+          }}>
+            <header><h2>Novo colaborador</h2><button type="button" disabled={collaboratorSaving} aria-label="Fechar cadastro de colaborador" onClick={() => setCollaboratorOpen(false)}><X /></button></header>
+            <fieldset className="form-grid" disabled={collaboratorSaving}>
+              {(["nome", "email", "cpf", "telefone", "senha"] as const).map(key => <label key={key}>
+                {key === "cpf" ? "CPF" : titleCase(key)}
+                <input required={key !== "telefone"} type={key === "senha" ? "password" : key === "email" ? "email" : "text"}
+                  minLength={key === "senha" ? 8 : undefined} maxLength={key === "senha" ? 72 : undefined}
+                  value={collaboratorForm[key]} onChange={e => setCollaboratorForm(current => ({ ...current, [key]: e.target.value }))} />
+              </label>)}
+            </fieldset>
+            {collaboratorError && <p className="form-error" role="alert">{collaboratorError}</p>}
             <footer>
-              <button
-                type="button"
-                className="button secondary"
-                onClick={() =>
-                  setCollaboratorForm({
-                    nome: "",
-                    email: "",
-                    senha: "",
-                    cpf: "",
-                    telefone: "",
-                  })
-                }
-              >
-                Cancelar
-              </button>
-              <button className="button primary">Cadastrar colaborador</button>
+              <button type="button" className="button secondary" disabled={collaboratorSaving} onClick={() => setCollaboratorOpen(false)}>Cancelar</button>
+              <button className="button primary" disabled={collaboratorSaving}>{collaboratorSaving ? "Cadastrando…" : "Cadastrar colaborador"}</button>
             </footer>
           </form>
         </div>

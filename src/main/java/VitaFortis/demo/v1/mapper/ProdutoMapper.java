@@ -25,6 +25,7 @@ public interface ProdutoMapper {
     @Mapping(target = "atributos", expression = "java(java.util.Map.of())")
     @Mapping(target = "objetivos", expression = "java(java.util.Set.of())")
     @Mapping(target = "esportes", expression = "java(java.util.Set.of())")
+    @Mapping(target = "imagensAdicionais", ignore = true)
     ProdutoResponseDto toCatalogResponseDto(Produto produto);
 
     @Mapping(target = "id", ignore = true)

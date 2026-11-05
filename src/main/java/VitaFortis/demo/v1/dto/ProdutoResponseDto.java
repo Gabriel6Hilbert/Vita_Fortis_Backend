@@ -26,6 +26,7 @@ public class ProdutoResponseDto {
     private java.util.Map<@jakarta.validation.constraints.Size(max=40) String, @jakarta.validation.constraints.Size(max=255) String> atributos;
     private boolean ativo;
     private String imagemUrl;
+    private java.util.List<String> imagensAdicionais;
     private Set<String> objetivos;
     private Set<String> esportes;
     private boolean vegano;

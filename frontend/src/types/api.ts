@@ -42,6 +42,7 @@ export interface Product {
   categoria: string;
   ativo: boolean;
   imagemUrl?: string;
+  imagensAdicionais?: string[]
   objetivos?: string[];
   esportes?: string[];
   vegano?: boolean;

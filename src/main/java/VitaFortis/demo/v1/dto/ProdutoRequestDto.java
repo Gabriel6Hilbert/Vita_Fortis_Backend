@@ -41,6 +41,9 @@ public class ProdutoRequestDto {
     @Size(max = 500)
     private String imagemUrl;
 
+    @Size(max = 7)
+    private java.util.List<@NotBlank @Size(max = 500) @Pattern(regexp = "(?:/(?!/)|https?://)[^\\s]+") String> imagensAdicionais;
+
     private BigDecimal descontoPercentual;
     private BigDecimal descontoValor;
     private Boolean ativo;

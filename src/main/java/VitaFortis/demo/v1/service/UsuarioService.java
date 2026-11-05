@@ -44,13 +44,21 @@ public class UsuarioService {
             throw new IllegalArgumentException("E-mail já cadastrado.");
         }
 
+        String cpf = normalizarCpf(usuarioRequestDto.getCpf());
+        if (usuarioRepository.existsByCpf(cpf)) throw new IllegalArgumentException("CPF já cadastrado.");
+
         Usuario usuario = usuarioMapper.toEntity(usuarioRequestDto);
+        usuario.setCpf(cpf);
         usuario.setEmail(emailNormalizado);
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         usuario.setTipo(tipo);
 
         Usuario saved = usuarioRepository.save(usuario);
         return  usuarioMapper.toResponseDto(saved);
+    }
+
+    private static String normalizarCpf(String cpf) {
+        return cpf == null ? null : cpf.replaceAll("\\D", "");
     }
 
     @Transactional
@@ -65,7 +73,12 @@ public class UsuarioService {
             usuario.setEmail(novoEmail);
         }
 
-            usuarioMapper.updateFromDto(usuarioRequestDto, usuario);
+        String cpf = normalizarCpf(usuarioRequestDto.getCpf());
+        if (cpf != null && usuarioRepository.existsByCpfAndIdNot(cpf, id)) {
+            throw new IllegalArgumentException("CPF já cadastrado.");
+        }
+        usuarioMapper.updateFromDto(usuarioRequestDto, usuario);
+        if (cpf != null) usuario.setCpf(cpf);
         if (usuarioRequestDto.getSenha() != null && !usuarioRequestDto.getSenha().isBlank()) {
             usuario.setSenha(passwordEncoder.encode(usuarioRequestDto.getSenha()));
         }

@@ -109,3 +109,10 @@ Estado comprovado até 29/10/2026:
 - pagamento permanece simulado; o checkout comercial publicado ainda precisa de smoke test funcional completo.
 
 Última atualização deste painel: 29/10/2026. A release `c875f7af465eff16ec287fa30a94042bb7d203b5` foi publicada e verificada no Render. O pagamento continua simulado; a homologação autenticada completa dos três perfis e os testes formais em aparelhos e navegadores permanecem pendentes.
+
+## Homologação local QA-01 a QA-09 — 05/11/2026
+
+Estado: 🟣 Candidato testado localmente no Edge e em MySQL isolado. O pacote Java passou com 86 testes, zero falhas e um ignorado. O fluxo CSV passou e a identificação do controle adicional citado em QA-06 segue pendente. O ambiente público servia `0ac066878cd3d2b896b499cc0392de6c30d7432f` na conferência de leitura. A publicação do candidato e o smoke test público dependem de autorização.
+
+- [Matriz de cenários e capturas](docs/evidencias-qa-2026-11-05.md)
+- [Guia de operação](docs/guia-operacao-qa.md)

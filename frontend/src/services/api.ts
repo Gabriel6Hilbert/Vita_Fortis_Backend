@@ -44,17 +44,21 @@ export const getSession = (): Session | null => {
 }
 export const setSession = (session: Session | null) => session ? sessionStorage.setItem(SESSION_KEY, JSON.stringify(session)) : sessionStorage.removeItem(SESSION_KEY)
 
+const unavailable = 'A Vita Fortis está temporariamente indisponível. Tente novamente em instantes.'
+const networkFailure = 'Não foi possível conectar à Vita Fortis. Verifique sua conexão e tente novamente.'
+
 const csrfToken = (): Promise<CsrfToken> => {
   if (!csrfTokenPromise) {
     csrfTokenPromise = fetch(`${API_URL}/auth/csrf`, {
       headers: { Accept: 'application/json' },
       credentials: 'include',
+      signal: AbortSignal.timeout(20_000),
     }).then(async (response) => {
-      if (!response.ok) throw new ApiError('Não foi possível iniciar a proteção da sessão.', response.status)
+      if (!response.ok) throw new ApiError(response.status >= 500 ? unavailable : 'Não foi possível iniciar a sessão. Tente novamente.', response.status)
       return response.json() as Promise<CsrfToken>
     }).catch((error) => {
       csrfTokenPromise = null
-      throw error
+      throw error instanceof ApiError ? error : new ApiError(networkFailure, 0)
     })
   }
   return csrfTokenPromise
@@ -73,10 +77,21 @@ const request = async <T>(path: string, init: RequestInit = {}, authenticated = 
     if (!getSession()) throw new ApiError('Faça login para continuar.', 401)
   }
   let response: Response
-  try { response = await fetch(`${API_URL}${path}`, { ...init, headers, credentials:'include' }) }
-  catch { throw new ApiError('Não foi possível conectar à Vita Fortis. Tente novamente.', 0) }
+  try { response = await fetch(`${API_URL}${path}`, { ...init, headers, credentials:'include', signal: init.signal ?? AbortSignal.timeout(30_000) }) }
+  catch { throw new ApiError(networkFailure, 0) }
   const contentType = response.headers.get('content-type') || ''
-  const payload = response.status === 204 ? null : contentType.includes('json') ? await response.json() : await response.text()
+  if (response.status >= 500) throw new ApiError(unavailable, response.status)
+  if (response.status === 403) {
+    csrfTokenPromise = null
+    if (authenticated) {
+      const session = await fetch(API_URL + '/me', { credentials: 'include', signal: AbortSignal.timeout(5_000) }).catch(() => null)
+      if (session && [401, 403].includes(session.status)) {
+        throw new ApiError('Sua sessão expirou. Entre novamente para continuar.', 401)
+      }
+    }
+    throw new ApiError('A operação foi bloqueada. Confira sua sessão e suas permissões e tente novamente.', 403)
+  }
+  const payload = response.status === 204 ? null : contentType.includes('json') ? await response.json() : null
   if (!response.ok) {
     throw new ApiError(apiErrorMessage(payload, response.status), response.status, payload)
   }

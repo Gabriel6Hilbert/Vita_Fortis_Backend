@@ -30,6 +30,20 @@ class HomologacaoFluxosIntegrationTest {
     @Autowired ProdutoRepository produtos;
 
     @Test
+    void cadastroAceitaCpfFormatadoERejeitaOMesmoCpfSemMascara() throws Exception {
+        var cadastro = new HashMap<>(Map.of("nome", "Cadastro QA", "email", "cadastro-qa@vitafortis.test",
+                "cpf", "935.411.347-80", "senha", "Teste@123"));
+        mvc.perform(post("/api/v1/auth/cadastro").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(cadastro)))
+                .andExpect(status().isCreated());
+        cadastro.put("email", "outro-qa@vitafortis.test");
+        cadastro.put("cpf", "93541134780");
+        mvc.perform(post("/api/v1/auth/cadastro").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(cadastro)))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.mensagem").value("CPF já cadastrado."));
+    }
+
+    @Test
     void relatoriosAplicamContratoDeFiltrosEPermissaoEmTodosOsFormatos() throws Exception {
         var admin=login("admin@vitafortis.test");
         var cliente=login("cliente@vitafortis.test");

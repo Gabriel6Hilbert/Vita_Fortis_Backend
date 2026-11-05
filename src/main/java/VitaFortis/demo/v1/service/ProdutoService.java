@@ -167,6 +167,7 @@ public class ProdutoService {
     public ProdutoResponseDto ajustarEstoque(Long produtoId, int quantidadeNova, String motivo, String responsavel) {
         if (quantidadeNova < 0) throw new IllegalArgumentException("Estoque nao pode ser negativo");
         if (motivo == null || motivo.trim().length() < 3) throw new IllegalArgumentException("Informe o motivo do ajuste");
+        if (motivo.trim().length() > 255) throw new IllegalArgumentException("O motivo deve ter até 255 caracteres");
         Produto produto = produtoRepository.findById(produtoId).orElseThrow(() -> new IllegalArgumentException("Produto nao encontrado"));
         int anterior = produto.getQuantidadeEstoque();
         if (anterior == quantidadeNova) throw new IllegalArgumentException("A quantidade informada e igual ao estoque atual");
