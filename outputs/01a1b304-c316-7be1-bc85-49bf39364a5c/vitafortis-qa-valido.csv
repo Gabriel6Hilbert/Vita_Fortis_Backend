@@ -1,0 +1,2 @@
+codigo;nome;descricao;marca;unidade;preco;estoque;categoria;imagemUrl;ativo
+QA-D1D4A93-7F2-CSV;Produto QA CSV;Produto ficticio para reteste;Marca QA;300g;12.5;3;PROTEINAS;;false
