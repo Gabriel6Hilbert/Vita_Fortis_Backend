@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { chromium } from 'playwright-core'
 
 const base = process.env.QA_URL ?? 'http://127.0.0.1:5173'
-const browser = await chromium.launch({ channel: 'msedge' })
+const browser = await chromium.launch({ channel: 'chrome' })
 const failures = []
 try {
   for (const [label, viewport, mobile] of [
@@ -114,10 +114,10 @@ try {
       await page.getByRole('button', { name: 'Próxima' }).click()
       await send('Todos QA||1', { total: 219, number: 1 })
       await page.getByText('Página 2 de 19', { exact: true }).waitFor()
-      console.log(`PASSOU Edge ${label}: busca, carregamento, erros, filtros, limpeza e paginação`)
+      console.log(`PASSOU Chrome ${label}: busca, carregamento, erros, filtros, limpeza e paginação`)
     } catch (error) {
       failures.push(error)
-      console.error(`FALHOU Edge ${label}: ${error.message}`)
+      console.error(`FALHOU Chrome ${label}: ${error.message}`)
     } finally { await context.close() }
   }
 } finally { await browser.close() }

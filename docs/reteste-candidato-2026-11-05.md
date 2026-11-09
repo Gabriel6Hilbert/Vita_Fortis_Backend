@@ -13,7 +13,7 @@ A mudança da URL disparava outra busca sem invalidar os callbacks anteriores. E
 
 O relatório próprio expõe data, tipo e valor do lançamento e código, status cadastral e percentual de cashback do cupom. O saldo e a opção Pix/desconto continuam disponíveis sem a permissão de relatórios. O relatório não devolve pedidos, dados de clientes, identidade do operador ou justificativas administrativas. O status cadastral do cupom não indica elegibilidade em uma compra.
 
-Para repetir o teste do catálogo: em `frontend`, instale com `pnpm.cmd install --frozen-lockfile`, inicie `pnpm.cmd dev --host 127.0.0.1` e rode `pnpm.cmd test:catalog` em outro terminal com Microsoft Edge instalado. `QA_URL` permite apontar para outro servidor local ou para um build local em preview. O teste intercepta as requisições, então não depende de banco ou catálogo real.
+Para repetir o teste do catálogo, instale as dependências com `pnpm.cmd install --frozen-lockfile` em `frontend`, inicie `pnpm.cmd dev --host 127.0.0.1` e rode `pnpm.cmd test:catalog` em outro terminal com Google Chrome instalado. `QA_URL` permite apontar para outro servidor local ou para um build local em preview. O teste intercepta as requisições, então não depende de banco ou catálogo real.
 
 Arquivos para revisão:
 
