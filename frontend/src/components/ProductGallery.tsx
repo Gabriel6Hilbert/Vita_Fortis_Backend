@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Product } from '../types/api'
 
-const fallback = '/assets/imagens/proteina_exemplo.png'
+import { ProductImage } from './ProductImage'
 
 export function ProductGallery({ product }: { product: Product }) {
   const [selected, setSelected] = useState(0)
@@ -10,8 +10,7 @@ export function ProductGallery({ product }: { product: Product }) {
 
   return <div className="product-gallery">
     <div className="detail-image">
-      <img src={images[index] || fallback} alt={images.length > 1 ? product.nome + ' · foto ' + (index + 1) : product.nome}
-        onError={event => { if (!event.currentTarget.src.endsWith(fallback)) event.currentTarget.src = fallback }} />
+      <ProductImage key={index} src={images[index]} alt={images.length > 1 ? product.nome + ' · foto ' + (index + 1) : product.nome} />
     </div>
     {images.length > 1 && <div className="gallery-actions" aria-label="Galeria de fotos">
       <button className="button secondary" type="button" disabled={index === 0} onClick={() => setSelected(index - 1)}>Anterior</button>

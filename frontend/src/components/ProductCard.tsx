@@ -8,7 +8,7 @@ import { useCart } from '../app/CartContext'
 import { api } from '../services/api'
 import { favoriteIds, toggleFavorite } from '../utils/commerce'
 
-const fallback = '/assets/imagens/proteina_exemplo.png'
+import { ProductImage } from './ProductImage'
 
 export function ProductCard({ product }: { product: Product }) {
   const { user } = useAuth(); const { add } = useCart(); const [busy, setBusy] = useState(false); const [favorite, setFavorite] = useState(() => favoriteIds().includes(product.id)); const [added, setAdded] = useState(false)
@@ -23,7 +23,7 @@ export function ProductCard({ product }: { product: Product }) {
       {product.oferta && discounted && <span className="discount-badge">Oferta -{discountPercent}%</span>}
       {product.lancamento && <span className="new-badge">Novidade</span>}
       <button className={`favorite-button ${favorite ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); if (!user) { setFavorite(toggleFavorite(product.id)); return } const next=!favorite; setFavorite(next); void (next ? api.addFavorite(user.id,product.id) : api.removeFavorite(user.id,product.id)).catch(() => setFavorite(!next)) }} aria-label={favorite ? `Remover ${product.nome} dos favoritos` : `Favoritar ${product.nome}`}><Heart fill={favorite ? 'currentColor' : 'none'} /></button>
-      <img src={product.imagemUrl || fallback} onError={(event) => { event.currentTarget.src = fallback }} alt={product.nome} className="product-image" width="600" height="600" loading="lazy" decoding="async" />
+      <ProductImage key={product.imagemUrl} src={product.imagemUrl} alt={product.nome} className="product-image" width="600" height="600" loading="lazy" decoding="async" />
     </Link>
     <div className="product-body">
       <span className="eyebrow">{product.marca || titleCase(product.categoria)}</span>
