@@ -79,6 +79,20 @@ const blankProduct: Partial<Product> = {
   kit: false,
   valorDesconto: 0,
 };
+function nextOrderStatuses(order: Order): string[] {
+  switch (order.status) {
+    case "PAGAMENTO_APROVADO":
+      return ["EM_SEPARACAO", "CANCELADO"];
+    case "EM_SEPARACAO":
+      return [order.formaRecebimento === "RETIRADA" ? "DISPONIVEL_RETIRADA" : "ENVIADO", "CANCELADO"];
+    case "DISPONIVEL_RETIRADA":
+    case "ENVIADO":
+      return ["ENTREGUE", "CANCELADO"];
+    default:
+      return [];
+  }
+}
+
 export function AdminPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");
@@ -821,6 +835,8 @@ export function AdminPage() {
                               ) : (
                                 <select
                                   value={o.status}
+                                  aria-label={`Status do pedido #${o.id}`}
+                                  disabled={nextOrderStatuses(o).length === 0}
                                   onChange={(e) =>
                                     confirm("Confirmar alteração do status?") &&
                                     void action(() =>
@@ -828,14 +844,7 @@ export function AdminPage() {
                                     )
                                   }
                                 >
-                                  {[
-                                    "PAGAMENTO_APROVADO",
-                                    "EM_SEPARACAO",
-                                    "DISPONIVEL_RETIRADA",
-                                    "ENVIADO",
-                                    "ENTREGUE",
-                                    "CANCELADO",
-                                  ].map((s) => (
+                                  {[o.status, ...nextOrderStatuses(o)].map((s) => (
                                     <option key={s}>{s}</option>
                                   ))}
                                 </select>
@@ -899,7 +908,7 @@ export function AdminPage() {
                                     )
                                   }
                                 />{" "}
-                                Relatórios
+                                Permitir relatórios próprios
                               </label>
                             ) : (
                               "—"

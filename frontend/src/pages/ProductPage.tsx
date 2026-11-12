@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, Heart, Minus, Plus, ShieldCheck, ShoppingBag } from 'lucide-react'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../app/AuthContext'
 import { useCart } from '../app/CartContext'
@@ -13,15 +13,50 @@ import { money, titleCase } from '../utils/format'
 
 export function ProductPage(){
  const {id=''}=useParams();const {user}=useAuth();const {add}=useCart();const navigate=useNavigate()
- const [product,setProduct]=useState<Product|null>(null);const [quantity,setQuantity]=useState(1);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [favorite,setFavorite]=useState(false);const [reviews,setReviews]=useState<Review[]>([]);const [related,setRelated]=useState<Product[]>([]);const [rating,setRating]=useState(5);const [comment,setComment]=useState('');const [reviewMessage,setReviewMessage]=useState('')
- const load=()=>api.product(id).then(async value=>{setProduct(value);addRecentlyViewed(value.id);const [reviewList,relatedPage,userFavorites]=await Promise.all([api.reviews(value.id).catch(()=>[]),api.products({categoria:value.categoria,tamanho:5}).catch(()=>null),user?api.favorites(user.id).catch(()=>[]):Promise.resolve([])]);setFavorite(user?userFavorites.some(p=>p.id===value.id):favoriteIds().includes(value.id));setReviews(reviewList);setRelated(relatedPage?.content.filter(p=>p.id!==value.id).slice(0,4)||[])}).catch((e:Error)=>setError(e.message))
- useEffect(()=>{void load()},[id,user?.id])
+ const [product,setProduct]=useState<Product|null>(null);const [quantity,setQuantity]=useState(1);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [adding,setAdding]=useState(false);const [purchaseMessage,setPurchaseMessage]=useState('');const [favorite,setFavorite]=useState(false);const [reviews,setReviews]=useState<Review[]>([]);const [related,setRelated]=useState<Product[]>([]);const [rating,setRating]=useState(5);const [comment,setComment]=useState('');const [reviewMessage,setReviewMessage]=useState('')
+ const requestVersion = useRef(0)
+ const load = async () => {
+   const version = ++requestVersion.current
+   setError('')
+   setProduct(null)
+   setReviews([])
+   setRelated([])
+   setFavorite(false)
+   setQuantity(1)
+   try {
+     const value = await api.product(id)
+     if (version !== requestVersion.current) return
+     setProduct(value)
+     addRecentlyViewed(value.id)
+
+     void api.reviews(value.id).then(items => {
+       if (version === requestVersion.current) setReviews(items)
+     }).catch(() => undefined)
+     void api.products({categoria:value.categoria,tamanho:5}).then(page => {
+       if (version === requestVersion.current) setRelated(page.content.filter(p=>p.id!==value.id).slice(0,4))
+     }).catch(() => undefined)
+     if (user) {
+       void api.favorites(user.id).then(items => {
+         if (version === requestVersion.current) setFavorite(items.some(p=>p.id===value.id))
+       }).catch(() => undefined)
+     } else {
+       setFavorite(favoriteIds().includes(value.id))
+     }
+   } catch (cause) {
+     if (version === requestVersion.current) setError(cause instanceof Error ? cause.message : 'Não foi possível carregar o produto.')
+   }
+ }
+ useEffect(() => {
+   void load()
+   return () => { requestVersion.current += 1 }
+ }, [id, user?.id])
+ useEffect(()=>{setPurchaseMessage('')},[id])
  if(error)return <div className="page container"><ErrorState message={error} retry={load}/></div>;if(!product)return <div className="page container"><Loading/></div>
- const addItem=async()=>{setBusy(true);try{await add(product.id,quantity);setReviewMessage('Produto adicionado à sacola. Você pode continuar comprando.');setTimeout(()=>setReviewMessage(''),2500)}catch(e){setError(e instanceof Error?e.message:'Erro ao adicionar.')}finally{setBusy(false)}}
+ const addItem=async()=>{setAdding(true);setPurchaseMessage('');try{await add(product.id,quantity);setPurchaseMessage('Produto adicionado à sacola. Você pode continuar comprando.')}catch(e){setPurchaseMessage(e instanceof Error?e.message:'Erro ao adicionar.')}finally{setAdding(false)}}
  const changeFavorite=async()=>{if(!user){setFavorite(toggleFavorite(product.id));return}const next=!favorite;setFavorite(next);try{await(next?api.addFavorite(user.id,product.id):api.removeFavorite(user.id,product.id))}catch(e){setFavorite(!next);setError(e instanceof Error?e.message:'Não foi possível atualizar o favorito.')}}
  const submitReview=async(e:FormEvent)=>{e.preventDefault();if(!user)return navigate('/entrar');setBusy(true);try{await api.createReview(product.id,{usuarioId:user.id,nota:rating,comentario:comment});setComment('');setReviewMessage('Avaliação enviada com sucesso.');setReviews(await api.reviews(product.id))}catch(err){setReviewMessage(err instanceof Error?err.message:'Não foi possível enviar a avaliação.')}finally{setBusy(false)}}
  return <div className="page container"><Link to="/catalogo" className="back-link"><ArrowLeft size={17}/> Voltar ao catálogo</Link>
- <div className="product-detail"><ProductGallery key={product.id} product={product}/><div className="detail-info"><div className="detail-top"><span className="eyebrow">{product.marca||titleCase(product.categoria)}</span><button className={`favorite-inline ${favorite?'active':''}`} onClick={changeFavorite}><Heart fill={favorite?'currentColor':'none'}/> {favorite?'Favoritado':'Favoritar'}</button></div><h1>{product.nome}</h1><p className="product-code">Cód. {product.codigo} {product.unidade&&`• ${product.unidade}`} • {titleCase(product.categoria)}</p><div className="detail-price">{Number(product.precoFinal)<Number(product.preco)&&<del>{money(product.preco)}</del>}<strong>{money(product.precoFinal)}</strong></div><div className="stock-line"><Check/> {product.ativo&&product.quantidadeEstoque>0?`Disponível — ${product.quantidadeEstoque} unidade(s)`:'Produto indisponível'}</div><p className="detail-description">{product.descricao}</p><dl>{Object.entries(product.atributos||{}).map(([key,value])=><div key={key}><dt>{titleCase(key)}</dt><dd>{value}</dd></div>)}</dl>{(product.objetivos?.length||product.esportes?.length||product.vegano||product.vegetariano)&&<div className="product-traits">{product.objetivos?.map(v=><span key={v}>{titleCase(v)}</span>)}{product.esportes?.map(v=><span key={v}>{titleCase(v)}</span>)}{product.vegano&&<span>Vegano</span>}{product.vegetariano&&<span>Vegetariano</span>}</div>}<p className="subtotal">Subtotal: <strong>{money(Number(product.precoFinal)*quantity)}</strong></p><div className="purchase-row"><div className="quantity"><button onClick={()=>setQuantity(Math.max(1,quantity-1))}><Minus/></button><span>{quantity}</span><button onClick={()=>setQuantity(Math.min(product.quantidadeEstoque,quantity+1))}><Plus/></button></div><button className="button primary grow" onClick={addItem} disabled={busy||!product.ativo||product.quantidadeEstoque===0}><ShoppingBag size={18}/> {busy?'Adicionando…':'Adicionar à sacola'}</button></div><div className="safe-note"><ShieldCheck/><span><strong>Finalização responsável</strong>Escolha retirada ou entrega e a forma de pagamento antes de concluir o pedido.</span></div></div></div>
+ <div className="product-detail"><ProductGallery key={product.id} product={product}/><div className="detail-info"><div className="detail-top"><span className="eyebrow">{product.marca||titleCase(product.categoria)}</span><button className={`favorite-inline ${favorite?'active':''}`} onClick={changeFavorite}><Heart fill={favorite?'currentColor':'none'}/> {favorite?'Favoritado':'Favoritar'}</button></div><h1>{product.nome}</h1><p className="product-code">Cód. {product.codigo} {product.unidade&&`• ${product.unidade}`} • {titleCase(product.categoria)}</p><div className="detail-price">{Number(product.precoFinal)<Number(product.preco)&&<del>{money(product.preco)}</del>}<strong>{money(product.precoFinal)}</strong></div><div className="stock-line"><Check/> {product.ativo&&product.quantidadeEstoque>0?`Disponível — ${product.quantidadeEstoque} unidade(s)`:'Produto indisponível'}</div><p className="detail-description">{product.descricao}</p><dl>{Object.entries(product.atributos||{}).map(([key,value])=><div key={key}><dt>{titleCase(key)}</dt><dd>{value}</dd></div>)}</dl>{(product.objetivos?.length||product.esportes?.length||product.vegano||product.vegetariano)&&<div className="product-traits">{product.objetivos?.map(v=><span key={v}>{titleCase(v)}</span>)}{product.esportes?.map(v=><span key={v}>{titleCase(v)}</span>)}{product.vegano&&<span>Vegano</span>}{product.vegetariano&&<span>Vegetariano</span>}</div>}<p className="subtotal">Subtotal: <strong>{money(Number(product.precoFinal)*quantity)}</strong></p><div className="purchase-row"><div className="quantity"><button onClick={()=>setQuantity(Math.max(1,quantity-1))}><Minus/></button><span>{quantity}</span><button onClick={()=>setQuantity(Math.min(product.quantidadeEstoque,quantity+1))}><Plus/></button></div><button className="button primary grow" onClick={addItem} disabled={adding||!product.ativo||product.quantidadeEstoque===0}><ShoppingBag size={18}/> Adicionar à sacola</button></div><div className="purchase-status" role="status">{adding ? 'Adicionando à sacola…' : purchaseMessage}</div><div className="safe-note"><ShieldCheck/><span><strong>Finalização responsável</strong>Escolha retirada ou entrega e a forma de pagamento antes de concluir o pedido.</span></div></div></div>
  <section className="product-section"><div className="section-heading"><div><span className="eyebrow">Opiniões verificadas</span><h2>Avaliações</h2><p>Compartilhe sua experiência para ajudar outros clientes.</p></div></div>{user&&<form className="review-form" onSubmit={submitReview}><label>Nota<select value={rating} onChange={e=>setRating(Number(e.target.value))} aria-label="Nota da avaliação">{[5,4,3,2,1].map(v=><option key={v} value={v}>{v} {v===1?'estrela':'estrelas'}</option>)}</select></label><label>Comentário<textarea maxLength={1000} value={comment} onChange={e=>setComment(e.target.value)} placeholder="Conte como foi sua experiência"/></label><button className="button primary" disabled={busy}>{busy?'Publicando…':'Publicar avaliação'}</button>{reviewMessage&&<span className="review-message" role="status" aria-live="polite">{reviewMessage}</span>}</form>}{reviews.length?<div className="review-grid">{reviews.map(r=><article key={r.id}><strong aria-label={`${r.nota} de 5 estrelas`}>{'★'.repeat(r.nota)}{'☆'.repeat(5-r.nota)}</strong><p>{r.comentario||'Avaliação sem comentário.'}</p><small>{r.usuarioNome||'Cliente Vita Fortis'}</small></article>)}</div>:<p className="empty-inline">Este produto ainda não possui avaliações publicadas.</p>}</section>
  {related.length>0&&<section className="product-section"><div className="section-heading"><div><span className="eyebrow">Continue explorando</span><h2>Produtos relacionados</h2></div></div><div className="product-grid">{related.map(p=><ProductCard key={p.id} product={p}/>)}</div></section>}</div>
 }

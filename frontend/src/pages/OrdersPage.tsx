@@ -93,7 +93,7 @@ export function OrdersPage() {
         {products(order)}
         <footer><span>{titleCase(order.formaRecebimento)} • Pagamento {titleCase(order.statusPagamento)}</span><strong>{money(order.total)}</strong>
           <button className="icon-button" disabled={openingOrderId !== null} aria-label={`Ver detalhes do pedido #${order.id}`} aria-busy={openingOrderId === order.id} onClick={event => void open(order.id, event.currentTarget)}>
-            {openingOrderId === order.id ? <><LoaderCircle className="spin" aria-hidden="true" /> Abrindo…</> : <><Eye aria-hidden="true" /> Ver detalhes</>}
+            {openingOrderId === order.id ? <><LoaderCircle className="spin" aria-hidden="true" /> Abrindo…</> : <><Eye size={18} aria-hidden="true" /> Ver detalhes</>}
           </button>
         </footer>
       </article>)}</div>}

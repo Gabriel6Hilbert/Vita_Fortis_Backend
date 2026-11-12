@@ -4981,3 +4981,64 @@ body {
 .gallery-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-block: 8px; }
 .product-gallery { min-width: 0; }
 .admin-modal fieldset.form-grid { border: 0; margin: 0; padding: 0; }
+
+.purchase-status:not(:empty) {
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+.detail-info .safe-note {
+  margin-top: 16px;
+}
+.order-card footer .icon-button svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.account-page :is(label, .chart-card p) {
+  color: #35352f;
+}
+.account-page input:disabled {
+  color: #35352f;
+  -webkit-text-fill-color: #35352f;
+  background: #f1f0eb;
+  opacity: 1;
+}
+.account-page :is(.chart-card, .admin-modal) label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .detail-info .purchase-row {
+    flex-wrap: wrap;
+  }
+  .detail-info .purchase-row > .button {
+    min-width: min(100%, 12rem);
+    white-space: normal;
+  }
+  .order-card footer {
+    flex-wrap: wrap;
+  }
+  .order-card footer .icon-button {
+    min-height: 44px;
+  }
+}
+
+.collaborator-nav {
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.collaborator-page :is(#cashback-colaborador, #relatorios-colaborador) {
+  scroll-margin-top: 160px;
+}
+.header-main .header-actions {
+  margin-inline-start: auto;
+}
+
+.home-offers .section-heading > .text-link {
+  display: inline-flex;
+}
+@media (max-width: 600px) {
+  .home-offers .section-heading {
+    flex-wrap: wrap;
+  }
+}

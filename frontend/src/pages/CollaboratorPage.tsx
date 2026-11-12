@@ -32,12 +32,18 @@ export function CollaboratorPage() {
   }
 
   return <div className="page container collaborator-page">
-    <header className="page-header compact"><span className="eyebrow">Área do colaborador</span><h1>Olá, {user.nome.split(' ')[0]}.</h1><p>Consulte seu saldo e escolha como deseja utilizá-lo.</p><div className="profile-actions"><Link className="button primary" to="/catalogo"><ShoppingBag /> Comprar produtos</Link><Link className="button secondary" to="/pedidos">Meus pedidos</Link></div></header>
+    <header className="page-header compact"><span className="eyebrow">Painel do colaborador</span><h1>Olá, {user.nome.split(' ')[0]}.</h1><p>Consulte seu saldo e escolha como deseja utilizá-lo.</p><div className="profile-actions"><Link className="button primary" to="/catalogo"><ShoppingBag /> Comprar produtos</Link><Link className="button secondary" to="/pedidos">Meus pedidos</Link></div></header>
+    <nav className="profile-actions collaborator-nav" aria-label="Painel do colaborador">
+      <a className="button secondary" href="#cashback-colaborador">Cashback</a>
+      {user.permissaoRelatorios && <a className="button secondary" href="#relatorios-colaborador">Relatórios</a>}
+    </nav>
+    <div id="cashback-colaborador">
     {error ? <ErrorState message={error} retry={load} /> : loading || !data ? <Loading /> : <>
       <article className="cashback-balance-card"><BadgeDollarSign /><span>Saldo disponível de cashback</span><strong>{money(data.saldo)}</strong><p>Valor acumulado pelos pedidos elegíveis e confirmados.</p></article>
       <section className="chart-card"><h2>Como receber ou usar o cashback</h2><p>Sua escolha fica salva e pode ser alterada.</p><label>Destino do cashback<select value={data.destinoCashback || ''} onChange={event => event.target.value && choose(event.target.value as 'PIX' | 'DESCONTO')}><option value="" disabled>Escolha uma opção</option><option value="PIX">Receber por Pix</option><option value="DESCONTO">Usar como desconto em compras</option></select></label></section>
     </>}
-    {user.permissaoRelatorios && <OwnReports key={user.id} />}
+    </div>
+    {user.permissaoRelatorios && <div id="relatorios-colaborador"><OwnReports key={user.id} /></div>}
   </div>
 }
 
