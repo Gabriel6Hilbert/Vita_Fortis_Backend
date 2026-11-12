@@ -3,6 +3,7 @@ import type { AdminPrivacyRequest, CatalogRegistration, Address, AddressInput, A
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const SESSION_KEY = 'vita-fortis-session'
 const PUBLIC_CACHE_MS = 30_000
+const PUBLIC_CACHE_LIMIT = 64
 const publicCache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>()
 type CsrfToken = { headerName: string; token: string }
 let csrfTokenPromise: Promise<CsrfToken> | null = null
@@ -102,8 +103,20 @@ const request = async <T>(path: string, init: RequestInit = {}, authenticated = 
 const publicRequest = <T>(path: string): Promise<T> => {
   const cached = publicCache.get(path)
   if (cached && cached.expiresAt > Date.now()) return cached.promise as Promise<T>
-  const promise = request<T>(path).catch(error => { publicCache.delete(path); throw error })
-  publicCache.set(path, { expiresAt: Date.now() + PUBLIC_CACHE_MS, promise })
+  const promise = request<T>(path).then(result => {
+    const entry = publicCache.get(path)
+    if (entry?.promise === promise) entry.expiresAt = Date.now() + PUBLIC_CACHE_MS
+    return result
+  }).catch(error => {
+    if (publicCache.get(path)?.promise === promise) publicCache.delete(path)
+    throw error
+  })
+  publicCache.delete(path)
+  publicCache.set(path, { expiresAt: Infinity, promise })
+  if (publicCache.size > PUBLIC_CACHE_LIMIT) {
+    const oldest = publicCache.keys().next().value
+    if (oldest !== undefined) publicCache.delete(oldest)
+  }
   return promise
 }
 
@@ -118,7 +131,7 @@ export const api = {
   catalogRegistrations: () => request<CatalogRegistration[]>('/admin/catalogo/cadastros', {}, true),
   saveCatalogRegistration: (body: Partial<CatalogRegistration>) => request<CatalogRegistration>('/admin/catalogo/cadastros' + (body.id ? '/' + body.id : ''), { method: body.id ? 'PUT' : 'POST', body: JSON.stringify(body) }, true),
   disableCatalogRegistration: (id: number) => request<void>('/admin/catalogo/cadastros/' + id, { method: 'DELETE' }, true),
-  store: () => request<StoreInfo>('/loja'),
+  store: () => publicRequest<StoreInfo>('/loja'),
   products: (filters: Record<string, string | number | boolean | undefined>) => publicRequest<Page<Product>>(`/produtos${query(filters)}`),
   product: (id: string | number) => publicRequest<Product>(`/produtos/${id}`),
   reviews: (id: string | number) => request<Review[]>(`/produtos/${id}/avaliacoes`),

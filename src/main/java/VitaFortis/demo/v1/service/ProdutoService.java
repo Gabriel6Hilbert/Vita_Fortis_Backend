@@ -16,7 +16,6 @@ import VitaFortis.demo.v1.dto.MovimentacaoEstoqueDto;
 import VitaFortis.demo.v1.dto.HistoricoImportacaoProdutoDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -188,13 +187,20 @@ public class ProdutoService {
 
     @Transactional(readOnly = true)
     public Page<ProdutoResponseDto> listarAdmin(String busca, int pagina, int tamanho) {
-        String termo = busca == null ? "" : busca.trim().toLowerCase();
-        var todos = produtoRepository.findAll(Sort.by(Sort.Order.asc("nome").ignoreCase())).stream()
-                .filter(p -> termo.isBlank() || ((p.getNome()+" "+p.getCodigo()+" "+(p.getMarca()==null?"":p.getMarca())).toLowerCase().contains(termo)))
-                .map(produtoMapper::toResponseDto).toList();
+        String termo = busca == null ? "" : busca.trim().toLowerCase(java.util.Locale.ROOT);
+        Sort ordenacao = Sort.by(Sort.Order.asc("nome").ignoreCase(), Sort.Order.asc("id"));
         int page = Math.max(0, pagina), size = Math.max(1, Math.min(500, tamanho));
-        int inicio = Math.min(page * size, todos.size()), fim = Math.min(inicio + size, todos.size());
-        return new PageImpl<>(todos.subList(inicio, fim), PageRequest.of(page, size), todos.size());
+        Pageable pageable = PageRequest.of(page, size, ordenacao);
+        if (termo.isBlank()) return produtoRepository.findAll(pageable).map(produtoMapper::toResponseDto);
+
+        String padrao = "%" + termo.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
+        Specification<Produto> filtro = (produto, consulta, cb) -> {
+            var nomeCodigo = cb.concat(cb.concat(produto.<String>get("nome"), " "),
+                    cb.coalesce(produto.<String>get("codigo"), "null"));
+            var texto = cb.concat(cb.concat(nomeCodigo, " "), cb.coalesce(produto.<String>get("marca"), ""));
+            return cb.like(cb.lower(texto), padrao, '!');
+        };
+        return produtoRepository.findAll(filtro, pageable).map(produtoMapper::toResponseDto);
     }
 
     @Transactional(readOnly = true)

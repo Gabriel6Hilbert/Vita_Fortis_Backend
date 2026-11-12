@@ -37,6 +37,10 @@ export function CartPage() {
   const [message, setMessage] = useState("");
   const [ordering, setOrdering] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [pendingRemoval, setPendingRemoval] = useState<{
+    label: string;
+    action: () => Promise<void>;
+  } | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [quote, setQuote] = useState<Order | null>(null);
   const [reviewedInput, setReviewedInput] = useState<OrderInput | null>(null);
@@ -182,7 +186,6 @@ export function CartPage() {
   };
 
   const clearCart = async () => {
-    if (!window.confirm("Deseja remover todos os produtos da sacola?")) return;
     setClearing(true);
     setMessage("");
     try {
@@ -256,7 +259,10 @@ export function CartPage() {
                 <strong>{money(item.subtotal)}</strong>
                 <button
                   type="button"
-                  onClick={() => { if(window.confirm(`Remover ${item.produtoNome} da sacola?`)) void changeCart(() => remove(item.itemId)) }}
+                  onClick={() => setPendingRemoval({
+                    label: `Remover ${item.produtoNome} da sacola?`,
+                    action: () => changeCart(() => remove(item.itemId)),
+                  })}
                   aria-label="Remover"
                 >
                   <Trash2 />
@@ -267,11 +273,28 @@ export function CartPage() {
           <button
             type="button"
             className="text-button danger clear-cart"
-            onClick={clearCart}
+            onClick={() => setPendingRemoval({
+              label: "Remover todos os produtos da sacola?",
+              action: clearCart,
+            })}
             disabled={clearing}
           >
             <Trash2 size={16} /> {clearing ? "Limpando…" : "Limpar sacola"}
           </button>
+          {pendingRemoval && (
+            <div className="review-alert" role="group" aria-label={pendingRemoval.label}>
+              <strong role="status">{pendingRemoval.label}</strong>
+              <button type="button" className="button secondary" onClick={() => setPendingRemoval(null)}>
+                Cancelar
+              </button>
+              <button type="button" className="button primary" onClick={() => {
+                setPendingRemoval(null);
+                void pendingRemoval.action();
+              }}>
+                Confirmar remoção
+              </button>
+            </div>
+          )}
         </section>
         <aside className="summary">
           <h2>Finalização</h2>

@@ -20,7 +20,7 @@ export function CatalogPage() {
     setLoading(true)
     setError('')
     setPage(null)
-    api.products({ ...filters, pagina: Number(query.get('pagina') || 0), tamanho: 12 })
+    const fetchProducts = () => api.products({ ...filters, pagina: Number(query.get('pagina') || 0), tamanho: 12 })
       .then(result => {
         if (!current) return
         if (query.has('pagina') && result.totalPages > 0 && result.number >= result.totalPages) {
@@ -36,7 +36,13 @@ export function CatalogPage() {
         setError(error.message)
         setLoading(false)
       })
-    return () => { current = false }
+    const editing = query.has('busca') || query.has('precoMin') || query.has('precoMax')
+    const timer = editing ? window.setTimeout(fetchProducts, 250) : undefined
+    if (!editing) void fetchProducts()
+    return () => {
+      current = false
+      if (timer !== undefined) window.clearTimeout(timer)
+    }
   }, [key, attempt, setParams])
   useEffect(()=>{Promise.all([api.categories(),api.brands(),api.goals()]).then(([c,b,g])=>{setCategories(c);setBrands(b);setGoals(g)}).catch(()=>undefined)},[])
   const set=(name:string,value:string)=>{const next=new URLSearchParams(params);if(value)next.set(name,value);else next.delete(name);if(name!=='pagina')next.delete('pagina');setParams(next)}; const active=[...params].filter(([name])=>name!=='pagina')

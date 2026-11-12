@@ -114,6 +114,17 @@ try {
       await page.getByRole('button', { name: 'Próxima' }).click()
       await send('Todos QA||1', { total: 219, number: 1 })
       await page.getByText('Página 2 de 19', { exact: true }).waitFor()
+      const rapidSearches = []
+      page.on('request', req => {
+        const url = new URL(req.url())
+        const term = url.searchParams.get('busca')
+        if (url.pathname === '/api/v1/produtos' && term?.startsWith('Rajada QA')) rapidSearches.push(term)
+      })
+      await search.fill('Rajada QA A')
+      await search.fill('Rajada QA AB')
+      await search.fill('Rajada QA ABC')
+      await send('Rajada QA ABC||0')
+      assert.deepEqual(rapidSearches, ['Rajada QA ABC'])
       console.log(`PASSOU Chrome ${label}: busca, carregamento, erros, filtros, limpeza e paginação`)
     } catch (error) {
       failures.push(error)

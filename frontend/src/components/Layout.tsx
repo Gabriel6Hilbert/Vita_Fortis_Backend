@@ -9,7 +9,17 @@ import { useCart } from '../app/CartContext'
 export function Layout() {
   const [menu, setMenu] = useState(false); const [megaMenu,setMegaMenu]=useState(false); const [search, setSearch] = useState(''); const [store, setStore] = useState<StoreInfo | null>(null); const [megaCategories,setMegaCategories]=useState<CategorySummary[]>([]); const [megaGoals,setMegaGoals]=useState<GoalSummary[]>([]); const [megaBest,setMegaBest]=useState<Product[]>([])
   const { user, logout } = useAuth(); const { count } = useCart(); const navigate = useNavigate(); const location = useLocation()
-  useEffect(() => { Promise.all([api.store(),api.categories(),api.goals(),api.products({maisVendidos:true,tamanho:7})]).then(([shop,categories,goals,best])=>{setStore(shop);setMegaCategories(categories);setMegaGoals(goals);setMegaBest(best.content)}).catch(() => undefined) }, [])
+  useEffect(() => { api.store().then(setStore).catch(() => undefined) }, [])
+  useEffect(() => {
+    if (!megaMenu) return
+    let current = true
+    void api.categories().then(value => { if (current) setMegaCategories(value) }).catch(() => undefined)
+    void api.goals().then(value => { if (current) setMegaGoals(value) }).catch(() => undefined)
+    void api.products({ maisVendidos: true, tamanho: 8 }).then(value => {
+      if (current) setMegaBest(value.content.slice(0, 7))
+    }).catch(() => undefined)
+    return () => { current = false }
+  }, [megaMenu])
   useEffect(() => { if (!location.pathname.startsWith('/catalogo')) setSearch(''); setMegaMenu(false); setMenu(false) }, [location.pathname,location.search])
   const closeNavigation=()=>{setMegaMenu(false);setMenu(false)}
   const goHome = () => { setSearch(''); closeNavigation() }

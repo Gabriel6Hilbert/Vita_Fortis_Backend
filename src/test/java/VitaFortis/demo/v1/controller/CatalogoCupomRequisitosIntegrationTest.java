@@ -107,6 +107,15 @@ class CatalogoCupomRequisitosIntegrationTest {
         var data=new HashMap<String,Object>();data.put("codigo",unique());data.put("nome","Produto categoria nova");data.put("descricao","Descricao teste");
         data.put("preco",30);data.put("quantidadeEstoque",10);data.put("categoria",cat);data.put("atributos",Map.of(attr,"Morango"));
         long id=request(post("/api/v1/admin/produtos"),admin,data,201).get("id").asLong();
+        var buscaAdmin = request(get("/api/v1/admin/produtos")
+                .param("busca", data.get("codigo").toString().toLowerCase(java.util.Locale.ROOT))
+                .param("tamanho", "1"), admin, null, 200);
+        assertEquals(1, buscaAdmin.get("totalElements").asInt());
+        assertEquals(id, buscaAdmin.get("content").get(0).get("id").asLong());
+        var paginaSeguinte = request(get("/api/v1/admin/produtos")
+                .param("busca", data.get("codigo").toString()).param("tamanho", "1")
+                .param("pagina", "1"), admin, null, 200);
+        assertEquals(0, paginaSeguinte.get("content").size());
         var publico=request(get("/api/v1/produtos/"+id),null,null,200);
         assertEquals("Morango",publico.get("atributos").get(attr).asText());
         assertEquals(1,request(get("/api/v1/produtos").param("categoria",cat),null,null,200).get("totalElements").asInt());
