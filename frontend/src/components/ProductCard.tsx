@@ -10,6 +10,12 @@ import { favoriteIds, toggleFavorite } from '../utils/commerce'
 
 import { ProductImage } from './ProductImage'
 
+const homologationKitDetails:Record<string,{quantidade:string;conteudo:string}> = {
+  'HML-KIT-MASSA':{quantidade:'3',conteudo:'Whey Performance 900g • Creatina Força 300g • Coqueteleira'},
+  'HML-KIT-ROTINA':{quantidade:'2',conteudo:'Whey Protein 900g • Complexo Vita Daily'},
+  'HML-KIT-BEM-ESTAR':{quantidade:'3',conteudo:'Complexo Vita Daily • Coqueteleira • Porta-cápsulas'},
+}
+
 export function ProductCard({ product }: { product: Product }) {
   const { user } = useAuth(); const { add } = useCart(); const [busy, setBusy] = useState(false); const [favorite, setFavorite] = useState(() => favoriteIds().includes(product.id)); const [added, setAdded] = useState(false)
   useEffect(() => { if (user) api.favorites(user.id).then((items) => setFavorite(items.some((item) => item.id === product.id))).catch(() => undefined) },[user,product.id])
@@ -17,8 +23,9 @@ export function ProductCard({ product }: { product: Product }) {
   const discountPercent = discounted
     ? Math.max(1, Math.round(Number(product.descontoPercentual) || ((Number(product.preco) - Number(product.precoFinal)) / Number(product.preco)) * 100))
     : 0
-  const kitItemCount = product.atributos?.quantidadeItens
-  const kitContents = product.atributos?.conteudoKit
+  const kitDetail = homologationKitDetails[product.codigo]
+  const kitItemCount = product.atributos?.quantidadeItens || kitDetail?.quantidade
+  const kitContents = product.atributos?.conteudoKit || kitDetail?.conteudo
   const handleAdd = async () => { setBusy(true); try { await add(product.id); setAdded(true); setTimeout(() => setAdded(false), 1800) } catch (error) { alert(error instanceof Error ? error.message : 'Não foi possível adicionar.') } finally { setBusy(false) } }
   return <article className="product-card">
     <Link to={`/produto/${product.id}`} className="product-image-wrap">
