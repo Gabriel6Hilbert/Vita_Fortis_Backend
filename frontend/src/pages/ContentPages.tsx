@@ -38,7 +38,7 @@ export function GoalsPage() { const [items,setItems]=useState<GoalSummary[]>([])
 export function CuratedPage() {
   const { pathname } = useLocation()
   const map:Record<string,{title:string;headline:string;subtitle:string;filters:Record<string,string>;empty:string;metric:string;icon:typeof Sparkles}> = {
-    '/ofertas':{title:'Ofertas',headline:'Mais performance, melhor preço.',subtitle:'Condições especiais em produtos selecionados para você aproveitar agora.',filters:{oferta:'true',ordenacao:'PRECO_ASC'},empty:'Nenhuma oferta disponível no momento.',metric:'economia selecionada',icon:BadgePercent},
+    '/ofertas':{title:'Ofertas',headline:'Mais performance, melhor preço.',subtitle:'Condições especiais em produtos selecionados para você aproveitar agora.',filters:{oferta:'true',ordenacao:'PRECO_ASC'},empty:'Nenhuma oferta disponível no momento.',metric:'ofertas selecionadas',icon:BadgePercent},
     '/novidades':{title:'Novidades',headline:'Acabou de chegar por aqui.',subtitle:'Conheça os lançamentos mais recentes da curadoria Vita Fortis.',filters:{lancamento:'true'},empty:'Nenhuma novidade cadastrada no momento.',metric:'novidades na vitrine',icon:Sparkles},
     '/kits':{title:'Kits',headline:'Sua rotina pronta em um só kit.',subtitle:'Combinações pensadas para facilitar seus objetivos e render mais no dia a dia.',filters:{kit:'true'},empty:'Nenhum kit disponível no momento.',metric:'combinações disponíveis',icon:PackageCheck},
   }
