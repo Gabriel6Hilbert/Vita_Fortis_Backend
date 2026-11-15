@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import static VitaFortis.demo.v1.enums.TipoUsuario.ADMIN;
 import static VitaFortis.demo.v1.enums.TipoUsuario.COLABORADOR;
@@ -21,7 +22,7 @@ class HomologacaoDataInitializerTest {
     @Autowired ProdutoRepository produtos;
     @Autowired CupomRepository cupons;
 
-    @Test void criaCenarioIdempotenteDeHomologacao() {
+    @Test @Transactional void criaCenarioIdempotenteDeHomologacao() {
         assertTrue(usuarios.existsByEmail("admin@vitafortis.test"));
         assertTrue(usuarios.existsByEmail("colaborador@vitafortis.test"));
         assertTrue(usuarios.existsByEmail("cliente@vitafortis.test"));
@@ -31,5 +32,9 @@ class HomologacaoDataInitializerTest {
         assertEquals(ADMIN, usuarios.findByEmail("admin@vitafortis.test").orElseThrow().getTipo());
         assertEquals(COLABORADOR, usuarios.findByEmail("colaborador@vitafortis.test").orElseThrow().getTipo());
         assertFalse(produtos.findByCodigoIgnoreCase("HML-INATIVO").orElseThrow().isAtivo());
+        var kit = produtos.findByCodigoIgnoreCase("HML-KIT-MASSA").orElseThrow();
+        assertTrue(kit.isKit());
+        assertEquals("3", kit.getAtributos().get("quantidadeItens"));
+        assertTrue(kit.getAtributos().get("conteudoKit").contains("Creatina"));
     }
 }

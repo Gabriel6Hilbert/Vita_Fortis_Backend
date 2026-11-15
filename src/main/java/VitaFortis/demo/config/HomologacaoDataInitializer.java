@@ -55,6 +55,9 @@ public class HomologacaoDataInitializer implements CommandLineRunner {
                 "/assets/imagens/vitamina_telafiltraveis", true, false, false, 20, 39);
         vitrine("HML-KIT-BEM-ESTAR", "Kit Bem-estar Essencial", 199.90, 9, "KITS",
                 "/assets/imagens/objetivos/saude-bem-estar.webp", false, true, true, 8, 18);
+        conteudoKit("HML-KIT-MASSA", "3", "Whey Performance 900g • Creatina Forca 300g • Coqueteleira");
+        conteudoKit("HML-KIT-ROTINA", "2", "Whey Protein 900g • Complexo Vita Daily");
+        conteudoKit("HML-KIT-BEM-ESTAR", "3", "Complexo Vita Daily • Coqueteleira • Porta-capsulas");
 
         if (!cupons.existsByCodigoIgnoreCase("COLAB10")) {
             Cupom cupom = new Cupom(); cupom.setCodigo("COLAB10"); cupom.setDescricao("Cupom de homologacao vinculado");
@@ -102,6 +105,13 @@ public class HomologacaoDataInitializer implements CommandLineRunner {
         p.setDescontoPercentual(oferta ? BigDecimal.valueOf(descontoPercentual) : null);
         p.setTotalVendido(totalVendido);
         p.setAtivo(true);
+        produtos.save(p);
+    }
+
+    private void conteudoKit(String codigo, String quantidadeItens, String conteudo) {
+        Produto p = produtos.findByCodigoIgnoreCase(codigo).orElseThrow();
+        p.getAtributos().put("quantidadeItens", quantidadeItens);
+        p.getAtributos().put("conteudoKit", conteudo);
         produtos.save(p);
     }
 }

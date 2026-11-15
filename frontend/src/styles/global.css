@@ -427,16 +427,47 @@ p {
   transform: scale(1.04);
 }
 .discount-badge {
-  position: absolute;
-  z-index: 2;
-  top: 12px;
-  left: 12px;
+  position: static;
   background: var(--gold);
   color: #1d382d;
   padding: 5px 8px;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 800;
+}
+.product-badge-stack {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+.product-badge-stack .new-badge { position: static; }
+.kit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  color: #fff;
+  background: #11110f;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  box-shadow: 0 5px 14px rgba(0,0,0,.18);
+}
+.kit-contents {
+  min-height: 36px;
+  margin: -2px 0 10px;
+  color: #777367;
+  font-size: 12px;
+  line-height: 1.45;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .product-body {
   padding: 20px;
@@ -5261,6 +5292,7 @@ body {
 .curated-hero-mark svg { width: 42px; height: 42px; stroke-width: 1.7; }
 .curated-hero-mark span { font-size: clamp(2.2rem, 5vw, 4.6rem); font-weight: 900; line-height: .9; letter-spacing: -.06em; }
 .brand-directory,
+.goals-directory,
 .curated-products {
   padding: clamp(24px, 4vw, 46px);
   border: 1px solid var(--discovery-line);
@@ -5294,6 +5326,26 @@ body {
 .brand-grid .brand-index { color: var(--brand-yellow); font-size: .7rem; font-weight: 800; letter-spacing: .14em; }
 .brand-grid a strong { align-self: end; font-size: clamp(1.1rem, 2vw, 1.45rem); letter-spacing: -.025em; }
 .brand-grid a > span:not(.brand-index) { font-size: .84rem; }
+.goal-selection-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.goal-selection-card {
+  position: relative;
+  isolation: isolate;
+  min-height: 330px;
+  overflow: hidden;
+  color: #fff;
+  border-radius: 22px;
+  background: #191916;
+  box-shadow: 0 12px 30px rgba(0,0,0,.14);
+}
+.goal-selection-card img { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+.goal-selection-shade { position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.12) 35%, rgba(0,0,0,.92) 100%); }
+.goal-selection-count { position: absolute; top: 20px; left: 20px; padding: 8px 11px; color: #151510; background: var(--brand-yellow); border-radius: 999px; font-size: .72rem; font-weight: 850; }
+.goal-selection-copy { position: absolute; inset: auto 74px 26px 24px; display: grid; gap: 7px; }
+.goal-selection-copy strong { font-size: clamp(1.45rem, 3vw, 2.25rem); line-height: 1; letter-spacing: -.035em; }
+.goal-selection-copy small { max-width: 360px; color: #d8d5ca; font-size: .86rem; line-height: 1.45; }
+.goal-selection-action { position: absolute; right: 22px; bottom: 24px; width: 42px; height: 42px; display: grid; place-items: center; color: #151510; background: var(--brand-yellow); border-radius: 50%; transition: transform .2s ease; }
+.goal-selection-card:hover img { transform: scale(1.05); }
+.goal-selection-card:hover .goal-selection-action { transform: translateX(4px); }
 .curated-products .product-grid { margin-top: 0; }
 .curated-products .product-card .availability { color: #c9c5b8; }
 .curated-products .product-card .availability svg { color: var(--brand-yellow); }
@@ -5305,6 +5357,7 @@ body {
   .discovery-stat { width: fit-content; padding: 22px; border-radius: 18px; background: var(--brand-yellow); }
   .curated-hero-mark { width: min(100%, 360px); min-height: 150px; }
   .brand-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .goal-selection-card { min-height: 280px; }
 }
 @media (max-width: 600px) {
   .discovery-page { gap: 22px; padding-top: 18px; }
@@ -5313,9 +5366,12 @@ body {
   .discovery-hero::before { width: 360px; opacity: .78; }
   .curated-hero-mark { min-height: 118px; padding: 18px; box-shadow: 6px 6px 0 #fff; }
   .brand-directory,
+  .goals-directory,
   .curated-products { padding: 20px 16px; border-radius: 20px; }
   .directory-heading { align-items: flex-start; flex-direction: column; margin-bottom: 22px; }
   .curated-benefits { justify-content: flex-start; }
   .brand-grid { grid-template-columns: 1fr; gap: 12px; }
   .brand-grid a { min-height: 126px; }
+  .goal-selection-grid { grid-template-columns: 1fr; gap: 12px; }
+  .goal-selection-card { min-height: 260px; border-radius: 17px; }
 }

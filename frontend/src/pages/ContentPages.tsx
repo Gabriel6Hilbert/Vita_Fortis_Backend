@@ -1,4 +1,4 @@
-import { ArrowRight, BadgePercent, CheckCircle2, Dumbbell, Heart, HelpCircle, Layers3, Mail, MapPin, PackageCheck, Sparkles, Tags } from 'lucide-react'
+import { ArrowRight, BadgePercent, CheckCircle2, Dumbbell, Heart, HelpCircle, Layers3, Mail, MapPin, PackageCheck, Sparkles, Tags, Target } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ProductCard } from '../components/ProductCard'
@@ -34,7 +34,30 @@ export function BrandsPage() {
     </section>}
   </main>
 }
-export function GoalsPage() { const [items,setItems]=useState<GoalSummary[]>([]); useEffect(()=>{api.goals().then(setItems)},[]); return <div className="page container"><header className="page-header"><span className="eyebrow">Eu quero...</span><h1>Qual é o seu objetivo?</h1><p>Encontre produtos relacionados ao resultado que você busca.</p></header><div className="selection-grid">{items.map(item=><Link key={item.codigo} to={`/catalogo?objetivos=${item.codigo}`}><strong>{item.nome}</strong><span>{item.quantidadeProdutos} produto(s)</span><ArrowRight/></Link>)}</div></div> }
+const goalVisuals:Record<string,{image:string;description:string}> = {
+  EMAGRECIMENTO:{image:'/assets/imagens/objetivos/emagrecimento.webp',description:'Escolhas para uma rotina equilibrada e consistente.'},
+  GANHO_DE_MASSA:{image:'/assets/imagens/objetivos/ganho-massa.webp',description:'Proteínas, energia e suporte para sua evolução.'},
+  PERFORMANCE:{image:'/assets/imagens/objetivos/performance.webp',description:'Potência e recuperação para ir mais longe.'},
+  SAUDE_E_BEM_ESTAR:{image:'/assets/imagens/objetivos/saude-bem-estar.webp',description:'Cuidado diário para corpo, mente e disposição.'},
+}
+export function GoalsPage() {
+  const [items,setItems]=useState<GoalSummary[]>([])
+  const [loading,setLoading]=useState(true)
+  const [error,setError]=useState('')
+  const load=()=>{setLoading(true);setError('');api.goals().then(setItems).catch((cause:Error)=>setError(cause.message)).finally(()=>setLoading(false))}
+  useEffect(load,[])
+  const productCount=items.reduce((sum,item)=>sum+item.quantidadeProdutos,0)
+  return <main className="page container discovery-page goals-page">
+    <header className="discovery-hero goals-hero">
+      <div className="discovery-hero-copy"><span className="eyebrow"><Target size={14}/> Eu quero...</span><h1>Comece pelo seu objetivo.</h1><p>Escolha o resultado que você busca e encontre uma seleção mais simples para a sua rotina.</p></div>
+      <div className="discovery-stat"><strong>{items.length}</strong><span>objetivos principais</span><small>{productCount} produtos relacionados</small></div>
+    </header>
+    {loading?<Loading label="Carregando objetivos…"/>:error?<ErrorState message={error} retry={load}/>:<section className="goals-directory" aria-label="Objetivos disponíveis">
+      <div className="directory-heading"><div><span className="eyebrow">Escolha seu caminho</span><h2>O que você quer conquistar?</h2></div><Link className="text-link" to="/catalogo">Explorar tudo <ArrowRight size={16}/></Link></div>
+      <div className="goal-selection-grid">{items.map((item,index)=>{const visual=goalVisuals[item.codigo]||Object.values(goalVisuals)[index%4];return <Link key={item.codigo} to={`/catalogo?objetivos=${item.codigo}`} className="goal-selection-card"><img src={visual.image} alt=""/><span className="goal-selection-shade"/><span className="goal-selection-count">{item.quantidadeProdutos} {item.quantidadeProdutos===1?'produto':'produtos'}</span><span className="goal-selection-copy"><strong>{item.nome}</strong><small>{visual.description}</small></span><span className="goal-selection-action" aria-hidden="true"><ArrowRight/></span></Link>})}</div>
+    </section>}
+  </main>
+}
 export function CuratedPage() {
   const { pathname } = useLocation()
   const map:Record<string,{title:string;headline:string;subtitle:string;filters:Record<string,string>;empty:string;metric:string;icon:typeof Sparkles}> = {

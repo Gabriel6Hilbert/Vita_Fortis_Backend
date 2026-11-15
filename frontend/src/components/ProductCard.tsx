@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Heart, ShoppingBag } from 'lucide-react'
+import { ArrowRight, Check, Heart, PackageCheck, ShoppingBag } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import type { Product } from '../types/api'
@@ -17,17 +17,23 @@ export function ProductCard({ product }: { product: Product }) {
   const discountPercent = discounted
     ? Math.max(1, Math.round(Number(product.descontoPercentual) || ((Number(product.preco) - Number(product.precoFinal)) / Number(product.preco)) * 100))
     : 0
+  const kitItemCount = product.atributos?.quantidadeItens
+  const kitContents = product.atributos?.conteudoKit
   const handleAdd = async () => { setBusy(true); try { await add(product.id); setAdded(true); setTimeout(() => setAdded(false), 1800) } catch (error) { alert(error instanceof Error ? error.message : 'Não foi possível adicionar.') } finally { setBusy(false) } }
   return <article className="product-card">
     <Link to={`/produto/${product.id}`} className="product-image-wrap">
-      {product.oferta && discounted && <span className="discount-badge">Oferta -{discountPercent}%</span>}
-      {product.lancamento && <span className="new-badge">Novidade</span>}
+      <span className="product-badge-stack">
+        {product.oferta && discounted && <span className="discount-badge">Oferta -{discountPercent}%</span>}
+        {product.lancamento && <span className="new-badge">Novidade</span>}
+        {product.kit && <span className="kit-badge"><PackageCheck size={13}/>{kitItemCount ? `Kit pronto · ${kitItemCount} itens` : 'Kit pronto'}</span>}
+      </span>
       <button className={`favorite-button ${favorite ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); if (!user) { setFavorite(toggleFavorite(product.id)); return } const next=!favorite; setFavorite(next); void (next ? api.addFavorite(user.id,product.id) : api.removeFavorite(user.id,product.id)).catch(() => setFavorite(!next)) }} aria-label={favorite ? `Remover ${product.nome} dos favoritos` : `Favoritar ${product.nome}`}><Heart fill={favorite ? 'currentColor' : 'none'} /></button>
       <ProductImage key={product.imagemUrl} src={product.imagemUrl} alt={product.nome} className="product-image" width="600" height="600" loading="lazy" decoding="async" />
     </Link>
     <div className="product-body">
       <span className="eyebrow">{product.marca || titleCase(product.categoria)}</span>
       <Link to={`/produto/${product.id}`}><h3>{product.nome}</h3></Link>
+      {product.kit && kitContents && <p className="kit-contents">Inclui: {kitContents}</p>}
       <div className="availability"><Check size={14} /> {product.ativo ? 'Disponível' : 'Indisponível'}</div>
       <div className="price-row">
         <div>{discounted && <small>{money(product.preco)}</small>}<strong>{money(product.precoFinal)}</strong></div>
