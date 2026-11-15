@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test:catalog": "node tests/catalog-race.mjs",
+    "test:customer-e2e": "node tests/customer-e2e.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
