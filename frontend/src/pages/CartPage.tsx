@@ -1,5 +1,5 @@
 import { ArrowRight, Minus, Plus, Trash2 } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../app/AuthContext";
 import { useCart } from "../app/CartContext";
@@ -22,6 +22,12 @@ const emptyAddress: AddressInput = {
 const UFS = ["MG", "SP", "RJ", "ES"];
 
 export function CartPage() {
+  const removalDialog = useRef<HTMLDialogElement>(null);
+  const [removal, setRemoval] = useState<{ message: string; confirm: () => void } | null>(null);
+  const requestRemoval = (message: string, confirm: () => void) => {
+    setRemoval({ message, confirm });
+    removalDialog.current?.showModal();
+  };
   const { user } = useAuth();
   const {
     cart,
@@ -211,6 +217,13 @@ export function CartPage() {
         <span className="eyebrow">Sua seleção</span>
         <h1>Sacola e checkout</h1>
       </header>
+      <dialog className="cart-removal-dialog" ref={removalDialog} aria-labelledby="cart-removal-title" onClose={() => setRemoval(null)}>
+        <h2 id="cart-removal-title">{removal?.message}</h2>
+        <form method="dialog" className="profile-actions">
+          <button className="button secondary" autoFocus>Cancelar</button>
+          <button className="button primary" onClick={() => removal?.confirm()}>Remover</button>
+        </form>
+      </dialog>
       <form className="cart-layout" onSubmit={finish}>
         <section className="cart-items">
           {cart.carrinhoItens.map((original) => { const priced = quote?.itens.find(item => item.produtoId === original.produtoId); const item = priced ? { ...original, precoUnitario: priced.precoUnitario, subtotal: priced.subtotal } : original; return (
@@ -256,9 +269,7 @@ export function CartPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (window.confirm("Remover " + item.produtoNome + " da sacola?")) {
-                      void changeCart(() => remove(item.itemId));
-                    }
+                    requestRemoval("Remover " + item.produtoNome + " da sacola?", () => { void changeCart(() => remove(item.itemId)); });
                   }}
                   aria-label="Remover"
                 >
@@ -271,9 +282,7 @@ export function CartPage() {
             type="button"
             className="text-button danger clear-cart"
             onClick={() => {
-              if (window.confirm("Remover todos os produtos da sacola?")) {
-                void clearCart();
-              }
+              requestRemoval("Remover todos os produtos da sacola?", () => { void clearCart(); });
             }}
             disabled={clearing}
           >

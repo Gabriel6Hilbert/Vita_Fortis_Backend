@@ -43,6 +43,19 @@ public class HomologacaoDataInitializer implements CommandLineRunner {
         produto("HML-ZERO", "Produto Sem Estoque", 49.90, 0, true, "VITAMINAS");
         produto("HML-INATIVO", "Produto Inativo", 39.90, 10, false, "VITAMINAS");
 
+        vitrine("HML-OFERTA-WHEY", "Whey Performance 900g", 189.90, 15, "PROTEINAS",
+                "/assets/imagens/proteina_exemplo.png", true, false, true, 18, 84);
+        vitrine("HML-OFERTA-CREATINA", "Creatina Forca 300g", 119.90, 18, "AMINOACIDOS",
+                "/assets/imagens/creatina", true, false, true, 15, 61);
+        vitrine("HML-KIT-MASSA", "Kit Evolucao Muscular", 329.90, 12, "KITS",
+                "/assets/imagens/imagem whey catalogo.jpg", false, true, true, 12, 42);
+        vitrine("HML-KIT-ROTINA", "Kit Rotina Ativa", 249.90, 10, "KITS",
+                "/assets/imagens/proteina_telafiltraveis.jpg", true, true, false, 10, 27);
+        vitrine("HML-OFERTA-VITAMINAS", "Complexo Vita Daily", 79.90, 22, "VITAMINAS",
+                "/assets/imagens/vitamina_telafiltraveis", true, false, false, 20, 39);
+        vitrine("HML-KIT-BEM-ESTAR", "Kit Bem-estar Essencial", 199.90, 9, "KITS",
+                "/assets/imagens/objetivos/saude-bem-estar.webp", false, true, true, 8, 18);
+
         if (!cupons.existsByCodigoIgnoreCase("COLAB10")) {
             Cupom cupom = new Cupom(); cupom.setCodigo("COLAB10"); cupom.setDescricao("Cupom de homologacao vinculado");
             cupom.setTipo(CupomTipo.PERCENTUAL); cupom.setDesconto(new BigDecimal("10.00")); cupom.setMinSubtotal(BigDecimal.ZERO);
@@ -68,5 +81,27 @@ public class HomologacaoDataInitializer implements CommandLineRunner {
         p.setCodigo(codigo); p.setNome(nome); p.setDescricao("Produto criado exclusivamente para homologacao do fluxo de vendas.");
         p.setMarca("Vita Test"); p.setUnidade("UN"); p.setPreco(BigDecimal.valueOf(preco)); p.setQuantidadeEstoque(estoque);
         p.setCategoria(categoria); p.setAtivo(ativo); produtos.save(p);
+    }
+
+    private void vitrine(String codigo, String nome, double preco, int estoque, String categoria,
+                         String imagemUrl, boolean oferta, boolean kit, boolean destaque,
+                         int descontoPercentual, long totalVendido) {
+        Produto p = produtos.findByCodigoIgnoreCase(codigo).orElseGet(Produto::new);
+        p.setCodigo(codigo);
+        p.setNome(nome);
+        p.setDescricao("Produto ficticio criado exclusivamente para validar a vitrine de homologacao.");
+        p.setMarca("Vita Test");
+        p.setUnidade("UN");
+        p.setPreco(BigDecimal.valueOf(preco));
+        p.setQuantidadeEstoque(estoque);
+        p.setCategoria(categoria);
+        p.setImagemUrl(imagemUrl);
+        p.setOferta(oferta);
+        p.setKit(kit);
+        p.setDestaque(destaque);
+        p.setDescontoPercentual(oferta ? BigDecimal.valueOf(descontoPercentual) : null);
+        p.setTotalVendido(totalVendido);
+        p.setAtivo(true);
+        produtos.save(p);
     }
 }

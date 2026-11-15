@@ -128,18 +128,17 @@ backup, restauracao isolada e baseline descrito em `docs/operacao/BANCO_BACKUP_F
 
 ## E-mail transacional
 
-O projeto usa Spring Mail e esta preparado para o relay SMTP da Brevo. Em producao, cadastre
-os valores abaixo como segredos do provedor de hospedagem; nunca grave a chave SMTP no repositorio:
+Para enviar pela API HTTPS da Brevo no Render, configure as variáveis de ambiente do serviço.
 
-- `MAIL_HOST=smtp-relay.brevo.com`
-- `MAIL_PORT=587`
-- `MAIL_USERNAME`
-- `MAIL_PASSWORD`
-- `MAIL_SMTP_AUTH=true`
-- `MAIL_STARTTLS=true`
-- `EMAIL_FROM` e `EMAIL_REPLY_TO`
-- `FRONTEND_URL`
-- `EMAIL_ENABLED=true`, somente depois de verificar remetente, DKIM/DMARC e realizar o teste real
+- `EMAIL_TRANSPORT=brevo`
+- `BREVO_API_KEY` como segredo do Render
+- `EMAIL_FROM` com um remetente verificado e `EMAIL_REPLY_TO` opcional
+- `FRONTEND_URL` com a URL pública da loja para os links de recuperação e pedidos
+- `EMAIL_ENABLED=true` após verificar o domínio e o remetente na Brevo
+
+Depois do deploy, solicite a recuperação de uma conta de teste e atualize um pedido de teste.
+Confirme o recebimento das duas mensagens e os links para a loja.
+O transporte `smtp` continua disponível com as variáveis `MAIL_*`.
 
 Enquanto `EMAIL_ENABLED=false`, nenhum e-mail e enviado. Falhas de notificacao de pedido sao
 registradas depois do commit e nao desfazem pedido, pagamento ou estoque.

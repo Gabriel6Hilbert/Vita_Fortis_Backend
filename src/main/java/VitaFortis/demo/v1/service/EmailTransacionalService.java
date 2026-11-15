@@ -2,23 +2,43 @@ package VitaFortis.demo.v1.service;
 
 import VitaFortis.demo.v1.enums.FormaRecebimento;
 import VitaFortis.demo.v1.enums.StatusCompra;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 @Service
 public class EmailTransacionalService {
     private final ObjectProvider<JavaMailSender> mailSender;
+    private final RestClient brevo;
 
     @Value("${vita-fortis.email.enabled:false}") private boolean habilitado;
+    @Value("${vita-fortis.email.transport:smtp}") private String transporte;
+    @Value("${vita-fortis.email.brevo-api-key:}") private String brevoApiKey;
     @Value("${vita-fortis.email.from:nao-responda@vitafortis.com.br}") private String remetente;
     @Value("${vita-fortis.email.reply-to:}") private String responderPara;
     @Value("${vita-fortis.frontend-url:http://localhost:5001}") private String frontendUrl;
 
+    @Autowired
     public EmailTransacionalService(ObjectProvider<JavaMailSender> mailSender) {
+        this(mailSender, RestClient.builder());
+    }
+
+    EmailTransacionalService(ObjectProvider<JavaMailSender> mailSender, RestClient.Builder http) {
         this.mailSender = mailSender;
+        var requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(5000);
+        requestFactory.setReadTimeout(5000);
+        this.brevo = http.requestFactory(requestFactory).build();
     }
 
     public boolean habilitado() {
@@ -53,6 +73,11 @@ public class EmailTransacionalService {
 
     private void enviar(String destino, String assunto, String texto) {
         if (!habilitado) return;
+        if ("brevo".equals(transporte)) {
+            enviarViaBrevo(destino, assunto, texto);
+            return;
+        }
+        if (!"smtp".equals(transporte)) throw new IllegalStateException("Transporte de e-mail inválido.");
         JavaMailSender sender = mailSender.getIfAvailable();
         if (sender == null) throw new IllegalStateException("O provedor de e-mail ainda não foi configurado.");
         SimpleMailMessage mensagem = new SimpleMailMessage();
@@ -62,5 +87,32 @@ public class EmailTransacionalService {
         mensagem.setSubject(assunto);
         mensagem.setText(texto);
         sender.send(mensagem);
+    }
+
+    private void enviarViaBrevo(String destino, String assunto, String texto) {
+        if (brevoApiKey.isBlank()) throw new IllegalStateException("Chave da Brevo não configurada.");
+        Map<String, Object> mensagem = new LinkedHashMap<>();
+        mensagem.put("sender", Map.of("email", remetente, "name", "Vita Fortis"));
+        mensagem.put("to", List.of(Map.of("email", destino)));
+        mensagem.put("subject", assunto);
+        mensagem.put("textContent", texto);
+        if (!responderPara.isBlank()) mensagem.put("replyTo", Map.of("email", responderPara));
+
+        try {
+            brevo.post()
+                    .uri("https://api.brevo.com/v3/smtp/email")
+                    .header("api-key", brevoApiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(mensagem)
+                    .exchange((request, response) -> {
+                        if (response.getStatusCode().value() != 201) {
+                            throw new IllegalStateException("A Brevo rejeitou o envio (HTTP "
+                                    + response.getStatusCode().value() + ").");
+                        }
+                        return null;
+                    });
+        } catch (RestClientException erro) {
+            throw new IllegalStateException("Não foi possível conectar ao serviço de e-mail da Brevo.");
+        }
     }
 }

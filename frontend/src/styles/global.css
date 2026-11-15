@@ -5140,3 +5140,182 @@ body {
     font-size: clamp(28px, 8vw, 38px);
   }
 }
+
+.order-card footer .icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+.account-page .chart-card:nth-child(odd) :is(label, p, .recent-order, td, th) {
+  color: #f3f1e9;
+}
+.cart-removal-dialog {
+  width: min(440px, calc(100% - 32px));
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--brand-black);
+  background: white;
+}
+.cart-removal-dialog::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+.cart-removal-dialog .profile-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Vitrines de descoberta: ofertas, kits, novidades e marcas. */
+.discovery-page {
+  --discovery-ink: #11110f;
+  --discovery-paper: #f8f6ef;
+  --discovery-line: rgba(17, 17, 15, .13);
+  display: grid;
+  gap: 36px;
+  padding-top: 32px;
+}
+.discovery-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 300px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, .5fr);
+  align-items: end;
+  gap: clamp(28px, 6vw, 84px);
+  overflow: hidden;
+  padding: clamp(30px, 5vw, 64px);
+  color: #fff;
+  background: var(--discovery-ink);
+  border-radius: 28px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .16);
+}
+.discovery-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto -6% -45% auto;
+  width: min(52vw, 660px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--brand-yellow);
+  opacity: .92;
+}
+.discovery-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: .18;
+  background: repeating-linear-gradient(135deg, transparent 0 22px, rgba(255,255,255,.13) 22px 23px);
+}
+.discovery-hero-copy { max-width: 760px; }
+.discovery-hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand-yellow);
+}
+.discovery-hero h1 {
+  max-width: 760px;
+  margin: 12px 0 16px;
+  color: #fff;
+  font-size: clamp(2.65rem, 6vw, 5.6rem);
+  line-height: .92;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+}
+.discovery-hero p {
+  max-width: 620px;
+  margin: 0;
+  color: #d8d5ca;
+  font-size: clamp(1rem, 1.6vw, 1.18rem);
+  line-height: 1.55;
+}
+.discovery-hero .button { margin-top: 28px; }
+.discovery-stat {
+  position: relative;
+  z-index: 1;
+  align-self: end;
+  display: grid;
+  color: var(--discovery-ink);
+}
+.discovery-stat strong { font-size: clamp(4rem, 8vw, 7rem); line-height: .8; letter-spacing: -.08em; }
+.discovery-stat span { margin-top: 14px; font-size: 1.05rem; font-weight: 800; }
+.discovery-stat small { margin-top: 4px; font-size: .82rem; font-weight: 650; }
+.curated-hero { grid-template-columns: minmax(0, 1.4fr) minmax(260px, .6fr); }
+.curated-hero-mark {
+  position: relative;
+  z-index: 1;
+  min-height: 180px;
+  display: grid;
+  align-content: space-between;
+  padding: 24px;
+  color: var(--discovery-ink);
+  border: 2px solid var(--discovery-ink);
+  border-radius: 20px;
+  background: var(--brand-yellow);
+  box-shadow: 9px 9px 0 #fff;
+  transform: rotate(2deg);
+}
+.curated-hero-mark svg { width: 42px; height: 42px; stroke-width: 1.7; }
+.curated-hero-mark span { font-size: clamp(2.2rem, 5vw, 4.6rem); font-weight: 900; line-height: .9; letter-spacing: -.06em; }
+.brand-directory,
+.curated-products {
+  padding: clamp(24px, 4vw, 46px);
+  border: 1px solid var(--discovery-line);
+  border-radius: 26px;
+  background: var(--discovery-paper);
+  box-shadow: 0 16px 42px rgba(32, 29, 18, .08);
+}
+.directory-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.directory-heading h2 { margin: 6px 0 0; font-size: clamp(1.8rem, 3.2vw, 3rem); line-height: 1; letter-spacing: -.04em; }
+.curated-benefits { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
+.curated-benefits span { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; color: #4d4a40; background: #fff; border: 1px solid var(--discovery-line); border-radius: 999px; font-size: .8rem; font-weight: 750; }
+.brand-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.brand-grid a {
+  position: relative;
+  min-height: 154px;
+  padding: 24px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 18px;
+  box-shadow: none;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.brand-grid a::after { content: ""; position: absolute; inset: auto -22px -35px auto; width: 100px; aspect-ratio: 1; border: 1px solid rgba(249,215,0,.32); border-radius: 50%; }
+.brand-grid a:hover { transform: translateY(-4px); background: #24231f; box-shadow: 0 14px 28px rgba(0,0,0,.17); }
+.brand-grid .brand-index { color: var(--brand-yellow); font-size: .7rem; font-weight: 800; letter-spacing: .14em; }
+.brand-grid a strong { align-self: end; font-size: clamp(1.1rem, 2vw, 1.45rem); letter-spacing: -.025em; }
+.brand-grid a > span:not(.brand-index) { font-size: .84rem; }
+.curated-products .product-grid { margin-top: 0; }
+.curated-products .product-card .availability { color: #c9c5b8; }
+.curated-products .product-card .availability svg { color: var(--brand-yellow); }
+.discovery-page > .state { min-height: 260px; border-radius: 24px; background: #fff; }
+
+@media (max-width: 900px) {
+  .discovery-hero,
+  .curated-hero { grid-template-columns: 1fr; min-height: auto; }
+  .discovery-stat { width: fit-content; padding: 22px; border-radius: 18px; background: var(--brand-yellow); }
+  .curated-hero-mark { width: min(100%, 360px); min-height: 150px; }
+  .brand-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .discovery-page { gap: 22px; padding-top: 18px; }
+  .discovery-hero { padding: 28px 22px; border-radius: 20px; }
+  .discovery-hero h1 { font-size: clamp(2.45rem, 13vw, 4rem); }
+  .discovery-hero::before { width: 360px; opacity: .78; }
+  .curated-hero-mark { min-height: 118px; padding: 18px; box-shadow: 6px 6px 0 #fff; }
+  .brand-directory,
+  .curated-products { padding: 20px 16px; border-radius: 20px; }
+  .directory-heading { align-items: flex-start; flex-direction: column; margin-bottom: 22px; }
+  .curated-benefits { justify-content: flex-start; }
+  .brand-grid { grid-template-columns: 1fr; gap: 12px; }
+  .brand-grid a { min-height: 126px; }
+}

@@ -1,4 +1,4 @@
-import { BadgeDollarSign, ShoppingBag } from 'lucide-react'
+import { BadgeDollarSign, ChevronDown, ReceiptText, ShoppingBag } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../app/AuthContext'
@@ -6,6 +6,7 @@ import { ErrorState, Loading } from '../components/States'
 import { ApiError, api } from '../services/api'
 import { isCollaborator, type CollaboratorReport, type CollaboratorSummary } from '../types/api'
 import { money } from '../utils/format'
+import './CollaboratorPage.css'
 
 export function CollaboratorPage() {
   const { user } = useAuth()
@@ -32,15 +33,35 @@ export function CollaboratorPage() {
   }
 
   return <div className="page container collaborator-page">
-    <header className="page-header compact"><span className="eyebrow">Painel do colaborador</span><h1>Olá, {user.nome.split(' ')[0]}.</h1><p>Consulte seu saldo e escolha como deseja utilizá-lo.</p><div className="profile-actions"><Link className="button primary" to="/catalogo"><ShoppingBag /> Comprar produtos</Link><Link className="button secondary" to="/pedidos">Meus pedidos</Link></div></header>
-    <nav className="profile-actions collaborator-nav" aria-label="Painel do colaborador">
-      <a className="button secondary" href="#cashback-colaborador">Cashback</a>
-      {user.permissaoRelatorios && <a className="button secondary" href="#relatorios-colaborador">Relatórios</a>}
-    </nav>
-    <div id="cashback-colaborador">
+    <header className="collaborator-header">
+      <div><p>Painel do colaborador</p><h1>Olá, {user.nome.split(' ')[0]}.</h1></div>
+      <div className="collaborator-actions">
+        <Link className="button primary" to="/catalogo"><ShoppingBag aria-hidden="true" /> Comprar produtos</Link>
+        <Link className="button secondary" to="/pedidos"><ReceiptText aria-hidden="true" /> Meus pedidos</Link>
+        {user.permissaoRelatorios && <a className="button secondary" href="#relatorios-colaborador">Relatórios</a>}
+      </div>
+    </header>
+    <div id="cashback-colaborador" className="collaborator-cashback">
     {error ? <ErrorState message={error} retry={load} /> : loading || !data ? <Loading /> : <>
-      <article className="cashback-balance-card"><BadgeDollarSign /><span>Saldo disponível de cashback</span><strong>{money(data.saldo)}</strong><p>Valor acumulado pelos pedidos elegíveis e confirmados.</p></article>
-      <section className="chart-card"><h2>Como receber ou usar o cashback</h2><p>Sua escolha fica salva e pode ser alterada.</p><label>Destino do cashback<select value={data.destinoCashback || ''} onChange={event => event.target.value && choose(event.target.value as 'PIX' | 'DESCONTO')}><option value="" disabled>Escolha uma opção</option><option value="PIX">Receber por Pix</option><option value="DESCONTO">Usar como desconto em compras</option></select></label></section>
+      <section className="collaborator-balance">
+        <BadgeDollarSign aria-hidden="true" />
+        <h2>Saldo disponível de cashback</h2>
+        <strong>{money(data.saldo)}</strong>
+        <p>Acumulado em pedidos elegíveis e confirmados.</p>
+      </section>
+      <section className="collaborator-preference">
+        <h2>Como usar o cashback</h2>
+        <label htmlFor="cashback-destination">Destino do cashback</label>
+        <div className="collaborator-select">
+          <select id="cashback-destination" aria-describedby="cashback-preference-help" value={data.destinoCashback || ''} onChange={event => event.target.value && choose(event.target.value as 'PIX' | 'DESCONTO')}>
+            <option value="" disabled>Escolha uma opção</option>
+            <option value="PIX">Receber por Pix</option>
+            <option value="DESCONTO">Usar como desconto em compras</option>
+          </select>
+          <ChevronDown aria-hidden="true" />
+        </div>
+        <p id="cashback-preference-help">A escolha é salva automaticamente e pode ser alterada a qualquer momento.</p>
+      </section>
     </>}
     </div>
     {user.permissaoRelatorios && <div id="relatorios-colaborador"><OwnReports key={user.id} /></div>}
@@ -67,7 +88,7 @@ function OwnReports() {
   }, [attempt])
   if (error) return <ErrorState message={error} retry={() => { setError(''); setAttempt(value => value + 1) }} />
   if (!report) return <Loading label="Carregando relatórios…" />
-  return <section className="chart-card">
+  return <section className="collaborator-reports">
     <h2>Meus relatórios</h2>
     <h3>Extrato de cashback</h3>
     {report.movimentos.length ? <ul>{report.movimentos.map(item => <li key={item.id}>

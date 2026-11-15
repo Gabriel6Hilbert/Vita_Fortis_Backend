@@ -1,0 +1,133 @@
+.collaborator-page {
+  display: grid;
+  gap: 20px;
+}
+
+.collaborator-header,
+.collaborator-balance,
+.collaborator-preference,
+.collaborator-reports {
+  padding: clamp(20px, 4vw, 36px);
+  border: 1px solid #e4dbc1;
+  border-radius: 20px;
+  background: #fffcf3;
+  color: var(--brand-black);
+}
+
+.collaborator-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.collaborator-header p {
+  margin: 0 0 6px;
+  color: #645529;
+  font-weight: 700;
+}
+
+.collaborator-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.collaborator-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.collaborator-actions .button {
+  min-height: 44px;
+}
+
+.collaborator-cashback {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.collaborator-cashback > :only-child {
+  grid-column: 1 / -1;
+}
+
+.collaborator-balance {
+  background: var(--brand-charcoal);
+  color: #fff;
+  border-color: var(--brand-charcoal);
+}
+
+.collaborator-balance > svg {
+  width: 36px;
+  height: 36px;
+  padding: 7px;
+  border-radius: 10px;
+  background: var(--brand-yellow);
+  color: var(--brand-black);
+}
+
+.collaborator-balance h2 {
+  margin: 14px 0 4px;
+  font-size: 1rem;
+  color: inherit;
+}
+
+.collaborator-balance strong {
+  display: block;
+  color: var(--brand-yellow);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.collaborator-balance p,
+.collaborator-preference p {
+  margin: 12px 0 0;
+}
+
+.collaborator-balance p { color: #d5d0bd; }
+.collaborator-preference p { color: #5b523f; }
+
+.collaborator-preference h2,
+.collaborator-reports h2 {
+  margin: 0 0 20px;
+  font-size: 1.35rem;
+}
+
+.collaborator-preference label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.collaborator-select { position: relative; }
+
+.collaborator-select select {
+  appearance: none;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 36px 8px 12px;
+  border: 1px solid #847c67;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--brand-black);
+  font: inherit;
+}
+
+.collaborator-select > svg {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+@media (max-width: 680px) {
+  .collaborator-cashback { grid-template-columns: minmax(0, 1fr); }
+}

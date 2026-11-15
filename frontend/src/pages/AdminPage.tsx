@@ -1,3 +1,4 @@
+import { CollaboratorPage } from './CollaboratorPage';
 import {
   BarChart3,
   Boxes,
@@ -30,6 +31,7 @@ import { OrderFiltersForm } from "../components/OrderFiltersForm";
 import { PrivacyAdmin } from "../components/PrivacyAdmin";
 import {
   isAdmin,
+  isCollaborator,
   type AdminMetrics,
   type Coupon,
   type Order,
@@ -94,6 +96,11 @@ function nextOrderStatuses(order: Order): string[] {
 }
 
 export function AdminPage() {
+  const { user } = useAuth();
+  return isCollaborator(user) ? <CollaboratorPage /> : <AdminPanel />;
+}
+
+function AdminPanel() {
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [registrations, setRegistrations] = useState<CatalogRegistration[]>([]);
