@@ -32,6 +32,9 @@ public class RecuperacaoSenhaService {
 
     @Transactional
     public void solicitar(String email) {
+        if (!emails.configurado()) {
+            throw new EmailIndisponivelException();
+        }
         usuarios.findByEmail(email.trim().toLowerCase()).filter(usuario -> usuario.isAtivo()).ifPresent(usuario -> {
             recuperacoes.findAllByUsuarioIdAndUtilizadoEmIsNull(usuario.getId())
                     .forEach(anterior -> anterior.setUtilizadoEm(LocalDateTime.now()));
@@ -44,8 +47,14 @@ public class RecuperacaoSenhaService {
             recuperacao.setExpiraEm(LocalDateTime.now().plusMinutes(30));
             recuperacoes.save(recuperacao);
 
-            if (emails.habilitado()) emails.enviarRecuperacaoSenha(usuario.getEmail(), usuario.getNome(), token);
+            emails.enviarRecuperacaoSenha(usuario.getEmail(), usuario.getNome(), token);
         });
+    }
+
+    public static final class EmailIndisponivelException extends RuntimeException {
+        public EmailIndisponivelException() {
+            super("O envio de recuperação está temporariamente indisponível. Fale com a Vita Fortis pelos canais oficiais.");
+        }
     }
 
     @Transactional(noRollbackFor = IllegalArgumentException.class)

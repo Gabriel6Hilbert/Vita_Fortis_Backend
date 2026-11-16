@@ -27,6 +27,17 @@ class RecuperacaoSenhaServiceTest {
     private final RecuperacaoSenhaService service = new RecuperacaoSenhaService(usuarios, recuperacoes, encoder, emails);
 
     @Test
+    void naoFingeQueEnviouQuandoEmailNaoEstaConfigurado() {
+        when(emails.configurado()).thenReturn(false);
+
+        RecuperacaoSenhaService.EmailIndisponivelException erro = assertThrows(
+                RecuperacaoSenhaService.EmailIndisponivelException.class,
+                () -> service.solicitar("cliente@vitafortis.test"));
+
+        assertEquals("O envio de recuperação está temporariamente indisponível. Fale com a Vita Fortis pelos canais oficiais.", erro.getMessage());
+    }
+
+    @Test
     void redefineSenhaEInvalidaTokensPendentes() {
         Usuario usuario = new Usuario();
         usuario.setId(7L);

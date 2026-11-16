@@ -2773,7 +2773,7 @@ p {
 .search button,
 .menu-toggle,
 .header-action { min-width: 44px; min-height: 44px; }
-.nav .container { min-height: 48px; justify-content: center; gap: clamp(24px, 3vw, 44px); }
+.nav .container { min-height: 48px; justify-content: center; gap: clamp(12px, 1.7vw, 28px); }
 .nav a { padding-block: 15px; font-size: .78rem; letter-spacing: .035em; }
 
 .hero-carousel {
@@ -5178,8 +5178,29 @@ body {
   justify-content: center;
   white-space: nowrap;
 }
+.order-card footer .icon-button svg,
+.order-detail-products img,
+.order-product img {
+  flex: 0 0 auto;
+}
+.order-detail-products img,
+.order-product img {
+  aspect-ratio: 1;
+  object-fit: contain;
+}
 .account-page .chart-card:nth-child(odd) :is(label, p, .recent-order, td, th) {
   color: #f3f1e9;
+}
+.account-page .chart-card:nth-child(even) :is(h2, label, p, .recent-order, td, th) {
+  color: var(--brand-black);
+}
+.account-page .chart-card:nth-child(odd) :is(input, select, textarea) {
+  color: var(--brand-black);
+  background: #fff;
+}
+.collaborator-report-scope {
+  color: var(--muted);
+  margin: -4px 0 18px;
 }
 .cart-removal-dialog {
   width: min(440px, calc(100% - 32px));

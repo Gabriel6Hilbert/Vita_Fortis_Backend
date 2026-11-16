@@ -38,7 +38,7 @@ export function CollaboratorPage() {
       <div className="collaborator-actions">
         <Link className="button primary" to="/catalogo"><ShoppingBag aria-hidden="true" /> Comprar produtos</Link>
         <Link className="button secondary" to="/pedidos"><ReceiptText aria-hidden="true" /> Meus pedidos</Link>
-        {user.permissaoRelatorios && <a className="button secondary" href="#relatorios-colaborador">Relatórios</a>}
+        {user.permissaoRelatorios && <a className="button secondary" href="#relatorios-colaborador">Meu extrato</a>}
       </div>
     </header>
     <div id="cashback-colaborador" className="collaborator-cashback">
@@ -89,7 +89,8 @@ function OwnReports() {
   if (error) return <ErrorState message={error} retry={() => { setError(''); setAttempt(value => value + 1) }} />
   if (!report) return <Loading label="Carregando relatórios…" />
   return <section className="collaborator-reports">
-    <h2>Meus relatórios</h2>
+    <h2>Meu extrato e meus cupons</h2>
+    <p className="collaborator-report-scope">Aqui aparecem somente os dados vinculados ao seu próprio cadastro.</p>
     <h3>Extrato de cashback</h3>
     {report.movimentos.length ? <ul>{report.movimentos.map(item => <li key={item.id}>
       {new Date(item.criadoEm).toLocaleDateString('pt-BR')} · {movementLabels[item.tipo]} · {money(item.valor)}

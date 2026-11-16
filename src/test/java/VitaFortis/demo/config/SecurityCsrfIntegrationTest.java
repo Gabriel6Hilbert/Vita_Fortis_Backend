@@ -47,7 +47,7 @@ class SecurityCsrfIntegrationTest {
     }
 
     @Test
-    void loginERecuperacaoPublicosExigemTokenEContinuamFuncionando() throws Exception {
+    void loginERecuperacaoPublicosExigemTokenESinalizamEmailNaoConfigurado() throws Exception {
         mvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"cliente@vitafortis.test\",\"senha\":\"Teste@123\"}"))
@@ -59,8 +59,8 @@ class SecurityCsrfIntegrationTest {
                         .header(csrf.headerName(), csrf.token())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"nao-cadastrado@vitafortis.test\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").isNotEmpty());
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.mensagem").value("O envio de recuperação está temporariamente indisponível. Fale com a Vita Fortis pelos canais oficiais."));
     }
 
     @Test

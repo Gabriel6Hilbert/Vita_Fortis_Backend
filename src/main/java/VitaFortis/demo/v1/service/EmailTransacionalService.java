@@ -27,6 +27,9 @@ public class EmailTransacionalService {
     @Value("${vita-fortis.email.from:nao-responda@vitafortis.com.br}") private String remetente;
     @Value("${vita-fortis.email.reply-to:}") private String responderPara;
     @Value("${vita-fortis.frontend-url:http://localhost:5001}") private String frontendUrl;
+    @Value("${spring.mail.host:localhost}") private String smtpHost;
+    @Value("${spring.mail.username:}") private String smtpUsuario;
+    @Value("${spring.mail.password:}") private String smtpSenha;
 
     @Autowired
     public EmailTransacionalService(ObjectProvider<JavaMailSender> mailSender) {
@@ -43,6 +46,16 @@ public class EmailTransacionalService {
 
     public boolean habilitado() {
         return habilitado;
+    }
+
+    public boolean configurado() {
+        if (!habilitado) return false;
+        if ("brevo".equalsIgnoreCase(transporte)) return !brevoApiKey.isBlank();
+        return "smtp".equalsIgnoreCase(transporte)
+                && !smtpHost.isBlank()
+                && !"localhost".equalsIgnoreCase(smtpHost)
+                && !smtpUsuario.isBlank()
+                && !smtpSenha.isBlank();
     }
 
     public void enviarRecuperacaoSenha(String email, String nome, String token) {

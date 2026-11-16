@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import jakarta.servlet.http.HttpServletRequest;
+import VitaFortis.demo.v1.service.RecuperacaoSenhaService.EmailIndisponivelException;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -16,6 +17,11 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(EmailIndisponivelException.class)
+    ResponseEntity<Map<String, Object>> emailIndisponivel(EmailIndisponivelException ex) {
+        return resposta(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage(), null);
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     ResponseEntity<Map<String, Object>> arquivoGrande(MaxUploadSizeExceededException ex, HttpServletRequest request) {
         String mensagem = request.getRequestURI().endsWith("/produtos/imagens")
