@@ -209,7 +209,7 @@ export function CartPage() {
     setReviewing(false); setQuote(null); setReviewedInput(null);
     try { await action(); } catch (error) { setMessage(error instanceof Error ? error.message : 'Não foi possível atualizar a sacola.'); }
   };
-  const lookupCep=async()=>{const cep=newAddress.cep.replace(/\D/g,'');if(cep.length!==8){setCepStatus('Informe os 8 dígitos do CEP.');return}setCepStatus('Consultando CEP…');try{const response=await fetch(`https://viacep.com.br/ws/${cep}/json/`);if(!response.ok)throw new Error();const data=await response.json();if(data.erro)throw new Error();setNewAddress(current=>({...current,cep,logradouro:data.logradouro||current.logradouro,bairro:data.bairro||current.bairro,cidade:data.localidade||current.cidade,uf:data.uf||current.uf}));setCepStatus('Endereço localizado. Confira o número e os dados.') }catch{setCepStatus('CEP não encontrado. Confira e tente novamente.')}};
+  const lookupCep=async()=>{const cep=newAddress.cep.replace(/\D/g,'');if(cep.length!==8){setCepStatus('Informe os 8 dígitos do CEP.');return}setCepStatus('Consultando CEP…');try{const response=await fetch(`https://viacep.com.br/ws/${cep}/json/`,{signal:AbortSignal.timeout(20_000)});if(!response.ok)throw new Error();const data=await response.json();if(data.erro)throw new Error();setNewAddress(current=>({...current,cep,logradouro:data.logradouro||current.logradouro,bairro:data.bairro||current.bairro,cidade:data.localidade||current.cidade,uf:data.uf||current.uf}));setCepStatus('Endereço localizado. Confira o número e os dados.') }catch{setCepStatus('CEP não encontrado. Confira e tente novamente.')}};
 
   return (
     <div className="page container">

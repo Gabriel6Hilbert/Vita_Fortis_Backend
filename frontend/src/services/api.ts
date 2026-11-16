@@ -4,6 +4,11 @@ const API_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const SESSION_KEY = 'vita-fortis-session'
 const PUBLIC_CACHE_MS = 30_000
 const PUBLIC_CACHE_LIMIT = 64
+const READ_TIMEOUT_MS = 90_000
+const WRITE_TIMEOUT_MS = 120_000
+const CSRF_TIMEOUT_MS = 90_000
+const SESSION_CHECK_TIMEOUT_MS = 30_000
+const RETRYABLE_STATUS = new Set([502, 503, 504])
 const publicCache = new Map<string, { expiresAt: number; promise: Promise<unknown> }>()
 type CsrfToken = { headerName: string; token: string }
 let csrfTokenPromise: Promise<CsrfToken> | null = null
@@ -47,19 +52,32 @@ export const setSession = (session: Session | null) => session ? sessionStorage.
 
 const unavailable = 'A Vita Fortis está temporariamente indisponível. Tente novamente em instantes.'
 const networkFailure = 'Não foi possível conectar à Vita Fortis. Verifique sua conexão e tente novamente.'
+const timeoutFailure = 'A Vita Fortis está levando mais tempo que o esperado. Tente novamente em instantes.'
+const delay = (milliseconds: number) => new Promise(resolve => window.setTimeout(resolve, milliseconds))
+const isAbortError = (error: unknown) => error instanceof DOMException && error.name === 'TimeoutError'
 
 const csrfToken = (): Promise<CsrfToken> => {
   if (!csrfTokenPromise) {
-    csrfTokenPromise = fetch(`${API_URL}/auth/csrf`, {
-      headers: { Accept: 'application/json' },
-      credentials: 'include',
-      signal: AbortSignal.timeout(20_000),
-    }).then(async (response) => {
-      if (!response.ok) throw new ApiError(response.status >= 500 ? unavailable : 'Não foi possível iniciar a sessão. Tente novamente.', response.status)
-      return response.json() as Promise<CsrfToken>
-    }).catch((error) => {
+    csrfTokenPromise = (async () => {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const response = await fetch(`${API_URL}/auth/csrf`, {
+            headers: { Accept: 'application/json' },
+            credentials: 'include',
+            signal: AbortSignal.timeout(CSRF_TIMEOUT_MS),
+          })
+          if (RETRYABLE_STATUS.has(response.status) && attempt === 0) { await delay(1_000); continue }
+          if (!response.ok) throw new ApiError(response.status >= 500 ? unavailable : 'Não foi possível iniciar a sessão. Tente novamente.', response.status)
+          return response.json() as Promise<CsrfToken>
+        } catch (error) {
+          if (attempt === 0 && !(error instanceof ApiError)) { await delay(1_000); continue }
+          throw error
+        }
+      }
+      throw new ApiError(unavailable, 503)
+    })().catch((error) => {
       csrfTokenPromise = null
-      throw error instanceof ApiError ? error : new ApiError(networkFailure, 0)
+      throw error instanceof ApiError ? error : new ApiError(isAbortError(error) ? timeoutFailure : networkFailure, 0)
     })
   }
   return csrfTokenPromise
@@ -77,15 +95,33 @@ const request = async <T>(path: string, init: RequestInit = {}, authenticated = 
   if (authenticated) {
     if (!getSession()) throw new ApiError('Faça login para continuar.', 401)
   }
-  let response: Response
-  try { response = await fetch(`${API_URL}${path}`, { ...init, headers, credentials:'include', signal: init.signal ?? AbortSignal.timeout(30_000) }) }
-  catch { throw new ApiError(networkFailure, 0) }
+  let response: Response | undefined
+  const maxAttempts = method === 'GET' && !init.signal ? 3 : 1
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      response = await fetch(`${API_URL}${path}`, {
+        ...init,
+        headers,
+        credentials:'include',
+        signal: init.signal ?? AbortSignal.timeout(method === 'GET' ? READ_TIMEOUT_MS : WRITE_TIMEOUT_MS),
+      })
+      if (RETRYABLE_STATUS.has(response.status) && attempt + 1 < maxAttempts) {
+        await delay(750 * (attempt + 1))
+        continue
+      }
+      break
+    } catch (error) {
+      if (attempt + 1 < maxAttempts) { await delay(750 * (attempt + 1)); continue }
+      throw new ApiError(isAbortError(error) ? timeoutFailure : networkFailure, 0)
+    }
+  }
+  if (!response) throw new ApiError(networkFailure, 0)
   const contentType = response.headers.get('content-type') || ''
   if (response.status >= 500) throw new ApiError(unavailable, response.status)
   if (response.status === 403) {
     csrfTokenPromise = null
     if (authenticated) {
-      const session = await fetch(API_URL + '/me', { credentials: 'include', signal: AbortSignal.timeout(5_000) }).catch(() => null)
+      const session = await fetch(API_URL + '/me', { credentials: 'include', signal: AbortSignal.timeout(SESSION_CHECK_TIMEOUT_MS) }).catch(() => null)
       if (session && [401, 403].includes(session.status)) {
         throw new ApiError('Sua sessão expirou. Entre novamente para continuar.', 401)
       }
@@ -214,7 +250,7 @@ export const api = {
   adminReviews: () => request<Review[]>('/admin/avaliacoes',{},true),
   moderateReview: (id:number,valor:boolean) => request<Review>(`/admin/avaliacoes/${id}/aprovada?valor=${valor}`,{method:'PATCH'},true),
   downloadReport: async (tipo:string,inicio:string,fim:string,formato:'csv'|'pdf'|'xlsx'='csv',filtros:Record<string,string>={}) => {
-    const response=await fetch(`${API_URL}/admin/relatorios/${tipo}.${formato}${query({...filtros,inicio,fim})}`,{credentials:'include'})
+    const response=await fetch(`${API_URL}/admin/relatorios/${tipo}.${formato}${query({...filtros,inicio,fim})}`,{credentials:'include',signal:AbortSignal.timeout(180_000)}).catch(error=>{throw new ApiError(isAbortError(error)?timeoutFailure:networkFailure,0)})
     if(!response.ok) { const payload=await response.json().catch(()=>null); throw new ApiError(apiErrorMessage(payload,response.status),response.status) }
     const blob=await response.blob(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`vita-fortis-${tipo.toLowerCase()}.${formato}`; a.click(); URL.revokeObjectURL(url)
   },
