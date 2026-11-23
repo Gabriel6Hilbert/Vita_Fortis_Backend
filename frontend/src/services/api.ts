@@ -202,9 +202,17 @@ export const api = {
   privacyRequests: () => request<PrivacyRequest[]>('/privacidade/solicitacoes',{},true),
   createPrivacyRequest: (body:{tipo:PrivacyRequestType;descricao:string}) => request<PrivacyRequest>('/privacidade/solicitacoes',{method:'POST',body:JSON.stringify(body)},true),
   favorites: (userId: number) => request<Product[]>(`/usuarios/${userId}/favoritos`, {}, true),
+  homeSections: () => request<import('../types/api').HomeSection[]>('/home/secoes'),
+  homeGoals: () => request<import('../types/api').HomeGoal[]>('/home/objetivos'),
   addFavorite: (userId: number, productId: number) => request<Product>(`/usuarios/${userId}/favoritos/${productId}`, { method: 'POST' }, true),
   removeFavorite: (userId: number, productId: number) => request<void>(`/usuarios/${userId}/favoritos/${productId}`, { method: 'DELETE' }, true),
   adminProducts: (filters: Record<string, string | number | boolean | undefined>) => request<Page<Product>>(`/admin/produtos${query(filters)}`,{},true),
+  adminHomeSections: () => request<import('../types/api').HomeSection[]>('/admin/home/secoes', {}, true),
+  saveHomeSection: (section: import('../types/api').HomeSection) => request<import('../types/api').HomeSection>(`/admin/home/secoes/${section.chave}`, { method: 'PUT', body: JSON.stringify(section) }, true),
+  saveHomeOrder: (secoes:{chave:string;posicao:number}[]) => request<import('../types/api').HomeSection[]>('/admin/home/secoes/ordem',{method:'PUT',body:JSON.stringify({secoes})},true),
+  adminHomeGoals: () => request<import('../types/api').HomeGoal[]>('/admin/home/objetivos',{},true),
+  saveHomeGoal: (goal:import('../types/api').HomeGoal) => request<import('../types/api').HomeGoal>(`/admin/home/objetivos/${goal.chave}`,{method:'PUT',body:JSON.stringify(goal)},true),
+  uploadHomeImage: (file:File) => { const body=new FormData();body.append('imagem',file);return request<{url:string}>('/admin/home/secoes/imagens',{method:'POST',body},true) },
   saveProduct: (body: Partial<Product>, id?: number) => request<Product>(`/admin/produtos${id ? `/${id}` : ''}`, { method: id ? 'PUT' : 'POST', body: JSON.stringify(body) }, true),
   uploadProductImage: (file: File) => {
     const body = new FormData()

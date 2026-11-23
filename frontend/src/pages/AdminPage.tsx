@@ -10,6 +10,7 @@ import {
   Pencil,
   Plus,
   ImagePlus,
+  LayoutTemplate,
   Search,
   ShieldAlert,
   TicketPercent,
@@ -29,6 +30,7 @@ import { CatalogAdmin } from "../components/CatalogAdmin";
 import type { CatalogRegistration } from "../types/api";
 import { OrderFiltersForm } from "../components/OrderFiltersForm";
 import { PrivacyAdmin } from "../components/PrivacyAdmin";
+import { HomeSectionsAdmin } from "../components/HomeSectionsAdmin";
 import {
   isAdmin,
   isCollaborator,
@@ -47,6 +49,7 @@ type Tab =
   | "dashboard"
   | "products"
   | "catalog"
+  | "home"
   | "orders"
   | "users"
   | "coupons"
@@ -57,6 +60,7 @@ const adminTabs = [
   ["dashboard", BarChart3, "Visão geral"],
   ["products", Boxes, "Produtos"],
   ["catalog", Boxes, "Categorias e atributos"],
+  ["home", LayoutTemplate, "Home"],
   ["orders", PackageCheck, "Pedidos"],
   ["users", Users, "Usuários"],
   ["coupons", TicketPercent, "Cupons"],
@@ -79,6 +83,7 @@ const blankProduct: Partial<Product> = {
   destaque: false,
   oferta: false,
   kit: false,
+  valorItensSeparados: null,
   valorDesconto: 0,
 };
 function nextOrderStatuses(order: Order): string[] {
@@ -497,6 +502,7 @@ function AdminPanel() {
             )
           ))}
         {tab === "catalog" && !loading && !error && <CatalogAdmin items={registrations} reload={load} />}
+        {tab === "home" && <HomeSectionsAdmin />}
         {tab !== "dashboard" && tab !== "catalog" &&
           !error &&
           (loading ? (
@@ -1118,13 +1124,18 @@ function AdminPanel() {
             <header>
               <div>
                 <span className="eyebrow">Cadastro</span>
-                <h2>{productForm.id ? "Editar produto" : "Novo produto"}</h2>
+                <h2>{productForm.id ? `Editar ${productForm.kit ? "kit" : "produto"}` : `Novo ${productForm.kit ? "kit" : "produto"}`}</h2>
               </div>
               <button type="button" disabled={imageUploading || productSaving} aria-label="Fechar cadastro de produto" onClick={() => openProductForm(null)}>
                 <X />
               </button>
             </header>
             <fieldset className="form-grid product-editor-fields" disabled={productSaving}>
+              <fieldset className="full kit-type-picker">
+                <legend>Tipo do item</legend>
+                <label className={!productForm.kit ? "selected" : ""}><input type="radio" name="product-type" checked={!productForm.kit} onChange={() => { const atributos={...productForm.atributos}; delete atributos.quantidadeItens; delete atributos.conteudoKit; setProductForm({...productForm,kit:false,valorItensSeparados:null,atributos}) }} /><strong>Produto</strong><span>Item individual do catálogo</span></label>
+                <label className={productForm.kit ? "selected" : ""}><input type="radio" name="product-type" checked={Boolean(productForm.kit)} onChange={() => setProductForm({...productForm,kit:true})} /><strong>Kit</strong><span>Conjunto fotografado e vendido como um item</span></label>
+              </fieldset>
               {([ ["codigo", "Código"], ["nome", "Nome"], ["preco", "Preço original"], ["descontoPercentual", "Desconto (%)"], ["descontoValor", "Desconto (R$)"], ["avaliacaoMedia", "Avaliação média"] ] as const).map(([key, label]) => (
                 <label key={key}>
                   {label}
@@ -1166,7 +1177,8 @@ function AdminPanel() {
               ))}
               <label>Marca<input required list="product-brands" value={productForm.marca || ""} placeholder="Selecione ou digite a marca" onChange={e => setProductForm({ ...productForm, marca: e.target.value })} /><datalist id="product-brands">{Array.from(new Set(products.map(p => p.marca).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
               <label>Categoria<select required value={productForm.categoria||""} onChange={e=>setProductForm({...productForm,categoria:e.target.value})}><option value="">Selecione</option>{registrations.filter(c=>c.tipo==='CATEGORIA'&&(c.ativo||c.codigo===productForm.categoria)).map(c=><option key={c.id} value={c.codigo}>{c.nome}{!c.ativo?' (inativa)':''}</option>)}</select></label>
-              {registrations.filter(c=>c.tipo==='ATRIBUTO'&&(c.ativo||productForm.atributos?.[c.codigo])).map(c=><label key={c.id}>{c.nome}<input maxLength={255} disabled={!c.ativo} value={productForm.atributos?.[c.codigo]||''} onChange={e=>{const atributos={...productForm.atributos};if(e.target.value.trim())atributos[c.codigo]=e.target.value;else delete atributos[c.codigo];setProductForm({...productForm,atributos})}} /></label>)}
+              {productForm.kit && <fieldset className="full kit-fields"><legend>Composição e comparação do kit</legend><label>Quantidade de itens<input type="number" min="1" step="1" value={productForm.atributos?.quantidadeItens||''} onChange={e=>{const atributos={...productForm.atributos};if(e.target.value)atributos.quantidadeItens=e.target.value;else delete atributos.quantidadeItens;setProductForm({...productForm,atributos})}} /></label><label>Valor comprando separadamente<input type="number" min="0" step=".01" value={productForm.valorItensSeparados??''} placeholder="Opcional" onChange={e=>setProductForm({...productForm,valorItensSeparados:e.target.value===''?null:Number(e.target.value)})} /><small>Deve ser maior que o preço final do kit.</small></label><label className="full">O que vem no kit<textarea required maxLength={255} value={productForm.atributos?.conteudoKit||''} placeholder="Ex.: Whey 900g • Creatina 300g • Coqueteleira" onChange={e=>{const atributos={...productForm.atributos};if(e.target.value)atributos.conteudoKit=e.target.value;else delete atributos.conteudoKit;setProductForm({...productForm,atributos})}} /></label></fieldset>}
+              {registrations.filter(c=>c.tipo==='ATRIBUTO'&&!['quantidadeItens','conteudoKit'].includes(c.codigo)&&(c.ativo||productForm.atributos?.[c.codigo])).map(c=><label key={c.id}>{c.nome}<input maxLength={255} disabled={!c.ativo} value={productForm.atributos?.[c.codigo]||''} onChange={e=>{const atributos={...productForm.atributos};if(e.target.value.trim())atributos[c.codigo]=e.target.value;else delete atributos[c.codigo];setProductForm({...productForm,atributos})}} /></label>)}
               <label>Subcategoria<input list="product-subcategories" value={productForm.subcategoria || ""} placeholder="Selecione ou digite a subcategoria" onChange={e => setProductForm({ ...productForm, subcategoria: e.target.value })} /><datalist id="product-subcategories">{Array.from(new Set(products.map(p => p.subcategoria).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
               <label>Unidade ou peso<input list="product-units" value={productForm.unidade || ""} placeholder="Ex.: 300g ou 60 cápsulas" onChange={e => setProductForm({ ...productForm, unidade: e.target.value })} /><datalist id="product-units">{Array.from(new Set(products.map(p => p.unidade).filter(Boolean))).sort().map(value => <option key={value} value={value} />)}</datalist></label>
               <div className="full image-upload-field">
@@ -1216,7 +1228,6 @@ function AdminPanel() {
                   ["lancamento", "Marcar como novidade"],
                   ["destaque", "Exibir em destaque"],
                   ["oferta", "Produto em oferta"],
-                  ["kit", "Este item é um kit"],
                 ] as const
               ).map(([key, label]) => (
                 <label className="check-row" key={key}>

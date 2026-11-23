@@ -22,7 +22,7 @@ public interface ProdutoMapper {
      */
     @Mapping(target = "valorDesconto", expression = "java(produto.getValorDesconto())")
     @Mapping(target = "precoFinal", expression = "java(produto.getPrecoFinal())")
-    @Mapping(target = "atributos", expression = "java(java.util.Map.of())")
+    @Mapping(target = "atributos", expression = "java(kitAttributes(produto))")
     @Mapping(target = "objetivos", expression = "java(java.util.Set.of())")
     @Mapping(target = "esportes", expression = "java(java.util.Set.of())")
     @Mapping(target = "imagensAdicionais", ignore = true)
@@ -49,6 +49,16 @@ public interface ProdutoMapper {
         if (value == null)return null;
         String t = value.trim();
         return t.isEmpty() ? null : t;
+    }
+
+    default java.util.Map<String, String> kitAttributes(Produto produto) {
+        if (!produto.isKit() || produto.getAtributos() == null) return java.util.Map.of();
+        var atributos = new java.util.HashMap<String, String>();
+        var quantidade = produto.getAtributos().get("quantidadeItens");
+        var conteudo = produto.getAtributos().get("conteudoKit");
+        if (quantidade != null && !quantidade.isBlank()) atributos.put("quantidadeItens", quantidade);
+        if (conteudo != null && !conteudo.isBlank()) atributos.put("conteudoKit", conteudo);
+        return atributos;
     }
 
 }

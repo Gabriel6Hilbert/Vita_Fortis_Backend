@@ -66,6 +66,7 @@ public class ProdutoService {
         if (entity.getPreco().signum() < 0) throw new IllegalArgumentException("Preço invalido");
         if (entity.getQuantidadeEstoque() < 0) throw new IllegalArgumentException("Estoque invalido");
         if (entity.getCategoria() == null) throw new IllegalArgumentException("Categoria obrigatorio");
+        validarDadosKit(entity);
         Produto saved = produtoRepository.save(entity);
         return produtoMapper.toResponseDto(saved);
     }
@@ -89,9 +90,36 @@ public class ProdutoService {
         if (entity.getPreco() == null || entity.getPreco().signum() < 0) throw new IllegalArgumentException("Preço invalido");
         if (entity.getQuantidadeEstoque() == null || entity.getQuantidadeEstoque() < 0) throw new IllegalArgumentException("Estoque invalido");
         if (entity.getCategoria() == null) throw new IllegalArgumentException("Categoria obrigatorio");
+        validarDadosKit(entity);
 
         Produto updated = produtoRepository.save(entity);
         return produtoMapper.toResponseDto(updated);
+    }
+
+    private void validarDadosKit(Produto produto) {
+        if (produto.getAtributos() == null) produto.setAtributos(new java.util.HashMap<>());
+        if (!produto.isKit()) {
+            produto.setValorItensSeparados(null);
+            produto.getAtributos().remove("quantidadeItens");
+            produto.getAtributos().remove("conteudoKit");
+            return;
+        }
+        String conteudo = produto.getAtributos().get("conteudoKit");
+        if (conteudo == null || conteudo.isBlank()) {
+            throw new IllegalArgumentException("Informe o que vem no kit");
+        }
+        String quantidade = produto.getAtributos().get("quantidadeItens");
+        if (quantidade != null && !quantidade.isBlank()) {
+            try {
+                if (Integer.parseInt(quantidade) <= 0) throw new NumberFormatException();
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("A quantidade de itens do kit deve ser maior que zero");
+            }
+        }
+        if (produto.getValorItensSeparados() != null
+                && produto.getValorItensSeparados().compareTo(produto.getPrecoFinal()) <= 0) {
+            throw new IllegalArgumentException("O valor dos itens separados deve ser maior que o preco final do kit");
+        }
     }
 
     //ESTOQUE
@@ -271,6 +299,7 @@ public class ProdutoService {
 
         p.setDescontoValor(null);
         p.setDescontoPercentual(null);
+        validarDadosKit(p);
         return produtoMapper.toResponseDto(produtoRepository.save(p));
     }
 
@@ -284,6 +313,7 @@ public class ProdutoService {
         p.setVegano(dto.isVegano()); p.setVegetariano(dto.isVegetariano());
         p.setLinhaClinica(dto.isLinhaClinica()); p.setLancamento(dto.isLancamento());
         p.setDestaque(dto.isDestaque()); p.setOferta(dto.isOferta()); p.setKit(dto.isKit());
+        validarDadosKit(p);
         p.setSubcategoria(dto.getSubcategoria() == null ? null : dto.getSubcategoria().trim().toUpperCase());
         p.setAvaliacaoMedia(dto.getAvaliacaoMedia());
         return produtoMapper.toResponseDto(produtoRepository.save(p));

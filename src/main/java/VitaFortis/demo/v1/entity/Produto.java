@@ -113,6 +113,10 @@ public class Produto {
     @Column(name = "LANCAMENTO", nullable = false) private boolean lancamento;
     @Column(name = "DESTAQUE", nullable = false) private boolean destaque;
     @Column(name = "KIT", nullable = false) private boolean kit;
+    @Digits(integer = 10, fraction = 2)
+    @DecimalMin(value = "0.00")
+    @Column(name = "VALOR_ITENS_SEPARADOS", precision = 12, scale = 2)
+    private BigDecimal valorItensSeparados;
     @Column(name = "OFERTA", nullable = false) private boolean oferta;
     @Size(max = 60) @Column(name = "SUBCATEGORIA", length = 60) private String subcategoria;
     @Digits(integer = 1, fraction = 2) @DecimalMin("0.0") @DecimalMax("5.0")
@@ -162,6 +166,7 @@ public class Produto {
         if (unidade == null || unidade.isBlank()) unidade = "UN";
         else unidade = unidade.trim().toUpperCase();
         if (preco != null) preco = money(preco);
+        if (valorItensSeparados != null) valorItensSeparados = money(valorItensSeparados);
         if (descontoPercentual != null) {
             BigDecimal dp = descontoPercentual;
             if (dp.signum() < 0) dp = BigDecimal.ZERO;

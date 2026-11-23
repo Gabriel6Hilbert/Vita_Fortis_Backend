@@ -14,7 +14,7 @@ class FlywaySafetyTest {
             statement.execute("create table produto (produto_id bigint primary key, preco decimal(12,2), desc_percent decimal(5,2), desc_valor decimal(12,2))");
         }
         Flyway flyway = Flyway.configure().dataSource(url, "sa", "").baselineOnMigrate(true).baselineVersion("0").load();
-        assertEquals(4, flyway.migrate().migrationsExecuted);
+        assertEquals(7, flyway.migrate().migrationsExecuted);
         flyway.validate();
         assertEquals(0, flyway.migrate().migrationsExecuted);
     }
@@ -29,8 +29,8 @@ class FlywaySafetyTest {
             statement.execute("create table produto (produto_id bigint primary key, preco decimal(12,2), desc_percent decimal(5,2), desc_valor decimal(12,2))");
         }
         Flyway flyway = Flyway.configure().dataSource(url, "sa", "").baselineOnMigrate(true).baselineVersion("2").load();
-        assertEquals(2, flyway.migrate().migrationsExecuted);
+        assertEquals(5, flyway.migrate().migrationsExecuted);
         flyway.validate();
-        assertEquals("4", flyway.info().current().getVersion().toString());
+        assertEquals("7", flyway.info().current().getVersion().toString());
     }
 }

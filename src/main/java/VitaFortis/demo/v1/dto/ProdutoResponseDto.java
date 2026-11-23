@@ -36,6 +36,7 @@ public class ProdutoResponseDto {
     private boolean destaque;
     private boolean oferta;
     private boolean kit;
+    private BigDecimal valorItensSeparados;
     private String subcategoria;
     private BigDecimal avaliacaoMedia;
     private long totalVendido;

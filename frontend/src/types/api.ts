@@ -52,10 +52,26 @@ export interface Product {
   destaque?: boolean;
   oferta?: boolean;
   kit?: boolean;
+  valorItensSeparados?: number | null;
   subcategoria?: string;
   avaliacaoMedia?: number;
   maisVendido?: boolean;
 }
+export type HomeSectionKey = 'HERO' | 'OBJETIVOS' | 'OFERTAS' | 'MAIS_VENDIDOS' | 'DESTAQUES' | 'VIDEO' | 'LINHAS' | 'ATALHOS' | 'INSTITUCIONAL';
+export interface HomeSection {
+  id?: number;
+  chave: HomeSectionKey;
+  ativa: boolean;
+  ordem: number;
+  modo: 'MANUAL' | 'DINAMICO';
+  titulo?: string;
+  subtitulo?: string;
+  mediaUrl?: string;
+  texto?: string;
+  limite: number;
+  produtoIds: number[];
+}
+export interface HomeGoal { id?:number; chave:'EMAGRECIMENTO'|'GANHO_DE_MASSA'|'PERFORMANCE'|'SAUDE_E_BEM_ESTAR'; titulo:string; imagemUrl?:string; textoAlternativo:string; ordem:number; ativo:boolean }
 export interface Page<T> {
   content: T[];
   totalElements: number;

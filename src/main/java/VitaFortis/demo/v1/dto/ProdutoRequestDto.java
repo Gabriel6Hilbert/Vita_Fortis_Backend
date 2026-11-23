@@ -51,6 +51,9 @@ public class ProdutoRequestDto {
     private boolean lancamento;
     private boolean oferta;
     private boolean kit;
+    @Digits(integer = 10, fraction = 2)
+    @DecimalMin(value = "0.00")
+    private BigDecimal valorItensSeparados;
     private Set<@Size(max = 50) String> objetivos;
 
 }

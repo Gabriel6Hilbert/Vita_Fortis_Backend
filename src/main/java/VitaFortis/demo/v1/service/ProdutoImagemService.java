@@ -42,6 +42,10 @@ public class ProdutoImagemService {
         if (declarado == null || !TIPOS.contains(declarado)) {
             throw new IllegalArgumentException("Use uma imagem JPG, PNG ou WebP");
         }
+        String original=Optional.ofNullable(imagem.getOriginalFilename()).orElse("").toLowerCase(java.util.Locale.ROOT);
+        if(!original.endsWith(extensao(declarado)) && !("image/jpeg".equals(declarado)&&original.endsWith(".jpeg"))) {
+            throw new IllegalArgumentException("A extensao do arquivo nao corresponde ao tipo da imagem");
+        }
         byte[] conteudo;
         try (var input = imagem.getInputStream()) {
             conteudo = input.readNBytes(MAX_BYTES + 1);

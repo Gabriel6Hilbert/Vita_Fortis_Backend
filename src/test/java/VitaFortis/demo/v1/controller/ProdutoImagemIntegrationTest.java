@@ -162,7 +162,7 @@ class ProdutoImagemIntegrationTest {
 
     private String enviar(byte[] bytes, String tipo) throws Exception {
         var resultado = mvc.perform(multipart(UPLOAD)
-                        .file(new MockMultipartFile("imagem", "../../nome-do-cliente.php", tipo, bytes))
+                        .file(new MockMultipartFile("imagem", "../../nome-do-cliente." + (tipo.equals("image/jpeg") ? "jpg" : tipo.substring(6)), tipo, bytes))
                         .with(csrf())
                         .with(user("admin@teste.com").roles("ADMIN")))
                 .andExpect(status().isOk()).andReturn();
