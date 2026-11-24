@@ -401,3 +401,41 @@ Matriz confrontada com `STATUS_CONSOLIDADO_V2.md` (revisão de 28/10), as rotas 
 | Reversão da rodada · ADMIN/Aiven | Não testado | Banco e interface previstos | Reverter dados de QA sem afetar registros alheios e inventariar resíduos de auditoria | Esta rodada não alterou dados funcionais de QA. Os resíduos anteriores permanecem registrados acima. |
 
 Nenhum defeito de código foi reproduzido de forma conclusiva. Não houve commit, push, novo deploy ou novo resíduo funcional de QA. Para continuar a rodada autenticada pela interface, foram localizadas credenciais de QA utilizáveis para dois clientes e um colaborador. Faltou confirmar uma sessão ADMIN e uma segunda sessão de colaborador com credenciais de QA disponíveis para o navegador. Para os cenários que deixam cadastros ou auditoria, o próximo passo é validar a compensação seletiva por ID e os estados inicial e final na base existente.
+
+## Incidente de preços e recuperação do Flyway — 23/11/2026
+
+Estado: 🟢 banco recuperado, correção publicada e release verificada no Render.
+
+### Incidente e recuperação
+
+- O deploy anterior executou a V3 destrutiva no Aiven: 234 produtos ficaram com preço R$ 1,00 e os descontos foram zerados. A V4 falhou porque `produto_galeria` já existia.
+- Antes de qualquer reparo foi criado o dump `output/recuperacao-precos-2026-11-23/vitafortis-defaultdb-20261124T022504Z.sql`, com 11.301.181 bytes e SHA-256 `7D659F878D6A1F0FC730FB885B1E9877EBC5ED4DBC90F28BB0AD822DA5098CAA`.
+- Os preços e descontos de 183 SKUs foram recuperados do backup verificado de 29/10/2026. Os seis produtos de Home tiveram os valores restaurados a partir da configuração comercial versionada.
+- Como não havia fonte comercial confiável para inventar valores, 37 produtos IM/Darkness permaneceram inativos, com estoque zero e preço nulo. Três cadastros manuais sem histórico de preço também permaneceram inativos. Os cinco fixtures de QA continuaram inativos.
+- Estado final do banco: 234 produtos, 188 ativos, nenhum produto ativo por R$ 1,00 e 37 produtos inativos com preço nulo.
+
+### Estratégia e testes do Flyway
+
+- V3 passou a ser uma migração de preservação e teve o checksum reparado de forma controlada depois do backup.
+- V4 passou a criar `produto_galeria` somente quando a tabela não existe.
+- V5 foi convertida em migração Java idempotente, que adiciona `valor_itens_separados` somente quando a coluna não existe.
+- O caminho foi ensaiado em MySQL isolado a partir do banco legado com V3 aplicada e V4 falha, e também em banco novo desde V1. Preços, descontos, galeria e valor comparativo dos kits foram preservados; a segunda execução aplicou zero migrações.
+- No Aiven, o Flyway validou oito entradas, reconheceu o schema na versão 7 e confirmou `No migration necessary` na inicialização publicada.
+- Atenção técnica: o Aiven usa MySQL 8.4.11 e a versão atual do Flyway declara suporte testado até MySQL 8.1. Os ensaios e o deploy passaram, mas a dependência deve ser atualizada em tarefa separada.
+
+### Validação e publicação
+
+- Commit funcional `337281f8500f0540ec3a21e86bc8423ca15e9181`, enviado para `qa/vitafortis-2026-11-05` e `main`.
+- Suíte Java completa: 105 testes, zero falhas, zero erros e dois ignorados. Lint e build do frontend passaram. O pacote Spring também foi gerado com sucesso.
+- O serviço `vita-fortis-loja` estava suspenso manualmente. Ele foi retomado e recebeu deploy manual do commit funcional.
+- Release pública: HTTP 200, SHA completo `337281f8500f0540ec3a21e86bc8423ca15e9181` e pagamento identificado como `SIMULADO`.
+- Smoke público: Home, seções, quatro objetivos, catálogo e imagens responderam HTTP 200; 188 produtos ativos foram expostos, sem preço R$ 1,00 ou preço nulo. Os nove SKUs HML exibiram os valores esperados e os três kits HML foram localizados como kits.
+- As imagens amostradas de produtos FTW, ofertas, kits e quatro cards de objetivos responderam HTTP 200.
+
+### Pendências posteriores à urgência
+
+- Definir e cadastrar preços, estoque e ativação dos produtos IM/Darkness e dos três cadastros manuais sem fonte comercial.
+- Atualizar o Flyway para compatibilidade oficialmente testada com MySQL 8.4.
+- Implementar pagamento real e SMTP/Brevo real.
+- Concluir decisões jurídicas e dados comerciais dos produtos FTW.
+- Executar compatibilidade final em aparelhos e navegadores.
