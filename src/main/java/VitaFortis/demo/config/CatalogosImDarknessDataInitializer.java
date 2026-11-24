@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -62,9 +61,10 @@ public class CatalogosImDarknessDataInitializer implements CommandLineRunner {
                 produto.setObjetivos(item.objetivos());
                 produto.setImagemUrl("/uploads/produtos/" + item.imagemNome());
                 produto.setImagemContentType("image/webp");
-                produto.setPreco(new BigDecimal("1.00"));
-                produto.setQuantidadeEstoque(1);
-                produto.setAtivo(true);
+                // Catalogo de referencia: preco, estoque e ativacao dependem de revisao comercial.
+                produto.setPreco(null);
+                produto.setQuantidadeEstoque(0);
+                produto.setAtivo(false);
                 produtos.save(produto);
             }
         }

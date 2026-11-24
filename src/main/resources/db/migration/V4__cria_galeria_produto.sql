@@ -1,4 +1,4 @@
-CREATE TABLE produto_galeria (
+CREATE TABLE IF NOT EXISTS produto_galeria (
     produto_id BIGINT NOT NULL,
     posicao INT NOT NULL,
     url VARCHAR(500) NOT NULL,

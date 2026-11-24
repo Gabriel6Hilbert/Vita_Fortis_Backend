@@ -16,7 +16,7 @@ class CatalogosImDarknessDataInitializerTest {
     @Autowired VitaFortis.demo.config.CatalogosImDarknessDataInitializer inicializador;
 
     @Test
-    void importa37ProdutosAtivosComPrecoEstoqueEImagensPersistidasNoBanco() {
+    void importa37ProdutosComoRascunhosSemPrecoOuEstoqueComercial() {
         var catalogo = produtos.findAll().stream()
                 .filter(produto -> produto.getCodigo().startsWith("IM-2026-")
                         || produto.getCodigo().startsWith("DARK-2026-"))
@@ -24,9 +24,9 @@ class CatalogosImDarknessDataInitializerTest {
 
         assertThat(catalogo).hasSize(37);
         assertThat(catalogo).allSatisfy(produto -> {
-            assertThat(produto.isAtivo()).isTrue();
-            assertThat(produto.getPreco()).isEqualByComparingTo("1.00");
-            assertThat(produto.getQuantidadeEstoque()).isEqualTo(1);
+            assertThat(produto.isAtivo()).isFalse();
+            assertThat(produto.getPreco()).isNull();
+            assertThat(produto.getQuantidadeEstoque()).isZero();
             assertThat(produto.getDescricao()).isNotBlank();
             assertThat(produto.getImagemUrl()).startsWith("/uploads/produtos/").endsWith(".webp");
             assertThat(imagens.existsById(produto.getImagemUrl().replace("/uploads/produtos/", ""))).isTrue();
